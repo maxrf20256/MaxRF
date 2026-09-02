@@ -10,9 +10,28 @@
     seleccionados: [],
     comprobanteBase64: null,
     comprobanteFilename: null,
-    comprobanteMimetype: null,
-    filtro: 'disponible' // valor inicial del filtro del talonario: 'todos' | 'disponible' | 'reservado' | 'vendido'
+    comprobanteMimetype: null
   };
+
+  // El usuario final solo debe ver números disponibles (limpia el talonario
+  // de reservados/vendidos para no distraer ni confundir). Si en el futuro
+  // quieres mostrar también los otros estados, cambia esto a false.
+  var MOSTRAR_SOLO_DISPONIBLES = true;
+
+  // Normaliza el valor de "estado" que llega del Google Sheet: quita
+  // espacios, tildes y mayúsculas para que "Disponible ", "DISPONIBLE",
+  // "disponible" etc. se traten todas como el mismo estado. Esto evita
+  // casillas en blanco cuando el dato del Sheet no viene perfectamente
+  // escrito.
+  function normalizarEstado(valor) {
+    var s = String(valor || 'disponible').trim().toLowerCase();
+    s = s.normalize ? s.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : s;
+    if (s.indexOf('disp') === 0) return 'disponible';
+    if (s.indexOf('reserv') === 0) return 'reservado';
+    if (s.indexOf('vend') === 0) return 'vendido';
+    if (s.indexOf('rechaz') === 0) return 'disponible'; // rechazado = vuelve a estar libre
+    return 'disponible'; // por seguridad, cualquier valor desconocido se trata como disponible
+  }
 
   var els = {};
 
@@ -35,8 +54,6 @@
     els.talonarioLoading = document.getElementById('talonario-loading');
     els.talonarioGrid = document.getElementById('talonario-grid');
     els.talonarioVacio = document.getElementById('talonario-vacio');
-    els.filtroTalonario = document.getElementById('filtro-talonario');
-    els.filtroBtns = els.filtroTalonario.querySelectorAll('.filtro-btn');
     els.seleccionBar = document.getElementById('seleccion-bar');
     els.seleccionLista = document.getElementById('seleccion-lista');
     els.seleccionTotal = document.getElementById('seleccion-total');
@@ -68,15 +85,6 @@
   }
 
   function bindEvents() {
-    els.filtroBtns.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        state.filtro = btn.dataset.filtro;
-        els.filtroBtns.forEach(function (b) { b.classList.remove('activo'); });
-        btn.classList.add('activo');
-        renderTalonario();
-      });
-    });
-
     els.btnParticipar.addEventListener('click', abrirModalParticipar);
     els.btnCerrarModal.addEventListener('click', cerrarModalParticipar);
     els.modalParticipar.addEventListener('click', function (e) {
@@ -157,7 +165,7 @@
   }
 
   function renderStats() {
-    var disponibles = state.numeros.filter(function (n) { return n.estado === 'disponible'; }).length;
+    var disponibles = state.numeros.filter(function (n) { return normalizarEstado(n.estado) === 'disponible'; }).length;
     els.statDisponibles.textContent = disponibles;
     els.statPrecio.textContent = formatMoney(state.config.precio_numero);
     els.statFecha.textContent = state.config.fecha_sorteo ? formatFecha(state.config.fecha_sorteo) : '--';
@@ -178,13 +186,19 @@
       'Selecciona tu(s) número(s) del ' + (state.config.rango === '999' ? '000 al 999' : '00 al 99') +
       '. Precio: ' + formatMoney(state.config.precio_numero) + ' c/u.';
 
-    // Aplica el filtro activo ('todos' muestra todo; los demás filtran por estado)
-    var numerosFiltrados = state.filtro === 'todos'
-      ? state.numeros
-      : state.numeros.filter(function (item) { return item.estado === state.filtro; });
+    // Normalizamos el estado de cada número (evita casillas en blanco si el
+    // valor del Google Sheet viene con mayúsculas, espacios o tildes distintas)
+    var numerosNormalizados = state.numeros.map(function (item) {
+      return { numero: item.numero, estado: normalizarEstado(item.estado) };
+    });
+
+    // El usuario final solo ve números disponibles (talonario limpio)
+    var numerosAMostrar = MOSTRAR_SOLO_DISPONIBLES
+      ? numerosNormalizados.filter(function (item) { return item.estado === 'disponible'; })
+      : numerosNormalizados;
 
     els.talonarioGrid.innerHTML = '';
-    numerosFiltrados.forEach(function (item) {
+    numerosAMostrar.forEach(function (item) {
       var div = document.createElement('div');
       div.className = 'ticket-num ' + item.estado;
       div.textContent = item.numero;
@@ -201,7 +215,7 @@
 
     els.talonarioLoading.classList.add('hidden');
 
-    if (numerosFiltrados.length === 0) {
+    if (numerosAMostrar.length === 0) {
       els.talonarioGrid.classList.add('hidden');
       els.talonarioVacio.classList.remove('hidden');
     } else {

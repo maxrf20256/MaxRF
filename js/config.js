@@ -13,7 +13,7 @@
  */
 window.RIFA_CONFIG = {
   // 👉 Reemplaza esta URL por la de tu Google Apps Script Web App
-  API_URL: 'https://script.google.com/macros/s/AKfycbx6IN8BHD0CrvsEuEVG5618xUTGLiJ7M5xSTPFUWyqB5U0QXqeyitCKcceksqQH-DIr/exec',
+  API_URL: 'https://script.google.com/macros/s/TU_ID_DE_IMPLEMENTACION/exec',
 
   // Nombre que se muestra si el modo demo está activo (sin backend real)
   DEMO_MODE_LABEL: 'MODO DEMO — conecta tu Google Sheet para producción'
