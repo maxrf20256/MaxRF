@@ -10,24 +10,8 @@
     seleccionados: [],
     comprobanteBase64: null,
     comprobanteFilename: null,
-    comprobanteMimetype: null,
-    soloDisponibles: false // se activa/desactiva con el botón "Ver solo disponibles"
+    comprobanteMimetype: null
   };
-
-  // Normaliza el valor de "estado" que llega del Google Sheet: quita
-  // espacios, tildes y mayúsculas para que "Disponible ", "DISPONIBLE",
-  // "disponible" etc. se traten todas como el mismo estado. Esto evita
-  // casillas en blanco cuando el dato del Sheet no viene perfectamente
-  // escrito.
-  function normalizarEstado(valor) {
-    var s = String(valor || 'disponible').trim().toLowerCase();
-    s = s.normalize ? s.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : s;
-    if (s.indexOf('disp') === 0) return 'disponible';
-    if (s.indexOf('reserv') === 0) return 'reservado';
-    if (s.indexOf('vend') === 0) return 'vendido';
-    if (s.indexOf('rechaz') === 0) return 'disponible'; // rechazado = vuelve a estar libre
-    return 'disponible'; // por seguridad, cualquier valor desconocido se trata como disponible
-  }
 
   var els = {};
 
@@ -49,8 +33,6 @@
     els.talonarioSubtitle = document.getElementById('talonario-subtitle');
     els.talonarioLoading = document.getElementById('talonario-loading');
     els.talonarioGrid = document.getElementById('talonario-grid');
-    els.talonarioVacio = document.getElementById('talonario-vacio');
-    els.btnSoloDisponibles = document.getElementById('btn-solo-disponibles');
     els.seleccionBar = document.getElementById('seleccion-bar');
     els.seleccionLista = document.getElementById('seleccion-lista');
     els.seleccionTotal = document.getElementById('seleccion-total');
@@ -82,12 +64,6 @@
   }
 
   function bindEvents() {
-    els.btnSoloDisponibles.addEventListener('click', function () {
-      state.soloDisponibles = !state.soloDisponibles;
-      els.btnSoloDisponibles.classList.toggle('activo', state.soloDisponibles);
-      renderTalonario();
-    });
-
     els.btnParticipar.addEventListener('click', abrirModalParticipar);
     els.btnCerrarModal.addEventListener('click', cerrarModalParticipar);
     els.modalParticipar.addEventListener('click', function (e) {
@@ -168,7 +144,7 @@
   }
 
   function renderStats() {
-    var disponibles = state.numeros.filter(function (n) { return normalizarEstado(n.estado) === 'disponible'; }).length;
+    var disponibles = state.numeros.filter(function (n) { return n.estado === 'disponible'; }).length;
     els.statDisponibles.textContent = disponibles;
     els.statPrecio.textContent = formatMoney(state.config.precio_numero);
     els.statFecha.textContent = state.config.fecha_sorteo ? formatFecha(state.config.fecha_sorteo) : '--';
@@ -189,29 +165,13 @@
       'Selecciona tu(s) número(s) del ' + (state.config.rango === '999' ? '000 al 999' : '00 al 99') +
       '. Precio: ' + formatMoney(state.config.precio_numero) + ' c/u.';
 
-    // Normalizamos el estado de cada número (evita casillas en blanco si el
-    // valor del Google Sheet viene con mayúsculas, espacios o tildes distintas)
-    var numerosNormalizados = state.numeros.map(function (item) {
-      return { numero: item.numero, estado: normalizarEstado(item.estado) };
-    });
-
-    // Por defecto se muestran TODOS los estados con su color correspondiente.
-    // Si el usuario activó el botón "Ver solo disponibles", ocultamos los
-    // números reservados/vendidos para limpiar visualmente el talonario.
-    var numerosAMostrar = state.soloDisponibles
-      ? numerosNormalizados.filter(function (item) { return item.estado === 'disponible'; })
-      : numerosNormalizados;
-
     els.talonarioGrid.innerHTML = '';
-    numerosAMostrar.forEach(function (item) {
+    state.numeros.forEach(function (item) {
       var div = document.createElement('div');
       div.className = 'ticket-num ' + item.estado;
       div.textContent = item.numero;
       div.dataset.numero = item.numero;
       div.dataset.estado = item.estado;
-      if (item.estado === 'disponible' && state.seleccionados.indexOf(item.numero) !== -1) {
-        div.classList.add('seleccionado');
-      }
       if (item.estado === 'disponible') {
         div.addEventListener('click', function () { toggleSeleccion(item.numero, div); });
       }
@@ -219,17 +179,7 @@
     });
 
     els.talonarioLoading.classList.add('hidden');
-
-    if (numerosAMostrar.length === 0) {
-      els.talonarioGrid.classList.add('hidden');
-      els.talonarioVacio.querySelector('p').textContent = state.soloDisponibles
-        ? '¡No quedan números disponibles! Muy pronto se realizará el sorteo.'
-        : 'No hay números en el talonario todavía.';
-      els.talonarioVacio.classList.remove('hidden');
-    } else {
-      els.talonarioGrid.classList.remove('hidden');
-      els.talonarioVacio.classList.add('hidden');
-    }
+    els.talonarioGrid.classList.remove('hidden');
   }
 
   function renderPremio() {
