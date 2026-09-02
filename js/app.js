@@ -10,7 +10,8 @@
     seleccionados: [],
     comprobanteBase64: null,
     comprobanteFilename: null,
-    comprobanteMimetype: null
+    comprobanteMimetype: null,
+    filtro: 'disponible' // valor inicial del filtro del talonario: 'todos' | 'disponible' | 'reservado' | 'vendido'
   };
 
   var els = {};
@@ -33,6 +34,9 @@
     els.talonarioSubtitle = document.getElementById('talonario-subtitle');
     els.talonarioLoading = document.getElementById('talonario-loading');
     els.talonarioGrid = document.getElementById('talonario-grid');
+    els.talonarioVacio = document.getElementById('talonario-vacio');
+    els.filtroTalonario = document.getElementById('filtro-talonario');
+    els.filtroBtns = els.filtroTalonario.querySelectorAll('.filtro-btn');
     els.seleccionBar = document.getElementById('seleccion-bar');
     els.seleccionLista = document.getElementById('seleccion-lista');
     els.seleccionTotal = document.getElementById('seleccion-total');
@@ -64,6 +68,15 @@
   }
 
   function bindEvents() {
+    els.filtroBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.filtro = btn.dataset.filtro;
+        els.filtroBtns.forEach(function (b) { b.classList.remove('activo'); });
+        btn.classList.add('activo');
+        renderTalonario();
+      });
+    });
+
     els.btnParticipar.addEventListener('click', abrirModalParticipar);
     els.btnCerrarModal.addEventListener('click', cerrarModalParticipar);
     els.modalParticipar.addEventListener('click', function (e) {
@@ -165,13 +178,21 @@
       'Selecciona tu(s) número(s) del ' + (state.config.rango === '999' ? '000 al 999' : '00 al 99') +
       '. Precio: ' + formatMoney(state.config.precio_numero) + ' c/u.';
 
+    // Aplica el filtro activo ('todos' muestra todo; los demás filtran por estado)
+    var numerosFiltrados = state.filtro === 'todos'
+      ? state.numeros
+      : state.numeros.filter(function (item) { return item.estado === state.filtro; });
+
     els.talonarioGrid.innerHTML = '';
-    state.numeros.forEach(function (item) {
+    numerosFiltrados.forEach(function (item) {
       var div = document.createElement('div');
       div.className = 'ticket-num ' + item.estado;
       div.textContent = item.numero;
       div.dataset.numero = item.numero;
       div.dataset.estado = item.estado;
+      if (item.estado === 'disponible' && state.seleccionados.indexOf(item.numero) !== -1) {
+        div.classList.add('seleccionado');
+      }
       if (item.estado === 'disponible') {
         div.addEventListener('click', function () { toggleSeleccion(item.numero, div); });
       }
@@ -179,7 +200,14 @@
     });
 
     els.talonarioLoading.classList.add('hidden');
-    els.talonarioGrid.classList.remove('hidden');
+
+    if (numerosFiltrados.length === 0) {
+      els.talonarioGrid.classList.add('hidden');
+      els.talonarioVacio.classList.remove('hidden');
+    } else {
+      els.talonarioGrid.classList.remove('hidden');
+      els.talonarioVacio.classList.add('hidden');
+    }
   }
 
   function renderPremio() {
