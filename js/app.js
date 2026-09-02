@@ -10,13 +10,9 @@
     seleccionados: [],
     comprobanteBase64: null,
     comprobanteFilename: null,
-    comprobanteMimetype: null
+    comprobanteMimetype: null,
+    soloDisponibles: false // se activa/desactiva con el botón "Ver solo disponibles"
   };
-
-  // El usuario final solo debe ver números disponibles (limpia el talonario
-  // de reservados/vendidos para no distraer ni confundir). Si en el futuro
-  // quieres mostrar también los otros estados, cambia esto a false.
-  var MOSTRAR_SOLO_DISPONIBLES = true;
 
   // Normaliza el valor de "estado" que llega del Google Sheet: quita
   // espacios, tildes y mayúsculas para que "Disponible ", "DISPONIBLE",
@@ -54,6 +50,7 @@
     els.talonarioLoading = document.getElementById('talonario-loading');
     els.talonarioGrid = document.getElementById('talonario-grid');
     els.talonarioVacio = document.getElementById('talonario-vacio');
+    els.btnSoloDisponibles = document.getElementById('btn-solo-disponibles');
     els.seleccionBar = document.getElementById('seleccion-bar');
     els.seleccionLista = document.getElementById('seleccion-lista');
     els.seleccionTotal = document.getElementById('seleccion-total');
@@ -85,6 +82,12 @@
   }
 
   function bindEvents() {
+    els.btnSoloDisponibles.addEventListener('click', function () {
+      state.soloDisponibles = !state.soloDisponibles;
+      els.btnSoloDisponibles.classList.toggle('activo', state.soloDisponibles);
+      renderTalonario();
+    });
+
     els.btnParticipar.addEventListener('click', abrirModalParticipar);
     els.btnCerrarModal.addEventListener('click', cerrarModalParticipar);
     els.modalParticipar.addEventListener('click', function (e) {
@@ -192,8 +195,10 @@
       return { numero: item.numero, estado: normalizarEstado(item.estado) };
     });
 
-    // El usuario final solo ve números disponibles (talonario limpio)
-    var numerosAMostrar = MOSTRAR_SOLO_DISPONIBLES
+    // Por defecto se muestran TODOS los estados con su color correspondiente.
+    // Si el usuario activó el botón "Ver solo disponibles", ocultamos los
+    // números reservados/vendidos para limpiar visualmente el talonario.
+    var numerosAMostrar = state.soloDisponibles
       ? numerosNormalizados.filter(function (item) { return item.estado === 'disponible'; })
       : numerosNormalizados;
 
@@ -217,6 +222,9 @@
 
     if (numerosAMostrar.length === 0) {
       els.talonarioGrid.classList.add('hidden');
+      els.talonarioVacio.querySelector('p').textContent = state.soloDisponibles
+        ? '¡No quedan números disponibles! Muy pronto se realizará el sorteo.'
+        : 'No hay números en el talonario todavía.';
       els.talonarioVacio.classList.remove('hidden');
     } else {
       els.talonarioGrid.classList.remove('hidden');

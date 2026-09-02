@@ -134,6 +134,39 @@ body {
   display: inline-block;
 }
 
+/* Toggle "Ver solo disponibles" (oculta reservados/vendidos) */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 22px;
+  border-radius: 999px;
+  background: #d1d5db;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+.toggle-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  transition: transform 0.2s ease;
+}
+#btn-solo-disponibles.activo .toggle-switch {
+  background: var(--primary);
+}
+#btn-solo-disponibles.activo .toggle-knob {
+  transform: translateX(18px);
+}
+#btn-solo-disponibles.activo {
+  border-color: var(--primary-light) !important;
+  color: var(--primary-dark);
+  background: #eef2ff;
+}
 
 
 /* ---------------------------------------------------------------------

@@ -134,13 +134,25 @@
         <p id="talonario-subtitle" class="text-gray-500">Cargando talonario...</p>
       </div>
 
-      <!-- Leyenda simplificada: el usuario final solo ve números disponibles -->
-      <div class="flex flex-wrap items-center justify-center gap-5 mb-8 text-sm font-semibold text-gray-600">
+      <!-- Leyenda -->
+      <div class="flex flex-wrap items-center justify-center gap-5 mb-6 text-sm font-semibold text-gray-600">
         <span class="flex items-center gap-2"><i class="legend-dot" style="background:#bbf7d0"></i> Disponible</span>
+        <span class="flex items-center gap-2"><i class="legend-dot" style="background:#fde68a"></i> Reservado</span>
+        <span class="flex items-center gap-2"><i class="legend-dot" style="background:#fecaca"></i> Vendido</span>
         <span class="flex items-center gap-2"><i class="legend-dot" style="background:#6366f1"></i> Tu selección</span>
       </div>
 
-      <!-- Grid del talonario (solo se muestran números disponibles) -->
+      <!-- Botón extra: ocultar reservados/vendidos para limpiar la vista -->
+      <div class="flex items-center justify-center mb-8">
+        <button type="button" id="btn-solo-disponibles" class="flex items-center gap-3 bg-white border-2 border-gray-200 rounded-full pl-2 pr-4 py-2 font-semibold text-sm text-gray-600 hover:border-indigo-300 transition">
+          <span id="toggle-switch" class="toggle-switch">
+            <span class="toggle-knob"></span>
+          </span>
+          Ver solo disponibles
+        </button>
+      </div>
+
+      <!-- Grid del talonario -->
       <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6 mb-6">
         <div id="talonario-loading" class="flex items-center justify-center gap-3 py-16 text-gray-500">
           <div class="spinner"></div> Cargando números...
@@ -148,7 +160,7 @@
         <div id="talonario-grid" class="hidden"></div>
         <div id="talonario-vacio" class="hidden text-center text-gray-400 py-12">
           <i class="fas fa-box-open text-3xl mb-3"></i>
-          <p>¡Todos los números fueron reservados! Muy pronto se realizará el sorteo.</p>
+          <p>No hay números disponibles en este momento. Muy pronto se realizará el sorteo.</p>
         </div>
       </div>
 
