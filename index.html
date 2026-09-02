@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rifa Digital | Participa y gana</title>
+  <meta name="description" content="Elige tu número de la suerte, registra tus datos y participa en la rifa. Talonario 100% digital con reserva en tiempo real.">
+  <link rel="icon" type="image/png" href="./img/favicon.png">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body class="bg-gray-50">
+
+  <!-- ============================================================ -->
+  <!-- BANNER MODO DEMO (se oculta solo si conectas backend real)   -->
+  <!-- ============================================================ -->
+  <div id="demo-banner" class="demo-banner hidden text-center text-xs sm:text-sm font-semibold text-amber-900 py-2 px-4">
+    <i class="fas fa-flask mr-1"></i>
+    <span id="demo-banner-text">MODO DEMO — los datos se guardan solo en tu navegador</span>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- HEADER / NAV                                                  -->
+  <!-- ============================================================ -->
+  <header class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100">
+    <nav class="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 py-4">
+      <a href="#inicio" class="flex items-center gap-2 font-extrabold text-lg text-gray-900">
+        <span class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white">
+          <i class="fas fa-ticket"></i>
+        </span>
+        Rifa<span class="text-indigo-600">Digital</span>
+      </a>
+      <div class="hidden md:flex items-center gap-8 text-sm font-semibold text-gray-600">
+        <a href="#talonario" class="hover:text-indigo-600">Talonario</a>
+        <a href="#como-funciona" class="hover:text-indigo-600">Cómo funciona</a>
+        <a href="#premio" class="hover:text-indigo-600">Premio</a>
+        <a href="#contacto" class="hover:text-indigo-600">Contacto</a>
+      </div>
+      <a href="#talonario" class="btn-primary text-sm font-bold px-4 py-2 rounded-lg">
+        <i class="fas fa-hand-pointer mr-1"></i> Elegir número
+      </a>
+    </nav>
+  </header>
+
+  <!-- ============================================================ -->
+  <!-- HERO                                                          -->
+  <!-- ============================================================ -->
+  <section id="inicio" class="gradient-hero text-white pt-16 pb-20 px-4 sm:px-6">
+    <div class="max-w-5xl mx-auto text-center">
+      <span class="inline-block text-xs font-bold tracking-wide uppercase bg-white/10 text-indigo-200 px-3 py-1 rounded-full mb-5 border border-white/10">
+        <i class="fas fa-bolt mr-1"></i> Reserva de números en tiempo real
+      </span>
+      <h1 class="text-3xl sm:text-5xl font-extrabold leading-tight mb-4">
+        Elige tu número, <span class="text-gradient">participa</span> y gana
+      </h1>
+      <p id="hero-premio" class="text-gray-300 text-base sm:text-lg max-w-2xl mx-auto mb-8">
+        Cargando información de la rifa...
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-4 mb-10">
+        <a href="#talonario" class="btn-primary font-bold px-6 py-3 rounded-xl text-base">
+          <i class="fas fa-th mr-2"></i> Ver talonario
+        </a>
+        <a href="#como-funciona" class="font-bold px-6 py-3 rounded-xl text-base border border-white/20 hover:bg-white/10">
+          <i class="fas fa-circle-info mr-2"></i> Cómo funciona
+        </a>
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-3 gap-4 max-w-lg mx-auto text-center">
+        <div>
+          <div id="stat-disponibles" class="text-2xl sm:text-3xl font-extrabold text-white">--</div>
+          <div class="text-xs text-gray-400 uppercase tracking-wide">Disponibles</div>
+        </div>
+        <div>
+          <div id="stat-precio" class="text-2xl sm:text-3xl font-extrabold text-white">--</div>
+          <div class="text-xs text-gray-400 uppercase tracking-wide">Por número</div>
+        </div>
+        <div>
+          <div id="stat-fecha" class="text-2xl sm:text-3xl font-extrabold text-white">--</div>
+          <div class="text-xs text-gray-400 uppercase tracking-wide">Fecha sorteo</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- CÓMO FUNCIONA                                                 -->
+  <!-- ============================================================ -->
+  <section id="como-funciona" class="py-16 px-4 sm:px-6 bg-white">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-center text-gray-900 mb-3">¿Cómo funciona?</h2>
+      <p class="text-center text-gray-500 mb-12 max-w-xl mx-auto">Participar es simple, rápido y 100% digital.</p>
+      <div class="grid sm:grid-cols-3 gap-6">
+        <div class="card-hover bg-gray-50 rounded-2xl p-6 border border-gray-100">
+          <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl mb-4">
+            <i class="fas fa-hand-pointer"></i>
+          </div>
+          <h3 class="font-bold text-gray-900 mb-2">1. Elige tu número</h3>
+          <p class="text-sm text-gray-500">Selecciona uno o varios números disponibles en el talonario digital.</p>
+        </div>
+        <div class="card-hover bg-gray-50 rounded-2xl p-6 border border-gray-100">
+          <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl mb-4">
+            <i class="fas fa-user-pen"></i>
+          </div>
+          <h3 class="font-bold text-gray-900 mb-2">2. Completa tus datos</h3>
+          <p class="text-sm text-gray-500">Ingresa tu nombre, correo, teléfono y adjunta el comprobante de pago.</p>
+        </div>
+        <div class="card-hover bg-gray-50 rounded-2xl p-6 border border-gray-100">
+          <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl mb-4">
+            <i class="fas fa-circle-check"></i>
+          </div>
+          <h3 class="font-bold text-gray-900 mb-2">3. Confirmación</h3>
+          <p class="text-sm text-gray-500">Verificamos tu pago y confirmamos tu número. ¡Así de fácil!</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- TALONARIO                                                     -->
+  <!-- ============================================================ -->
+  <section id="talonario" class="py-16 px-4 sm:px-6 bg-gray-50">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center mb-8">
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3">Talonario Digital</h2>
+        <p id="talonario-subtitle" class="text-gray-500">Cargando talonario...</p>
+      </div>
+
+      <!-- Leyenda -->
+      <div class="flex flex-wrap items-center justify-center gap-5 mb-8 text-sm font-semibold text-gray-600">
+        <span class="flex items-center gap-2"><i class="legend-dot" style="background:#bbf7d0"></i> Disponible</span>
+        <span class="flex items-center gap-2"><i class="legend-dot" style="background:#fde68a"></i> Reservado</span>
+        <span class="flex items-center gap-2"><i class="legend-dot" style="background:#fecaca"></i> Vendido</span>
+        <span class="flex items-center gap-2"><i class="legend-dot" style="background:#6366f1"></i> Tu selección</span>
+      </div>
+
+      <!-- Grid del talonario -->
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6 mb-6">
+        <div id="talonario-loading" class="flex items-center justify-center gap-3 py-16 text-gray-500">
+          <div class="spinner"></div> Cargando números...
+        </div>
+        <div id="talonario-grid" class="hidden"></div>
+      </div>
+
+      <!-- Barra flotante de selección -->
+      <div id="seleccion-bar" class="hidden sticky bottom-4 bg-white border border-gray-200 shadow-xl rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <div class="text-sm text-gray-500">Números seleccionados</div>
+          <div id="seleccion-lista" class="font-bold text-gray-900 text-lg">—</div>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="text-right">
+            <div class="text-sm text-gray-500">Total a pagar</div>
+            <div id="seleccion-total" class="font-extrabold text-indigo-600 text-xl">$0</div>
+          </div>
+          <button id="btn-participar" class="btn-primary font-bold px-5 py-3 rounded-xl">
+            <i class="fas fa-arrow-right mr-1"></i> Participar
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- PREMIO                                                        -->
+  <!-- ============================================================ -->
+  <section id="premio" class="py-16 px-4 sm:px-6 bg-white">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3">🎁 El premio</h2>
+      <p id="premio-nombre" class="text-xl font-bold text-indigo-600 mb-2">Cargando...</p>
+      <p class="text-gray-500 max-w-lg mx-auto">El sorteo se realizará de forma transparente en la fecha indicada. ¡Mucha suerte a todos los participantes!</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- MÉTODOS DE PAGO                                               -->
+  <!-- ============================================================ -->
+  <section class="py-16 px-4 sm:px-6 bg-gray-50">
+    <div class="max-w-4xl mx-auto text-center">
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-6">Métodos de pago aceptados</h2>
+      <div id="metodos-pago-list" class="flex flex-wrap items-center justify-center gap-3">
+        <!-- se llena por JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- CONTACTO / FOOTER                                             -->
+  <!-- ============================================================ -->
+  <footer id="contacto" class="bg-gray-900 text-gray-300 py-14 px-4 sm:px-6">
+    <div class="max-w-5xl mx-auto grid sm:grid-cols-3 gap-8">
+      <div>
+        <div class="flex items-center gap-2 font-extrabold text-lg text-white mb-3">
+          <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+            <i class="fas fa-ticket"></i>
+          </span>
+          RifaDigital
+        </div>
+        <p class="text-sm text-gray-400">Talonarios digitales, reserva en tiempo real y gestión simple para tus rifas.</p>
+      </div>
+      <div>
+        <h4 class="font-bold text-white mb-3">Contacto</h4>
+        <p id="contacto-whatsapp" class="text-sm mb-2"><i class="fab fa-whatsapp mr-2 text-green-400"></i> --</p>
+        <p class="text-sm"><i class="fas fa-envelope mr-2 text-indigo-400"></i> contacto@tudominio.com</p>
+      </div>
+      <div>
+        <h4 class="font-bold text-white mb-3">Enlaces</h4>
+        <ul class="text-sm space-y-2">
+          <li><a href="#talonario" class="hover:text-white">Talonario</a></li>
+          <li><a href="#como-funciona" class="hover:text-white">Cómo funciona</a></li>
+          <li><a href="#premio" class="hover:text-white">Premio</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="max-w-5xl mx-auto border-t border-gray-800 mt-8 pt-6 text-xs text-gray-500 text-center">
+      © 2026 RifaDigital. Todos los derechos reservados.
+    </div>
+  </footer>
+
+  <!-- WhatsApp flotante -->
+  <a id="wa-float" href="#" target="_blank" class="wa-float hidden">
+    <i class="fab fa-whatsapp"></i>
+  </a>
+
+  <!-- ============================================================ -->
+  <!-- MODAL DE PARTICIPACIÓN                                        -->
+  <!-- ============================================================ -->
+  <div id="modal-participar" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+        <h3 class="text-xl font-extrabold text-gray-900">Completa tu participación</h3>
+        <button id="btn-cerrar-modal" class="text-gray-400 hover:text-gray-700 text-xl"><i class="fas fa-xmark"></i></button>
+      </div>
+
+      <form id="form-participar" class="p-6 space-y-4">
+        <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <div class="text-xs text-indigo-500 font-bold uppercase">Números elegidos</div>
+            <div id="modal-numeros" class="font-extrabold text-indigo-700 text-lg">—</div>
+          </div>
+          <div class="text-right">
+            <div class="text-xs text-indigo-500 font-bold uppercase">Total</div>
+            <div id="modal-total" class="font-extrabold text-indigo-700 text-lg">$0</div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre completo *</label>
+          <input type="text" name="nombre" required class="w-full border border-gray-200 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Ej. Juan Pérez">
+        </div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Correo electrónico *</label>
+            <input type="email" name="correo" required class="w-full border border-gray-200 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="tu@correo.com">
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono *</label>
+            <input type="tel" name="telefono" required class="w-full border border-gray-200 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="+58 424 0000000">
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Método de pago *</label>
+          <select name="metodo_pago" required class="w-full border border-gray-200 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <option value="">Selecciona un método</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Número de referencia / comprobante *</label>
+          <input type="text" name="referencia_pago" required class="w-full border border-gray-200 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Ej. 000123456">
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Comprobante de pago (imagen) *</label>
+          <div id="file-drop" class="file-drop">
+            <input type="file" id="input-comprobante" accept="image/*" class="hidden">
+            <div id="file-drop-empty">
+              <i class="fas fa-cloud-arrow-up text-2xl text-gray-400 mb-2"></i>
+              <p class="text-sm text-gray-500">Haz clic o arrastra la imagen aquí (máx. 4MB)</p>
+            </div>
+            <div id="file-drop-preview" class="hidden">
+              <img id="file-preview-img" class="max-h-40 mx-auto rounded-lg mb-2" alt="Vista previa del comprobante">
+              <p id="file-preview-name" class="text-xs text-gray-500"></p>
+            </div>
+          </div>
+        </div>
+
+        <div id="form-error" class="hidden bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-3"></div>
+
+        <button type="submit" id="btn-enviar" class="btn-primary w-full font-bold py-3 rounded-xl text-base">
+          <span id="btn-enviar-text"><i class="fas fa-paper-plane mr-2"></i> Enviar participación</span>
+        </button>
+        <p class="text-xs text-gray-400 text-center">Al enviar, tus números quedarán reservados mientras verificamos tu pago manualmente.</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODAL DE ÉXITO                                                -->
+  <!-- ============================================================ -->
+  <div id="modal-exito" class="modal-overlay hidden">
+    <div class="modal-box text-center p-8">
+      <div class="w-16 h-16 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-3xl mx-auto mb-4">
+        <i class="fas fa-check"></i>
+      </div>
+      <h3 class="text-xl font-extrabold text-gray-900 mb-2">¡Participación registrada!</h3>
+      <p id="modal-exito-msg" class="text-gray-500 mb-6">Tus números quedaron reservados. Te contactaremos al confirmar tu pago.</p>
+      <button id="btn-cerrar-exito" class="btn-primary font-bold px-6 py-3 rounded-xl">Entendido</button>
+    </div>
+  </div>
+
+  <script src="./js/config.js"></script>
+  <script src="./js/demo-backend.js"></script>
+  <script src="./js/api.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>

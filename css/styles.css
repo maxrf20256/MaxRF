@@ -1,0 +1,229 @@
+/* =====================================================================
+   RIFA DIGITAL - Estilos personalizados
+   Paleta inspirada en tonos indigo/púrpura tipo SaaS moderno
+   ===================================================================== */
+
+:root {
+  --primary: #6366f1;
+  --primary-dark: #4338ca;
+  --primary-light: #818cf8;
+  --dark: #0b0f19;
+  --gray-900: #111827;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+}
+
+* {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Manrope', 'Inter', sans-serif;
+  background-color: #f8f9fc;
+  color: #374151;
+}
+
+.gradient-hero {
+  background: radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.35), transparent 40%),
+              radial-gradient(circle at 80% 0%, rgba(129, 140, 248, 0.25), transparent 45%),
+              linear-gradient(180deg, #0b0f19 0%, #131a2e 100%);
+}
+
+.text-gradient {
+  background: linear-gradient(90deg, #818cf8, #c4b5fd);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  transition: all 0.2s ease;
+  box-shadow: 0 8px 20px -6px rgba(99, 102, 241, 0.55);
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px -6px rgba(99, 102, 241, 0.65);
+}
+
+.card-hover {
+  transition: all 0.25s ease;
+}
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 35px -10px rgba(11, 15, 25, 0.12);
+}
+
+/* ---------------------------------------------------------------------
+   TALONARIO (grid de números)
+   --------------------------------------------------------------------- */
+#talonario-grid {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 8px;
+}
+@media (max-width: 640px) {
+  #talonario-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+.ticket-num {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.15s ease;
+  border: 2px solid transparent;
+}
+
+.ticket-num.disponible {
+  background: #ecfdf3;
+  color: #166534;
+  border-color: #bbf7d0;
+}
+.ticket-num.disponible:hover {
+  background: #d1fae5;
+  transform: scale(1.06);
+}
+
+.ticket-num.reservado {
+  background: #fffbeb;
+  color: #92400e;
+  border-color: #fde68a;
+  cursor: not-allowed;
+}
+
+.ticket-num.vendido {
+  background: #fef2f2;
+  color: #991b1b;
+  border-color: #fecaca;
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.ticket-num.seleccionado {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  border-color: var(--primary-dark);
+  transform: scale(1.08);
+  box-shadow: 0 6px 16px -4px rgba(99, 102, 241, 0.6);
+}
+
+.ticket-num.vendido::after,
+.ticket-num.reservado::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+}
+
+/* Leyenda */
+.legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* ---------------------------------------------------------------------
+   MODAL
+   --------------------------------------------------------------------- */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 15, 25, 0.65);
+  backdrop-filter: blur(3px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-box {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 560px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.3);
+}
+
+/* File drop zone */
+.file-drop {
+  border: 2px dashed #d1d5db;
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.file-drop:hover, .file-drop.dragover {
+  border-color: var(--primary);
+  background: #eef2ff;
+}
+
+/* Toast / notificaciones */
+.toast {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 200;
+  max-width: 380px;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  box-shadow: 0 15px 30px -10px rgba(0,0,0,0.25);
+  animation: slideIn 0.3s ease;
+}
+@keyframes slideIn {
+  from { transform: translateX(120%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Demo banner */
+.demo-banner {
+  background: repeating-linear-gradient(45deg, #fef3c7, #fef3c7 10px, #fde68a 10px, #fde68a 20px);
+}
+
+/* Loader spinner */
+.spinner {
+  border: 3px solid #e5e7eb;
+  border-top: 3px solid var(--primary);
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* WhatsApp floating button */
+.wa-float {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 90;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #25d366;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.6rem;
+  box-shadow: 0 10px 25px -5px rgba(37, 211, 102, 0.6);
+  transition: transform 0.2s ease;
+}
+.wa-float:hover {
+  transform: scale(1.08);
+}
