@@ -1,326 +1,914 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MaxRF | Participa y gana</title>
-  <meta name="description" content="Elige tu número de la suerte, registra tus datos y participa en la rifa. Talonario 100% digital con reserva en tiempo real.">
-  <link rel="icon" type="image/png" href="./img/favicon.png">
+  <title>MaxRF | Dinamica Digital & Sorteo Oficial Chontico Noche</title>
+  <meta name="description" content="Elige tu número de la suerte, participa en DinamicaMaxRF y gana un perfume exclusivo. Talonario 100% digital con reserva en tiempo real y respaldo de Chontico Noche.">
+  <link rel="icon" type="image/png" href="./img/Foto Web0.png">
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Font Awesome -->
-  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+  <!-- Font Awesome -->
+  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" rel="stylesheet">
+
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <!-- Estilos Premium Personalizados -->
   <link rel="stylesheet" href="./css/styles.css">
 </head>
-<body class="bg-gray-50">
+<body class="min-h-screen flex flex-col antialiased bg-[#f8fafc] text-slate-900 relative">
 
   <!-- ============================================================ -->
-  <!-- BANNER MODO DEMO (se oculta solo si conectas backend real)   -->
+  <!-- MARCA DE AGUA DE FONDO (Foto Web0 al 8% de opacidad)        -->
   <!-- ============================================================ -->
-  <div id="demo-banner" class="demo-banner hidden text-center text-xs sm:text-sm font-semibold text-amber-900 py-2 px-4">
-    <i class="fas fa-flask mr-1"></i>
-    <span id="demo-banner-text">MODO DEMO — los datos se guardan solo en tu navegador</span>
+  <div class="bg-watermark-fixed" aria-hidden="true">
+    <img src="./img/Foto Web0.png" alt="Mascota MaxRF Marca de Agua" class="bg-watermark-img">
   </div>
 
   <!-- ============================================================ -->
-  <!-- HEADER / NAV                                                  -->
+  <!-- HEADER / NAVEGACIÓN (Modo Claro Puro)                         -->
   <!-- ============================================================ -->
-  <header class="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-gray-100">
-    <nav class="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 py-4">
-      <a href="#inicio" class="flex items-center gap-2 font-extrabold text-lg text-gray-900">
-        <span class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white">
-          <i class="fas fa-ticket"></i>
-        </span>
-        Dinamica<span class="text-indigo-600">MaxRF</span>
+  <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 transition-colors bg-white/90">
+    <div class="max-w-6xl mx-auto flex items-center justify-between px-4 sm:px-6 py-3.5">
+      
+      <!-- Logo con Mascota & Tipografía de Marca -->
+      <a href="#inicio" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl overflow-hidden shadow-md shadow-indigo-500/20 border border-indigo-100 group-hover:scale-105 transition-transform bg-white flex items-center justify-center">
+          <img src="./img/Foto Web0.png" alt="Logo MaxRF" class="w-full h-full object-cover">
+        </div>
+        <div class="flex flex-col">
+          <span class="font-display font-black text-xl tracking-tight text-slate-900 leading-none">
+            Dinamica<span class="text-gradient">MaxRF</span>
+          </span>
+          <span class="text-[10px] uppercase font-bold tracking-widest text-indigo-600 leading-none mt-1">
+            Sorteos Oficiales
+          </span>
+        </div>
       </a>
-      <div class="hidden md:flex items-center gap-8 text-sm font-semibold text-gray-600">
-        <a href="#talonario" class="hover:text-indigo-600">Talonario</a>
-        <a href="#como-funciona" class="hover:text-indigo-600">Cómo funciona</a>
-        <a href="#premio" class="hover:text-indigo-600">Premio</a>
-        <a href="#contacto" class="hover:text-indigo-600">Contacto</a>
+
+      <!-- Enlaces de navegación (Reordenados: Talonario primero) -->
+      <nav class="hidden md:flex items-center gap-7 text-sm font-semibold text-slate-600">
+        <a href="#talonario" class="hover:text-indigo-600 transition-colors flex items-center gap-1.5 font-bold text-indigo-600">
+          <i class="fas fa-grid-2 text-xs"></i>
+          <span>Talonario</span>
+        </a>
+        <a href="#como-funciona" class="hover:text-indigo-600 transition-colors">¿Cómo funciona?</a>
+        <a href="#premio" class="hover:text-indigo-600 transition-colors">El Premio</a>
+        <a href="#pagos" class="hover:text-indigo-600 transition-colors">Métodos de Pago</a>
+        <a href="#faq" class="hover:text-indigo-600 transition-colors">Preguntas</a>
+      </nav>
+
+      <!-- Acción: Botón Elegir Número -->
+      <div class="flex items-center gap-2">
+        <a href="#talonario" class="btn-primary-gradient px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold flex items-center gap-2 shadow-md shadow-indigo-500/20">
+          <i class="fas fa-ticket text-xs"></i>
+          <span>Elegir número</span>
+        </a>
       </div>
-      <a href="#talonario" class="btn-primary text-sm font-bold px-4 py-2 rounded-lg">
-        <i class="fas fa-hand-pointer mr-1"></i> Elegir número
-      </a>
-    </nav>
+    </div>
   </header>
 
   <!-- ============================================================ -->
-  <!-- HERO                                                          -->
+  <!-- HERO SECTION                                                  -->
   <!-- ============================================================ -->
-  <section id="inicio" class="gradient-hero text-white pt-16 pb-20 px-4 sm:px-6">
-    <div class="max-w-5xl mx-auto text-center">
-      <span class="inline-block text-xs font-bold tracking-wide uppercase bg-white/10 text-indigo-200 px-3 py-1 rounded-full mb-5 border border-white/10">
-        <i class="fas fa-bolt mr-1"></i> Reserva de números en tiempo real
-      </span>
-      <h1 class="text-3xl sm:text-5xl font-extrabold leading-tight mb-4">
+  <section id="inicio" class="hero-glow-container pt-10 sm:pt-14 pb-12 sm:pb-16 px-4 sm:px-6 relative z-10 overflow-hidden">
+    <!-- Ambient Glow Orbs -->
+    <div class="ambient-orb ambient-orb-1"></div>
+    <div class="ambient-orb ambient-orb-2"></div>
+
+    <div class="max-w-4xl mx-auto text-center relative z-10">
+      
+      <!-- Pill Badge -->
+      <div class="inline-flex items-center justify-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 text-[11px] sm:text-xs font-bold uppercase tracking-wider mb-5 max-w-full">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+        <span class="truncate">Reserva en tiempo real • Respaldado por Chontico Noche</span>
+      </div>
+
+      <!-- Main Headline -->
+      <h1 class="font-display text-3xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 leading-[1.15] tracking-tight mb-4 break-words">
         Elige tu número, <span class="text-gradient">participa</span> y gana
       </h1>
-      <p id="hero-premio" class="text-gray-300 text-base sm:text-lg max-w-2xl mx-auto mb-8">
-        Cargando información de la rifa...
+
+      <!-- Dynamic Subtitle -->
+      <p id="hero-premio" class="text-base sm:text-xl text-slate-600 max-w-2xl mx-auto mb-7 font-normal leading-relaxed">
+        Cargando información oficial de la rifa...
       </p>
-      <div class="flex flex-wrap items-center justify-center gap-4 mb-10">
-        <a href="#talonario" class="btn-primary font-bold px-6 py-3 rounded-xl text-base">
-          <i class="fas fa-th mr-2"></i> Ver talonario
+
+      <!-- Action Buttons -->
+      <div class="flex flex-wrap items-center justify-center gap-3.5 mb-10">
+        <a href="#talonario" class="btn-primary-gradient px-7 py-3.5 rounded-2xl text-sm sm:text-base font-bold flex items-center gap-2.5 shadow-lg shadow-indigo-500/25">
+          <i class="fas fa-ticket"></i>
+          <span>Ver talonario digital</span>
         </a>
-        <a href="#como-funciona" class="font-bold px-6 py-3 rounded-xl text-base border border-white/20 hover:bg-white/10">
-          <i class="fas fa-circle-info mr-2"></i> Cómo funciona
+        <a href="#como-funciona" class="btn-secondary px-6 py-3.5 rounded-2xl text-sm sm:text-base font-bold flex items-center gap-2">
+          <i class="fas fa-circle-question text-indigo-500"></i>
+          <span>¿Cómo participar?</span>
         </a>
       </div>
 
-      <!-- Stats -->
-      <div class="grid grid-cols-4 gap-4 max-w-lg mx-auto text-center">
-        <div>
-          <div id="stat-disponibles" class="text-2xl sm:text-3xl font-extrabold text-white">--</div>
-          <div class="text-xs text-gray-400 uppercase tracking-wide">Disponibles</div>
+      <!-- Countdown Timer -->
+      <div id="countdown-container" class="mb-10 sm:mb-12 inline-block bg-white/80 border border-slate-200/80 rounded-2xl p-3 sm:p-5 shadow-sm backdrop-blur-md max-w-full">
+        <span class="text-[11px] sm:text-xs font-bold uppercase tracking-widest text-slate-500 block mb-2.5">
+          <i class="fas fa-clock mr-1 text-indigo-500"></i> Tiempo restante para el sorteo
+        </span>
+        <div class="flex items-center justify-center gap-1.5 sm:gap-3 text-slate-900">
+          <div class="countdown-box">
+            <div id="cd-days" class="font-display font-extrabold text-2xl sm:text-3xl tabular-nums">00</div>
+            <div class="text-[10px] uppercase font-bold text-slate-400">Días</div>
+          </div>
+          <span class="font-bold text-xl text-slate-300">:</span>
+          <div class="countdown-box">
+            <div id="cd-hours" class="font-display font-extrabold text-2xl sm:text-3xl tabular-nums">00</div>
+            <div class="text-[10px] uppercase font-bold text-slate-400">Horas</div>
+          </div>
+          <span class="font-bold text-xl text-slate-300">:</span>
+          <div class="countdown-box">
+            <div id="cd-mins" class="font-display font-extrabold text-2xl sm:text-3xl tabular-nums">00</div>
+            <div class="text-[10px] uppercase font-bold text-slate-400">Min</div>
+          </div>
+          <span class="font-bold text-xl text-slate-300">:</span>
+          <div class="countdown-box">
+            <div id="cd-secs" class="font-display font-extrabold text-2xl sm:text-3xl tabular-nums text-indigo-600">00</div>
+            <div class="text-[10px] uppercase font-bold text-slate-400">Seg</div>
+          </div>
         </div>
-        <div>
-          <div id="stat-precio" class="text-2xl sm:text-3xl font-extrabold text-white">--</div>
-          <div class="text-xs text-gray-400 uppercase tracking-wide">Por número</div>
-        </div>
-        <div>
-          <div id="stat-fecha" class="text-2xl sm:text-3xl font-extrabold text-white">--</div>
-          <div class="text-xs text-gray-400 uppercase tracking-wide">Fecha sorteo</div>
-        </div>
-        <div>
-          <div id="stat-loteria" class="text-2xl sm:text-3xl font-extrabold text-white">--</div>
-          <div class="text-xs text-gray-400 uppercase tracking-wide">Juega con CHONTICO NOCHE</div>
-        </div>        
       </div>
+
+      <!-- Stats Bar (4 columns) -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-3xl mx-auto">
+        <div class="premium-card rounded-2xl p-4 text-center">
+          <div id="stat-disponibles" class="font-display text-2xl sm:text-3xl font-extrabold text-emerald-600 tabular-nums">--</div>
+          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-0.5">Disponibles</div>
+        </div>
+        <div class="premium-card rounded-2xl p-4 text-center">
+          <div id="stat-precio" class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 tabular-nums">--</div>
+          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-0.5">Por número</div>
+        </div>
+        <div class="premium-card rounded-2xl p-4 text-center">
+          <div id="stat-fecha" class="font-display text-base sm:text-xl font-extrabold text-slate-900 leading-tight">--</div>
+          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-1">Fecha sorteo</div>
+        </div>
+        <div class="premium-card rounded-2xl p-4 text-center border-indigo-500/30">
+          <div id="stat-loteria" class="font-display text-sm sm:text-base font-black text-indigo-600 leading-tight">CHONTICO NOCHE</div>
+          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-1">Lotería Oficial</div>
+        </div>
+      </div>
+
     </div>
   </section>
 
   <!-- ============================================================ -->
-  <!-- CÓMO FUNCIONA                                                 -->
+  <!-- 1. TALONARIO DIGITAL (AHORA VA PRIMERO ANTES DE CÓMO FUNCIONA)-->
   <!-- ============================================================ -->
-  <section id="como-funciona" class="py-16 px-4 sm:px-6 bg-white">
+  <section id="talonario" class="py-16 sm:py-20 px-4 sm:px-6 bg-slate-50/80 border-t border-slate-200/80 relative z-10">
     <div class="max-w-5xl mx-auto">
-      <h2 class="text-2xl sm:text-3xl font-extrabold text-center text-gray-900 mb-3">¿Cómo funciona?</h2>
-      <p class="text-center text-gray-500 mb-12 max-w-xl mx-auto">Participar es simple, rápido y 100% digital.</p>
-      <div class="grid sm:grid-cols-3 gap-6">
-        <div class="card-hover bg-gray-50 rounded-2xl p-6 border border-gray-100">
-          <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl mb-4">
-            <i class="fas fa-hand-pointer"></i>
-          </div>
-          <h3 class="font-bold text-gray-900 mb-2">1. Elige tu número</h3>
-          <p class="text-sm text-gray-500">Selecciona uno o varios números disponibles en el talonario digital.</p>
-        </div>
-        <div class="card-hover bg-gray-50 rounded-2xl p-6 border border-gray-100">
-          <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl mb-4">
-            <i class="fas fa-user-pen"></i>
-          </div>
-          <h3 class="font-bold text-gray-900 mb-2">2. Completa tus datos</h3>
-          <p class="text-sm text-gray-500">Ingresa tu nombre, correo, teléfono y adjunta el comprobante de pago; en caso de realizar el pago despues, solo adjunta cualquier imagen para proceder.</p>
-        </div>
-        <div class="card-hover bg-gray-50 rounded-2xl p-6 border border-gray-100">
-          <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-xl mb-4">
-            <i class="fas fa-circle-check"></i>
-          </div>
-          <h3 class="font-bold text-gray-900 mb-2">3. Confirmación</h3>
-          <p class="text-sm text-gray-500">Verificamos tu pago y confirmamos tu número. ¡Así de fácil!</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================================ -->
-  <!-- TALONARIO                                                     -->
-  <!-- ============================================================ -->
-  <section id="talonario" class="py-16 px-4 sm:px-6 bg-gray-50">
-    <div class="max-w-5xl mx-auto">
-      <div class="text-center mb-8">
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3">Talonario Digital</h2>
-        <p id="talonario-subtitle" class="text-gray-500">Cargando talonario...</p>
+      
+      <!-- Título de Sección -->
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <span class="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-2 block">
+          Talonario Oficial en Tiempo Real
+        </span>
+        <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          Elige tus números de la suerte
+        </h2>
+        <p id="talonario-subtitle" class="text-slate-500 mt-2 text-sm sm:text-base">
+          Cargando disponibilidad en tiempo real...
+        </p>
       </div>
 
-      <!-- Leyenda -->
-      <div class="flex flex-wrap items-center justify-center gap-5 mb-8 text-sm font-semibold text-gray-600">
-        <span class="flex items-center gap-2"><i class="legend-dot" style="background:#bbf7d0"></i> Disponible</span>
-        <span class="flex items-center gap-2"><i class="legend-dot" style="background:#fde68a"></i> Reservado</span>
-        <span class="flex items-center gap-2"><i class="legend-dot" style="background:#fecaca"></i> Vendido</span>
-        <span class="flex items-center gap-2"><i class="legend-dot" style="background:#6366f1"></i> Tu selección</span>
+      <!-- Leyenda de Estados -->
+      <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mb-8 text-xs sm:text-sm font-semibold text-slate-600">
+        <span class="flex items-center gap-2">
+          <span class="w-3.5 h-3.5 rounded-md bg-emerald-500/20 border border-emerald-500 text-emerald-600 inline-block"></span>
+          <span>Disponible</span>
+        </span>
+        <span class="flex items-center gap-2">
+          <span class="w-3.5 h-3.5 rounded-md bg-indigo-600 border border-indigo-400 inline-block"></span>
+          <span>Tu selección</span>
+        </span>
+        <span class="flex items-center gap-2">
+          <span class="w-3.5 h-3.5 rounded-md bg-amber-500/20 border border-amber-500 inline-block"></span>
+          <span>Reservado</span>
+        </span>
+        <span class="flex items-center gap-2">
+          <span class="w-3.5 h-3.5 rounded-md bg-rose-500/20 border border-rose-500 line-through inline-block"></span>
+          <span>Vendido</span>
+        </span>
       </div>
 
-      <!-- Grid del talonario -->
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 sm:p-6 mb-6">
-        <div id="talonario-loading" class="flex items-center justify-center gap-3 py-16 text-gray-500">
-          <div class="spinner"></div> Cargando números...
-        </div>
-        <div id="talonario-grid" class="hidden"></div>
-      </div>
+      <!-- Barra de herramientas: Filtro disponibles, Ruleta aleatoria, Buscador -->
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-sm">
+        
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- Toggle Solo Disponibles -->
+          <button type="button" id="btn-solo-disponibles" class="btn-toggle flex items-center gap-2.5 px-4 py-2 rounded-xl bg-slate-100 text-xs sm:text-sm font-bold text-slate-700 hover:bg-slate-200 transition">
+            <span class="toggle-switch">
+              <span class="toggle-knob"></span>
+            </span>
+            <span>Ver solo disponibles</span>
+          </button>
 
-      <!-- Barra flotante de selección -->
-      <div id="seleccion-bar" class="hidden sticky bottom-4 bg-white border border-gray-200 shadow-xl rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <div class="text-sm text-gray-500">Números seleccionados</div>
-          <div id="seleccion-lista" class="font-bold text-gray-900 text-lg">—</div>
-        </div>
-        <div class="flex items-center gap-4">
-          <div class="text-right">
-            <div class="text-sm text-gray-500">Total a pagar</div>
-            <div id="seleccion-total" class="font-extrabold text-indigo-600 text-xl">$0</div>
-          </div>
-          <button id="btn-participar" class="btn-primary font-bold px-5 py-3 rounded-xl">
-            <i class="fas fa-arrow-right mr-1"></i> Participar
+          <!-- Ruleta "Elegir por mí" -->
+          <button type="button" id="btn-suerte" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-700 text-xs sm:text-sm font-bold transition" title="Selecciona aleatoriamente un número disponible">
+            <i class="fas fa-dice text-sm"></i>
+            <span>¡Número de la suerte!</span>
           </button>
         </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- ============================================================ -->
-  <!-- PREMIO                                                        -->
-  <!-- ============================================================ -->
-  <section id="premio" class="py-16 px-4 sm:px-6 bg-white">
-    <div class="max-w-4xl mx-auto text-center">
-      <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-3">🎁 El premio</h2>
-      <p id="premio-nombre" class="text-xl font-bold text-indigo-600 mb-2">Cargando...</p>
-      <p class="text-gray-500 max-w-lg mx-auto">El sorteo se realizará de forma transparente en la fecha indicada. ¡Mucha suerte a todos los participantes!</p>
-    </div>
-  </section>
-
-  <!-- ============================================================ -->
-  <!-- MÉTODOS DE PAGO                                               -->
-  <!-- ============================================================ -->
-  <section class="py-16 px-4 sm:px-6 bg-gray-50">
-    <div class="max-w-4xl mx-auto text-center">
-      <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-6">Métodos de pago aceptados</h2>
-      <div id="metodos-pago-list" class="flex flex-wrap items-center justify-center gap-3">
-        <!-- se llena por JS -->
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================================ -->
-  <!-- CONTACTO / FOOTER                                             -->
-  <!-- ============================================================ -->
-  <footer id="contacto" class="bg-gray-900 text-gray-300 py-14 px-4 sm:px-6">
-    <div class="max-w-5xl mx-auto grid sm:grid-cols-3 gap-8">
-      <div>
-        <div class="flex items-center gap-2 font-extrabold text-lg text-white mb-3">
-          <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-            <i class="fas fa-ticket"></i>
-          </span>
-          RifaDigital
+        <!-- Buscador de Número -->
+        <div class="relative w-full sm:w-56">
+          <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+          <input type="text" id="input-buscar-numero" maxlength="3" placeholder="Buscar número..." class="w-full pl-9 pr-8 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-indigo-500 transition">
+          <button type="button" id="btn-clear-buscar" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+            <i class="fas fa-times-circle"></i>
+          </button>
         </div>
-        <p class="text-sm text-gray-400">Talonarios digitales, reserva en tiempo real y gestión simple para tus rifas.</p>
+
       </div>
-      <div>
-        <h4 class="font-bold text-white mb-3">Contacto</h4>
-        <p id="contacto-whatsapp" class="text-sm mb-2"><i class="fab fa-whatsapp mr-2 text-green-400"></i> --</p>
-        <p class="text-sm"><i class="fas fa-envelope mr-2 text-indigo-400"></i> maxrf2025@gmail.com</p>
+
+      <!-- Contenedor del Talonario Grid -->
+      <div class="premium-card rounded-3xl p-4 sm:p-8 relative min-h-[300px]">
+        
+        <!-- Loading State -->
+        <div id="talonario-loading" class="flex flex-col items-center justify-center py-20 text-slate-400 gap-3">
+          <div class="spinner-ring"></div>
+          <span class="text-sm font-semibold">Cargando números del talonario...</span>
+        </div>
+
+        <!-- Grid -->
+        <div id="talonario-grid" class="ticket-grid hidden"></div>
+
+        <!-- Empty State -->
+        <div id="talonario-vacio" class="hidden text-center py-16 text-slate-400">
+          <i class="fas fa-box-open text-4xl mb-3 text-slate-300"></i>
+          <p class="font-semibold text-sm">No hay números que coincidan con la búsqueda.</p>
+        </div>
+
       </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- DOCK FLOTANTE DE SELECCIÓN                                    -->
+  <!-- ============================================================ -->
+  <div id="sticky-dock" class="sticky-dock">
+    <div class="glass-panel rounded-2xl p-4 sm:p-5 shadow-2xl border border-indigo-500/30 flex flex-wrap items-center justify-between gap-4 bg-white/95">
+      
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-indigo-600/30">
+          <i class="fas fa-ticket"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="dock-count" class="text-xs font-bold uppercase tracking-wider text-indigo-600">1 número</span>
+            <button type="button" id="btn-dock-vaciar" class="text-[11px] text-slate-400 hover:text-rose-500 underline ml-1">Vaciar</button>
+          </div>
+          <div id="dock-lista" class="font-display font-extrabold text-slate-900 text-base sm:text-lg max-w-[180px] sm:max-w-xs truncate">
+            —
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-4 ml-auto">
+        <div class="text-right">
+          <div class="text-[10px] uppercase font-bold text-slate-400">Total a pagar</div>
+          <div id="dock-total" class="font-display font-black text-indigo-600 text-xl sm:text-2xl tabular-nums">
+            $0
+          </div>
+        </div>
+
+        <button type="button" id="btn-dock-participar" class="btn-primary-gradient px-5 sm:px-6 py-3 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg shadow-indigo-600/30">
+          <span>Participar</span>
+          <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 2. CÓMO FUNCIONA                                              -->
+  <!-- ============================================================ -->
+  <section id="como-funciona" class="py-16 sm:py-20 px-4 sm:px-6 bg-white border-t border-slate-200/80 relative z-10">
+    <div class="max-w-5xl mx-auto">
+      <div class="text-center max-w-xl mx-auto mb-12 reveal-on-scroll">
+        <span class="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-2 block">
+          Proceso 100% transparente
+        </span>
+        <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          ¿Cómo participar?
+        </h2>
+        <p class="text-slate-500 mt-2 text-sm sm:text-base">
+          Participar es fácil, digital, seguro y toma menos de 2 minutos.
+        </p>
+      </div>
+
+      <!-- Bento Steps -->
+      <div class="grid sm:grid-cols-3 gap-6">
+        
+        <!-- Step 1 -->
+        <div class="premium-card rounded-3xl p-6 sm:p-7 relative overflow-hidden reveal-on-scroll">
+          <span class="absolute top-4 right-5 text-5xl font-black text-slate-200/50 font-display select-none">
+            01
+          </span>
+          <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl mb-5 shadow-sm">
+            <i class="fas fa-hand-pointer"></i>
+          </div>
+          <h3 class="font-display text-xl font-bold text-slate-900 mb-2">
+            1. Elige tu número
+          </h3>
+          <p class="text-sm text-slate-500 leading-relaxed">
+            Selecciona uno o más números disponibles en el talonario o usa el botón "Número de la suerte".
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="premium-card rounded-3xl p-6 sm:p-7 relative overflow-hidden reveal-on-scroll">
+          <span class="absolute top-4 right-5 text-5xl font-black text-slate-200/50 font-display select-none">
+            02
+          </span>
+          <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl mb-5 shadow-sm">
+            <i class="fas fa-wallet"></i>
+          </div>
+          <h3 class="font-display text-xl font-bold text-slate-900 mb-2">
+            2. Paga por Nequi
+          </h3>
+          <p class="text-sm text-slate-500 leading-relaxed">
+            Transfiere a Nequi (3188178457) y adjunta el comprobante; en caso de realizar el pago después, solo adjunta cualquier imagen para proceder.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="premium-card rounded-3xl p-6 sm:p-7 relative overflow-hidden reveal-on-scroll">
+          <span class="absolute top-4 right-5 text-5xl font-black text-slate-200/50 font-display select-none">
+            03
+          </span>
+          <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl mb-5 shadow-sm">
+            <i class="fas fa-award"></i>
+          </div>
+          <h3 class="font-display text-xl font-bold text-slate-900 mb-2">
+            3. Emisión de tiquete
+          </h3>
+          <p class="text-sm text-slate-500 leading-relaxed">
+            Recibes tu tiquete digital oficial asegurando tus números para el sorteo de <strong>Chontico Noche</strong>.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- Trust Badges -->
+      <div class="mt-12 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs font-bold text-slate-500">
+        <span class="flex items-center gap-2">
+          <i class="fas fa-shield-check text-emerald-500 text-sm"></i> Sorteo 100% Transparente
+        </span>
+        <span class="flex items-center gap-2">
+          <i class="fab fa-whatsapp text-emerald-500 text-sm"></i> Atención directa por WhatsApp
+        </span>
+        <span class="flex items-center gap-2">
+          <i class="fas fa-receipt text-indigo-500 text-sm"></i> Tiquete Digital Oficial
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 3. EL PREMIO (CON FOTO DEL PREMIO EDITABLE / MOSTRADA)        -->
+  <!-- ============================================================ -->
+  <section id="premio" class="py-16 sm:py-20 px-4 sm:px-6 relative z-10 bg-slate-50/80 border-t border-slate-200/80">
+    <div class="max-w-5xl mx-auto">
+      <div class="premium-card rounded-3xl p-6 sm:p-10 relative overflow-hidden border border-indigo-500/20 reveal-on-scroll bg-white">
+        
+        <div class="grid md:grid-cols-12 gap-8 items-center">
+          
+          <!-- Premio Columna Izquierda / Info -->
+          <div class="md:col-span-7">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 text-purple-700 text-xs font-bold uppercase tracking-wider mb-4">
+              <i class="fas fa-gift"></i> Premio Especial
+            </div>
+            
+            <h2 id="premio-nombre" class="font-display text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">
+              (PERFUME Hombre / Mujer), tú escoges.
+            </h2>
+            
+            <p id="premio-detalle" class="text-slate-600 text-sm sm:text-base leading-relaxed mb-6">
+              El ganador del sorteo tendrá la libertad de seleccionar su perfume favorito entre nuestra exclusiva selección de fragancias de lujo masculinas o femeninas.
+            </p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-7 text-sm font-semibold text-slate-700">
+              <div class="flex items-center gap-2.5">
+                <i class="fas fa-check-circle text-emerald-500"></i>
+                <span>100% Original Garantizado</span>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <i class="fas fa-check-circle text-emerald-500"></i>
+                <span>Hombre o Mujer a elección</span>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <i class="fas fa-check-circle text-emerald-500"></i>
+                <span>Entrega coordinada directa</span>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <i class="fas fa-check-circle text-emerald-500"></i>
+                <span>Sorteo con Chontico Noche</span>
+              </div>
+            </div>
+
+            <a href="#talonario" class="btn-primary-gradient inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm shadow-md shadow-indigo-500/25">
+              <i class="fas fa-ticket"></i>
+              <span>Participar por el perfume</span>
+            </a>
+          </div>
+
+          <!-- Premio Columna Derecha / Imagen Real del Premio -->
+          <div class="md:col-span-5 flex justify-center">
+            <div class="relative w-full max-w-sm rounded-3xl overflow-hidden bg-white border border-indigo-100 shadow-xl group">
+              <div class="relative overflow-hidden aspect-square bg-slate-50">
+                <img id="premio-img" src="./img/premio.png" alt="Premio Perfume Hombre / Mujer" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='./img/premio.jpg'">
+                <div class="absolute top-3 right-3 bg-slate-900/80 backdrop-blur text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow">
+                  Tú escoges
+                </div>
+              </div>
+              <div class="p-5 text-center bg-white border-t border-slate-100">
+                <span class="text-xs font-black uppercase tracking-widest text-indigo-600 block mb-1">
+                  Fragancias Originales
+                </span>
+                <h3 class="font-display text-lg font-bold text-slate-900 mb-1">
+                  Perfume de Alta Gama
+                </h3>
+                <p class="text-xs text-slate-500">
+                  Para Dama o Caballero. El ganador escoge su fragancia preferida.
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 4. MÉTODOS DE PAGO Y CONFIANZA                                -->
+  <!-- ============================================================ -->
+  <section id="pagos" class="py-16 sm:py-20 px-4 sm:px-6 bg-white border-t border-slate-200/80 relative z-10">
+    <div class="max-w-4xl mx-auto text-center reveal-on-scroll">
+      
+      <span class="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-2 block">
+        Transacción Fácil y Segura
+      </span>
+      <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">
+        Métodos de pago aceptados
+      </h2>
+      <p class="text-slate-500 text-sm sm:text-base max-w-lg mx-auto mb-10">
+        Paga de forma rápida y directa a través de Nequi. Guarda tu comprobante para adjuntarlo al formulario.
+      </p>
+
+      <!-- Nequi Card Destacada -->
+      <div class="max-w-md mx-auto premium-card rounded-3xl p-6 sm:p-8 mb-8 border-indigo-500/20 text-left bg-white">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-base shadow-sm">
+              <i class="fas fa-mobile-screen-button"></i>
+            </div>
+            <div>
+              <h3 class="font-display font-bold text-lg text-slate-900">Nequi Colombia</h3>
+              <span class="text-xs text-slate-400">Transferencia móvil inmediata</span>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 text-xs font-bold">
+            Activo
+          </span>
+        </div>
+
+        <div class="bg-slate-50 rounded-2xl p-3.5 flex items-center justify-between gap-3 mb-3 border border-slate-200/80">
+          <div>
+            <span class="text-[10px] uppercase font-bold text-slate-400 block">Número de cuenta</span>
+            <span class="font-display font-black text-xl text-slate-900 tracking-wider tabular-nums">3188178457</span>
+          </div>
+          <div class="relative">
+            <button type="button" id="btn-copy-nequi" class="btn-secondary px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 hover:border-indigo-500 bg-white" title="Copiar número al portapapeles">
+              <i class="fas fa-copy"></i>
+              <span>Copiar</span>
+            </button>
+            <span id="copy-tooltip" class="hidden absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow">
+              ¡Copiado!
+            </span>
+          </div>
+        </div>
+
+        <p class="text-xs text-slate-400 text-center">
+          Envía el valor exacto ($900 por número) y adjunta el comprobante al reservar.
+        </p>
+      </div>
+
+      <!-- Otros Métodos List -->
+      <div id="metodos-pago-list" class="flex flex-wrap items-center justify-center gap-3"></div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 5. PREGUNTAS FRECUENTES (FAQ)                                 -->
+  <!-- ============================================================ -->
+  <section id="faq" class="py-16 sm:py-20 px-4 sm:px-6 bg-slate-50/80 border-t border-slate-200/80 relative z-10">
+    <div class="max-w-3xl mx-auto">
+      
+      <div class="text-center mb-12 reveal-on-scroll">
+        <span class="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-2 block">
+          Resolvemos tus dudas
+        </span>
+        <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+          Preguntas frecuentes
+        </h2>
+      </div>
+
+      <div class="space-y-4">
+        
+        <!-- FAQ 1 -->
+        <div class="premium-card rounded-2xl overflow-hidden reveal-on-scroll bg-white">
+          <button type="button" class="faq-toggle w-full px-6 py-5 text-left flex items-center justify-between gap-4 font-bold text-slate-900 text-base">
+            <span>¿Cómo se elige al ganador del sorteo?</span>
+            <i class="faq-icon fas fa-chevron-down text-xs text-slate-400 transition-transform duration-300"></i>
+          </button>
+          <div class="faq-content hidden px-6 pb-5 text-sm text-slate-500 leading-relaxed border-t border-slate-100 pt-3">
+            El sorteo juega oficialmente con las últimas dos cifras del resultado de la lotería oficial <strong>CHONTICO NOCHE</strong> en la fecha estipulada. Esto garantiza 100% de transparencia e imparcialidad ya que los resultados son públicos y auditados.
+          </div>
+        </div>
+
+        <!-- FAQ 2 -->
+        <div class="premium-card rounded-2xl overflow-hidden reveal-on-scroll bg-white">
+          <button type="button" class="faq-toggle w-full px-6 py-5 text-left flex items-center justify-between gap-4 font-bold text-slate-900 text-base">
+            <span>¿Cómo elijo entre perfume de hombre o mujer si gano?</span>
+            <i class="faq-icon fas fa-chevron-down text-xs text-slate-400 transition-transform duration-300"></i>
+          </button>
+          <div class="faq-content hidden px-6 pb-5 text-sm text-slate-500 leading-relaxed border-t border-slate-100 pt-3">
+            Una vez se confirme el número ganador, te contactaremos de inmediato a tu WhatsApp y número de teléfono registrado para que escojas la fragancia de tu preferencia (masculina o femenina) dentro del catálogo de fragancias originales y coordinar la entrega.
+          </div>
+        </div>
+
+        <!-- FAQ 3 -->
+        <div class="premium-card rounded-2xl overflow-hidden reveal-on-scroll bg-white">
+          <button type="button" class="faq-toggle w-full px-6 py-5 text-left flex items-center justify-between gap-4 font-bold text-slate-900 text-base">
+            <span>¿Puedo apartar mis números y pagar después?</span>
+            <i class="faq-icon fas fa-chevron-down text-xs text-slate-400 transition-transform duration-300"></i>
+          </button>
+          <div class="faq-content hidden px-6 pb-5 text-sm text-slate-500 leading-relaxed border-t border-slate-100 pt-3">
+            Sí. Puedes completar el formulario y adjuntar cualquier imagen para proceder con la reserva de tus números. Luego nos envías tu comprobante por WhatsApp antes del día del sorteo para asegurar tu número de forma definitiva.
+          </div>
+        </div>
+
+        <!-- FAQ 4 -->
+        <div class="premium-card rounded-2xl overflow-hidden reveal-on-scroll bg-white">
+          <button type="button" class="faq-toggle w-full px-6 py-5 text-left flex items-center justify-between gap-4 font-bold text-slate-900 text-base">
+            <span>¿Qué métodos de pago están disponibles?</span>
+            <i class="faq-icon fas fa-chevron-down text-xs text-slate-400 transition-transform duration-300"></i>
+          </button>
+          <div class="faq-content hidden px-6 pb-5 text-sm text-slate-500 leading-relaxed border-t border-slate-100 pt-3">
+            El método principal y más ágil es <strong>Nequi</strong> al número <code>3188178457</code>. Si necesitas otro medio de pago alternativo, puedes escribirnos directamente a nuestro WhatsApp oficial.
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- FOOTER                                                        -->
+  <!-- ============================================================ -->
+  <footer id="contacto" class="bg-slate-950 text-slate-300 pt-16 pb-12 px-4 sm:px-6 border-t border-slate-800 relative z-10 mt-auto">
+    <div class="max-w-6xl mx-auto grid sm:grid-cols-3 gap-10">
+      
+      <!-- Marca -->
       <div>
-        <h4 class="font-bold text-white mb-3">Enlaces</h4>
-        <ul class="text-sm space-y-2">
-          <li><a href="#talonario" class="hover:text-white">Talonario</a></li>
-          <li><a href="#como-funciona" class="hover:text-white">Cómo funciona</a></li>
-          <li><a href="#premio" class="hover:text-white">Premio</a></li>
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-9 h-9 rounded-xl overflow-hidden bg-white shadow-sm border border-slate-700">
+            <img src="./img/Foto Web0.png" alt="Mascota MaxRF" class="w-full h-full object-cover">
+          </div>
+          <span class="font-display font-black text-xl text-white">
+            Dinamica<span class="text-indigo-400">MaxRF</span>
+          </span>
+        </div>
+        <p class="text-sm text-slate-400 leading-relaxed mb-4">
+          Talonarios digitales con reserva en tiempo real, transparencia total y respaldo oficial de la lotería Chontico Noche.
+        </p>
+        <div class="flex items-center gap-3 text-slate-400 text-sm">
+          <span class="flex items-center gap-1.5"><i class="fas fa-shield-halved text-emerald-400"></i> 100% Confiable</span>
+          <span>•</span>
+          <span class="flex items-center gap-1.5"><i class="fas fa-bolt text-amber-400"></i> En tiempo real</span>
+        </div>
+      </div>
+
+      <!-- Contacto -->
+      <div>
+        <h4 class="font-display font-bold text-white mb-4 text-base">Contacto & Soporte</h4>
+        <p id="contacto-whatsapp" class="text-sm mb-2 text-slate-300">
+          <i class="fab fa-whatsapp mr-2 text-emerald-400"></i> +57 318 817 8457
+        </p>
+        <p class="text-sm text-slate-300 mb-2">
+          <i class="fas fa-envelope mr-2 text-indigo-400"></i> maxrf2025@gmail.com
+        </p>
+        <p class="text-xs text-slate-500 mt-3">
+          Horario de atención: Lunes a Domingo, 8:00 AM - 9:00 PM
+        </p>
+      </div>
+
+      <!-- Enlaces Rápidos -->
+      <div>
+        <h4 class="font-display font-bold text-white mb-4 text-base">Navegación</h4>
+        <ul class="text-sm space-y-2.5">
+          <li><a href="#talonario" class="hover:text-white transition-colors">Talonario Digital</a></li>
+          <li><a href="#como-funciona" class="hover:text-white transition-colors">¿Cómo funciona?</a></li>
+          <li><a href="#premio" class="hover:text-white transition-colors">El Premio</a></li>
+          <li><a href="#pagos" class="hover:text-white transition-colors">Métodos de Pago</a></li>
+          <li><a href="#faq" class="hover:text-white transition-colors">Preguntas Frecuentes</a></li>
         </ul>
       </div>
+
     </div>
-    <div class="max-w-5xl mx-auto border-t border-gray-800 mt-8 pt-6 text-xs text-gray-500 text-center">
-      © 2026 RifaDigital. Todos los derechos reservados.
+
+    <!-- Copyright -->
+    <div class="max-w-6xl mx-auto border-t border-slate-800/80 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+      <p>© 2026 DinamicaMaxRF. Todos los derechos reservados.</p>
+      <p class="flex items-center gap-1">
+        <span>Diseñado con estándar de agencia para</span>
+        <span class="font-bold text-slate-400">MaxRF</span>
+      </p>
     </div>
   </footer>
 
-  <!-- WhatsApp flotante -->
-  <a id="wa-float" href="#" target="_blank" class="wa-float hidden">
+  <!-- WhatsApp Flotante -->
+  <a id="wa-float" href="#" target="_blank" rel="noopener noreferrer" class="wa-float-btn hidden" aria-label="Escribir por WhatsApp" title="Escribir por WhatsApp">
     <i class="fab fa-whatsapp"></i>
   </a>
 
   <!-- ============================================================ -->
   <!-- MODAL DE PARTICIPACIÓN                                        -->
   <!-- ============================================================ -->
-  <div id="modal-participar" class="modal-overlay hidden">
-    <div class="modal-box">
-      <div class="p-6 border-b border-gray-100 flex items-center justify-between">
-        <h3 class="text-xl font-extrabold text-gray-900">Completa tu participación</h3>
-        <button id="btn-cerrar-modal" class="text-gray-400 hover:text-gray-700 text-xl"><i class="fas fa-xmark"></i></button>
+  <div id="modal-participar" class="modal-overlay">
+    <div class="modal-dialog">
+      
+      <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-white rounded-t-3xl">
+        <div>
+          <h3 class="font-display text-xl font-extrabold text-slate-900">
+            Completa tu participación
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">Reserva tus números para el sorteo de MaxRF</p>
+        </div>
+        <button type="button" id="btn-cerrar-modal" class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 text-base hover:bg-slate-100 transition">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
 
-      <form id="form-participar" class="p-6 space-y-4">
-        <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-center justify-between">
+      <form id="form-participar" class="p-6 space-y-4 bg-white rounded-b-3xl">
+        
+        <!-- Summary Box -->
+        <div class="bg-indigo-50/70 border border-indigo-100 rounded-2xl p-4 flex items-center justify-between">
           <div>
-            <div class="text-xs text-indigo-500 font-bold uppercase">Números elegidos</div>
-            <div id="modal-numeros" class="font-extrabold text-indigo-700 text-lg">—</div>
+            <div class="text-[10px] text-indigo-600 font-bold uppercase tracking-wider">Números elegidos</div>
+            <div id="modal-numeros" class="font-display font-extrabold text-indigo-700 text-lg tabular-nums">—</div>
           </div>
           <div class="text-right">
-            <div class="text-xs text-indigo-500 font-bold uppercase">Total</div>
-            <div id="modal-total" class="font-extrabold text-indigo-700 text-lg">$0</div>
+            <div class="text-[10px] text-indigo-600 font-bold uppercase tracking-wider">Total a pagar</div>
+            <div id="modal-total" class="font-display font-black text-indigo-700 text-xl tabular-nums">$0</div>
           </div>
         </div>
 
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-1">Nombre completo *</label>
-          <input type="text" name="nombre" required class="w-full border border-gray-200 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Ej. Juan Pérez">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nombre completo *</label>
+          <input type="text" name="nombre" required class="w-full border border-slate-200 bg-slate-50/50 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Ej. Juan Pérez">
         </div>
+
         <div class="grid sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1">Correo electrónico *</label>
-            <input type="email" name="correo" required class="w-full border border-gray-200 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="tu@correo.com">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Correo electrónico *</label>
+            <input type="email" name="correo" required class="w-full border border-slate-200 bg-slate-50/50 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="tu@correo.com">
           </div>
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-1">Teléfono *</label>
-            <input type="tel" name="telefono" required class="w-full border border-gray-200 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="+58 424 0000000">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Teléfono / WhatsApp *</label>
+            <input type="tel" name="telefono" required class="w-full border border-slate-200 bg-slate-50/50 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="+57 318 0000000">
           </div>
         </div>
+
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-1">Método de pago *</label>
-          <select name="metodo_pago" required class="w-full border border-gray-200 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Método de pago *</label>
+          <select name="metodo_pago" required class="w-full border border-slate-200 bg-slate-50/50 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
             <option value="">Selecciona un método</option>
           </select>
         </div>
+
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-1">Número de referencia / comprobante *</label>
-          <input type="text" name="referencia_pago" required class="w-full border border-gray-200 rounded-lg px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Ej. 000123456">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Número de referencia o comprobante *</label>
+          <input type="text" id="input-referencia-pago" name="referencia_pago" required class="w-full border border-slate-200 bg-slate-50/50 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition" placeholder="Ej. 000123456 (o escribe 'Pendiente')">
         </div>
+
         <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-1">Comprobante de pago (imagen) *</label>
-          <div id="file-drop" class="file-drop">
+          <label class="flex items-center justify-between text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            <span>Comprobante de pago (imagen)</span>
+            <span id="comprobante-badge" class="text-rose-500 font-semibold text-[11px] transition-all">* Requerido</span>
+          </label>
+          <div id="file-drop" class="file-drop-area">
             <input type="file" id="input-comprobante" accept="image/*" class="hidden">
             <div id="file-drop-empty">
-              <i class="fas fa-cloud-arrow-up text-2xl text-gray-400 mb-2"></i>
-              <p class="text-sm text-gray-500">Haz clic o arrastra la imagen aquí (máx. 4MB)</p>
+              <i class="fas fa-cloud-arrow-up text-3xl text-indigo-500/70 mb-2"></i>
+              <p class="text-xs font-semibold text-slate-600">Haz clic o arrastra la captura aquí (máx. 4MB)</p>
+              <p id="file-drop-nota" class="text-[11px] text-slate-400 mt-1">Si colocas 'Pendiente' en referencia, puedes confirmar sin adjuntar comprobante</p>
             </div>
             <div id="file-drop-preview" class="hidden">
-              <img id="file-preview-img" class="max-h-40 mx-auto rounded-lg mb-2" alt="Vista previa del comprobante">
-              <p id="file-preview-name" class="text-xs text-gray-500"></p>
+              <img id="file-preview-img" class="max-h-36 mx-auto rounded-lg mb-2 shadow" alt="Vista previa comprobante">
+              <p id="file-preview-name" class="text-xs text-slate-500"></p>
             </div>
           </div>
         </div>
 
-        <div id="form-error" class="hidden bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg p-3"></div>
+        <!-- Opción de enviar comprobante y tiquete al correo del participante -->
+        <div class="bg-indigo-50/50 border border-indigo-100 rounded-2xl p-3.5 flex items-start gap-3 transition hover:bg-indigo-50/80">
+          <input type="checkbox" id="check-enviar-correo" name="enviar_correo" value="true" checked class="mt-0.5 w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 accent-indigo-600 cursor-pointer">
+          <label for="check-enviar-correo" class="text-xs text-slate-700 cursor-pointer select-none">
+            <span class="font-extrabold text-slate-900 flex items-center gap-1.5">
+              <i class="fas fa-envelope text-indigo-600 text-xs"></i>
+              Enviar comprobante y tiquete a mi correo
+            </span>
+            <span class="text-[11px] text-slate-500 block mt-0.5 leading-snug">
+              Te enviaremos una copia oficial con tus números reservados y detalles de la rifa.
+            </span>
+          </label>
+        </div>
 
-        <button type="submit" id="btn-enviar" class="btn-primary w-full font-bold py-3 rounded-xl text-base">
-          <span id="btn-enviar-text"><i class="fas fa-paper-plane mr-2"></i> Enviar participación</span>
-        </button>
-        <p class="text-xs text-gray-400 text-center">Al enviar, tus números quedarán reservados mientras verificamos tu pago manualmente.</p>
+        <div id="form-error" class="hidden bg-rose-500/10 border border-rose-500/30 text-rose-600 text-xs font-semibold rounded-xl p-3"></div>
+
+        <div class="pt-2">
+          <button type="submit" id="btn-enviar" class="btn-primary-gradient w-full py-3.5 rounded-xl font-bold text-sm sm:text-base shadow-lg shadow-indigo-600/30">
+            <span id="btn-enviar-text"><i class="fas fa-paper-plane mr-2"></i> Confirmar y Generar Tiquete</span>
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between pt-1">
+          <button type="button" id="btn-cancelar-modal" class="text-xs text-slate-400 hover:text-slate-600">
+            Cancelar
+          </button>
+          <p class="text-[11px] text-slate-400 text-right">Se emitirá tu tiquete oficial de reserva.</p>
+        </div>
+
       </form>
+
     </div>
   </div>
 
   <!-- ============================================================ -->
-  <!-- MODAL DE ÉXITO                                                -->
+  <!-- MODAL DE ÉXITO & TIQUETE DIGITAL OFICIAL                       -->
   <!-- ============================================================ -->
-  <div id="modal-exito" class="modal-overlay hidden">
-    <div class="modal-box text-center p-8">
-      <div class="w-16 h-16 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-3xl mx-auto mb-4">
-        <i class="fas fa-check"></i>
+  <div id="modal-exito" class="modal-overlay">
+    <div class="modal-dialog max-w-lg p-5 sm:p-7 text-center bg-white rounded-3xl">
+      
+      <!-- Cabecera modal (no-print) -->
+      <div id="modal-exito-header" class="no-print">
+        <div class="w-14 h-14 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center text-2xl mx-auto mb-3 shadow-md shadow-emerald-500/15">
+          <i class="fas fa-check"></i>
+        </div>
+        
+        <h3 class="font-display text-2xl font-black text-slate-900 mb-1">
+          ¡Participación Registrada!
+        </h3>
+        
+        <p id="modal-exito-msg" class="text-xs sm:text-sm text-slate-500 mb-3">
+          Tus números han quedado reservados con éxito. A continuación tienes tu tiquete oficial:
+        </p>
       </div>
-      <h3 class="text-xl font-extrabold text-gray-900 mb-2">¡Participación registrada!</h3>
-      <p id="modal-exito-msg" class="text-gray-500 mb-6">Tus números quedaron reservados. Te contactaremos al confirmar tu pago.</p>
-      <button id="btn-cerrar-exito" class="btn-primary font-bold px-6 py-3 rounded-xl">Entendido</button>
+
+      <!-- ========================================================== -->
+      <!-- TIQUETE DIGITAL OFICIAL DE PARTICIPACIÓN                    -->
+      <!-- ========================================================== -->
+      <div id="ticket-participacion" class="digital-ticket-box p-5 sm:p-6 text-left my-2 bg-white relative">
+        
+        <!-- Header del Tiquete -->
+        <div class="flex items-center justify-between border-b border-slate-200/80 pb-3 mb-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-10 h-10 rounded-xl overflow-hidden border border-indigo-200 bg-white shadow-sm flex items-center justify-center">
+              <img src="./img/Foto Web0.png" class="w-full h-full object-cover" alt="Logo MaxRF">
+            </div>
+            <div>
+              <span class="font-display font-black text-slate-900 text-base leading-none block">DinamicaMaxRF</span>
+              <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600 leading-none">Tiquete Oficial de Rifa</span>
+            </div>
+          </div>
+          <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-black uppercase tracking-wider border border-emerald-300">
+            ● Reservado
+          </span>
+        </div>
+
+        <!-- Info del Participante -->
+        <div class="grid grid-cols-2 gap-2.5 text-xs mb-3 bg-slate-50/80 p-3 rounded-xl border border-slate-100">
+          <div>
+            <span class="text-[10px] uppercase font-bold text-slate-400 block">Titular</span>
+            <span id="ticket-nombre" class="font-bold text-slate-900 text-sm truncate block">—</span>
+          </div>
+          <div>
+            <span class="text-[10px] uppercase font-bold text-slate-400 block">WhatsApp / Tel</span>
+            <span id="ticket-telefono" class="font-bold text-slate-900 text-sm truncate block">—</span>
+          </div>
+          <div>
+            <span class="text-[10px] uppercase font-bold text-slate-400 block">Referencia Pago</span>
+            <span id="ticket-ref" class="font-bold text-indigo-700 text-xs truncate block">—</span>
+          </div>
+          <div>
+            <span class="text-[10px] uppercase font-bold text-slate-400 block">Fecha y Hora</span>
+            <span id="ticket-fecha" class="font-semibold text-slate-600 text-[11px] block">—</span>
+          </div>
+        </div>
+
+        <!-- Caja de Números de la Suerte -->
+        <div class="bg-gradient-to-br from-indigo-50/80 via-purple-50/40 to-indigo-50/80 border border-indigo-200/80 rounded-2xl p-4 text-center mb-3">
+          <span class="text-[10px] font-black uppercase tracking-widest text-indigo-600 block mb-2">
+            TUS NÚMEROS DE LA SUERTE
+          </span>
+          <div id="ticket-numeros-container" class="flex flex-wrap items-center justify-center gap-2 my-1">
+            <!-- Se llena por JS: [ 00 ], [ 07 ] -->
+          </div>
+          <div class="mt-3 pt-2.5 border-t border-indigo-200/60 flex items-center justify-between text-xs font-bold text-slate-700">
+            <span>Total a pagar: <span id="ticket-total" class="text-indigo-600 font-extrabold text-sm">$0</span></span>
+            <span class="flex items-center gap-1 text-slate-500">
+              <i class="fas fa-ticket text-indigo-500"></i> Juega: <strong class="text-slate-900">CHONTICO NOCHE</strong>
+            </span>
+          </div>
+        </div>
+
+        <!-- Código y Nota Legal -->
+        <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono border-t border-slate-200/70 pt-2.5">
+          <span id="ticket-codigo" class="font-bold text-slate-600">MAXRF-TKT-XXXX</span>
+          <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Premio: Perfume a elección</span>
+        </div>
+      </div>
+
+      <!-- Notificación de Correo Enviado -->
+      <div id="box-correo-status" class="hidden my-2.5 p-3 bg-indigo-50/90 border border-indigo-200/80 rounded-2xl text-left flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5 overflow-hidden">
+          <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 text-sm shadow-sm">
+            <i class="fas fa-envelope-circle-check"></i>
+          </div>
+          <div class="truncate">
+            <span class="text-xs font-bold text-slate-900 block">Copia enviada a tu correo:</span>
+            <span id="txt-correo-notif" class="text-[11px] font-semibold text-indigo-600 truncate block">ejemplo@correo.com</span>
+          </div>
+        </div>
+        <button type="button" id="btn-reenviar-correo" class="shrink-0 text-xs font-bold text-indigo-600 hover:text-indigo-800 bg-white border border-indigo-200 px-2.5 py-1.5 rounded-lg shadow-sm hover:shadow transition">
+          <i class="fas fa-rotate-right mr-1"></i>Reenviar
+        </button>
+      </div>
+
+      <!-- Botones de Acción (no-print) -->
+      <div id="modal-exito-actions" class="no-print space-y-2.5 mt-4">
+        <div class="grid grid-cols-2 gap-2.5">
+          <button type="button" id="btn-imprimir-tiquete" class="w-full py-3 px-2 sm:px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition">
+            <i class="fas fa-print"></i>
+            <span>Imprimir / PDF</span>
+          </button>
+          <button type="button" id="btn-enviar-correo-modal" class="w-full py-3 px-2 sm:px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-indigo-600/20 transition">
+            <i class="fas fa-envelope"></i>
+            <span id="btn-enviar-correo-text">Enviar a mi correo</span>
+          </button>
+        </div>
+        <a id="btn-wa-confirmar" href="#" target="_blank" rel="noopener noreferrer" class="w-full py-3 px-3 sm:px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20 transition">
+          <i class="fab fa-whatsapp text-base"></i>
+          <span>Enviar confirmación a WhatsApp</span>
+        </a>
+        <button type="button" id="btn-cerrar-exito" class="btn-secondary w-full py-2.5 rounded-xl font-bold text-xs text-slate-600 hover:text-slate-900">
+          Cerrar y volver al talonario
+        </button>
+      </div>
+
     </div>
   </div>
 
+  <!-- Scripts -->
   <script src="./js/config.js"></script>
-  <script src="./js/demo-backend.js"></script>
   <script src="./js/api.js"></script>
   <script src="./js/app.js"></script>
 </body>
