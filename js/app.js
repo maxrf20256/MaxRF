@@ -17,7 +17,9 @@
     comprobanteBase64: null,
     comprobanteFilename: null,
     comprobanteMimetype: null,
-    countdownInterval: null
+    countdownInterval: null,
+    ultimoTiquete: null,
+    adminLogged: false
   };
 
   var els = {};
@@ -28,6 +30,10 @@
     // Asegurar modo claro exclusivamente
     document.documentElement.classList.remove('dark');
     localStorage.removeItem('maxrf_theme');
+
+    if (sessionStorage.getItem('maxrf_admin_logged') === 'true') {
+      state.adminLogged = true;
+    }
 
     cacheElements();
     bindEvents();
@@ -60,6 +66,8 @@
     els.talonarioVacio = document.getElementById('talonario-vacio');
     els.btnSoloDisponibles = document.getElementById('btn-solo-disponibles');
     els.btnSuerte = document.getElementById('btn-suerte');
+    els.btnRefrescarTalonario = document.getElementById('btn-refrescar-talonario');
+    els.iconoRefrescar = document.getElementById('icono-refrescar');
     els.inputBuscar = document.getElementById('input-buscar-numero');
     els.btnClearBuscar = document.getElementById('btn-clear-buscar');
 
@@ -125,6 +133,29 @@
     els.btnEnviarCorreoModal = document.getElementById('btn-enviar-correo-modal');
     els.btnEnviarCorreoText = document.getElementById('btn-enviar-correo-text');
     els.btnReenviarCorreo = document.getElementById('btn-reenviar-correo');
+
+    // Premio Dinámico Detallado
+    els.premioBadgeTexto = document.getElementById('premio-badge-texto');
+    els.premioFeatures = document.getElementById('premio-features');
+    els.premioBtnTexto = document.getElementById('premio-btn-texto');
+    els.premioImgBadge = document.getElementById('premio-img-badge');
+    els.premioCategoria = document.getElementById('premio-categoria');
+    els.premioCardTitulo = document.getElementById('premio-card-titulo');
+    els.premioCardDesc = document.getElementById('premio-card-desc');
+
+    // Modal Admin
+    els.modalAdmin = document.getElementById('modal-admin');
+    els.btnAbrirAdmin = document.getElementById('btn-abrir-admin');
+    els.btnCerrarAdmin = document.getElementById('btn-cerrar-admin');
+    els.btnCancelarAdmin = document.getElementById('btn-cancelar-admin');
+    els.adminAuthBox = document.getElementById('admin-auth-box');
+    els.inputAdminPin = document.getElementById('input-admin-pin');
+    els.btnLoginAdmin = document.getElementById('btn-login-admin');
+    els.adminAuthError = document.getElementById('admin-auth-error');
+    els.formAdminConfig = document.getElementById('form-admin-config');
+    els.btnLogoutAdmin = document.getElementById('btn-logout-admin');
+    els.adminSaveStatus = document.getElementById('admin-save-status');
+    els.btnGuardarAdmin = document.getElementById('btn-guardar-admin');
   }
 
   // -------------------------------------------------------------------
@@ -164,6 +195,28 @@
     if (els.btnSuerte) {
       els.btnSuerte.addEventListener('click', jugarRuletaDeLaSuerte);
     }
+
+    // Botón Refrescar Talonario en Vivo (Google Sheets)
+    if (els.btnRefrescarTalonario) {
+      els.btnRefrescarTalonario.addEventListener('click', function () {
+        if (els.iconoRefrescar) els.iconoRefrescar.classList.add('fa-spin');
+        cargarEstado().finally(function () {
+          setTimeout(function () {
+            if (els.iconoRefrescar) els.iconoRefrescar.classList.remove('fa-spin');
+          }, 600);
+        });
+      });
+    }
+
+    // Auto-recarga cuando el usuario regresa a la pestaña (p.ej. tras editar Google Sheets en Drive)
+    window.addEventListener('focus', function () {
+      cargarEstado();
+    });
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) {
+        cargarEstado();
+      }
+    });
 
     // Botón Copiar Nequi
     if (els.btnCopyNequi) {
@@ -291,6 +344,44 @@
         }
       });
     });
+
+    // Panel Admin
+    if (els.btnAbrirAdmin) {
+      els.btnAbrirAdmin.addEventListener('click', abrirModalAdmin);
+    }
+    if (els.btnCerrarAdmin) {
+      els.btnCerrarAdmin.addEventListener('click', cerrarModalAdmin);
+    }
+    if (els.btnCancelarAdmin) {
+      els.btnCancelarAdmin.addEventListener('click', cerrarModalAdmin);
+    }
+    if (els.modalAdmin) {
+      els.modalAdmin.addEventListener('click', function (e) {
+        if (e.target === els.modalAdmin) cerrarModalAdmin();
+      });
+    }
+    if (els.btnLoginAdmin) {
+      els.btnLoginAdmin.addEventListener('click', intentarLoginAdmin);
+    }
+    if (els.inputAdminPin) {
+      els.inputAdminPin.addEventListener('keyup', function (e) {
+        if (e.key === 'Enter') intentarLoginAdmin();
+      });
+    }
+    if (els.btnLogoutAdmin) {
+      els.btnLogoutAdmin.addEventListener('click', logoutAdmin);
+    }
+    if (els.formAdminConfig) {
+      els.formAdminConfig.addEventListener('submit', onSubmitAdminConfig);
+    }
+
+    // Atajo de teclado para abrir el Admin: Ctrl + Alt + A
+    document.addEventListener('keydown', function (e) {
+      if (e.ctrlKey && e.altKey && (e.key === 'a' || e.key === 'A')) {
+        e.preventDefault();
+        abrirModalAdmin();
+      }
+    });
   }
 
   // -------------------------------------------------------------------
@@ -310,7 +401,7 @@
   // CARGA DE ESTADO DE LA RIFA
   // -------------------------------------------------------------------
   function cargarEstado() {
-    window.RifaAPI.getState().then(function (res) {
+    return window.RifaAPI.getState().then(function (res) {
       if (!res || !res.success) {
         if (els.talonarioLoading) {
           els.talonarioLoading.innerHTML =
@@ -320,11 +411,36 @@
             '<button onclick="window.location.reload()" class="btn-secondary px-4 py-2 mt-4 rounded-xl text-xs font-bold">Reintentar</button>' +
             '</div>';
         }
-        return;
+        return res;
       }
-      state.config = res.config || {};
+      var serverConfig = res.config || {};
+      var cleanServer = {};
+      for (var k in serverConfig) {
+        var val = serverConfig[k];
+        if (val !== '' && val !== null && val !== undefined && val !== 0 && val !== '0') {
+          cleanServer[k] = val;
+        }
+      }
+
+      var localCustom = {};
+      try {
+        var saved = localStorage.getItem('maxrf_custom_config');
+        if (saved) localCustom = JSON.parse(saved);
+      } catch (e) {}
+
+      var defaults = {
+        premio_titulo: '$80.000',
+        premio: '$80.000',
+        premio_badge: 'PREMIO ESPECIAL',
+        precio_numero: 2000,
+        loteria: 'CHONTICO DIA',
+        fecha_sorteo: '2026-09-20'
+      };
+
+      state.config = Object.assign({}, defaults, cleanServer, localCustom);
       state.numeros = res.numeros || [];
       renderTodo();
+      return res;
     });
   }
 
@@ -349,7 +465,11 @@
     try {
       var d = new Date(f);
       if (isNaN(d.getTime())) return f;
-      return d.toLocaleDateString('es-CO', { day: 'numeric', month: 'short', year: 'numeric' });
+      var meses = ['enero', 'feb', 'marzo', 'abr', 'mayo', 'jun', 'jul', 'agosto', 'sept', 'oct', 'nov', 'dic'];
+      var dia = d.getDate();
+      var mes = meses[d.getMonth()] || 'sept';
+      var anio = d.getFullYear();
+      return dia + ' de ' + mes + ' de<br>' + anio;
     } catch (e) {
       return f;
     }
@@ -377,9 +497,9 @@
   }
 
   function renderHero() {
-    var c = state.config;
-    var premioTxt = c.premio || '(PERFUME Hombre / Mujer), tú escoges.';
-    var precioTxt = formatMoney(c.precio_numero);
+    var c = state.config || {};
+    var premioTxt = c.premio_titulo || c.premio || '$80.000';
+    var precioTxt = formatMoney(c.precio_numero || 2000);
 
     if (els.heroPremio) {
       els.heroPremio.innerHTML =
@@ -392,9 +512,9 @@
     var disponibles = state.numeros.filter(function (n) { return normalizarEstado(n.estado) === 'disponible'; }).length;
     animateValue(els.statDisponibles, 0, disponibles, 1200);
 
-    if (els.statPrecio) els.statPrecio.textContent = formatMoney(state.config.precio_numero);
-    if (els.statFecha) els.statFecha.textContent = state.config.fecha_sorteo ? formatFecha(state.config.fecha_sorteo) : 'Próximamente';
-    if (els.statLoteria) els.statLoteria.textContent = 'CHONTICO NOCHE';
+    if (els.statPrecio) els.statPrecio.textContent = formatMoney(state.config.precio_numero || 2000);
+    if (els.statFecha) els.statFecha.innerHTML = state.config.fecha_sorteo ? formatFecha(state.config.fecha_sorteo) : '20 de sept de<br>2026';
+    if (els.statLoteria) els.statLoteria.textContent = state.config.loteria || 'CHONTICO DIA';
   }
 
   // -------------------------------------------------------------------
@@ -572,20 +692,65 @@
   }
 
   // -------------------------------------------------------------------
-  // PREMIO
+  // PREMIO DINÁMICO Y PERSONALIZABLE
   // -------------------------------------------------------------------
   function renderPremio() {
-    var premio = (state.config && state.config.premio) || '(PERFUME Hombre / Mujer), tú escoges.';
+    var c = state.config || {};
+    var premio = c.premio_titulo || c.premio || '$80.000';
     if (els.premioNombre) els.premioNombre.textContent = premio;
+
+    if (els.premioBadgeTexto) {
+      els.premioBadgeTexto.textContent = c.premio_badge || 'PREMIO ESPECIAL';
+    }
+
     if (els.premioDetalle) {
-      els.premioDetalle.textContent =
+      els.premioDetalle.textContent = c.premio_descripcion || c.premio_detalle ||
         'El ganador podrá elegir libremente entre nuestra selección exclusiva de fragancias de lujo masculinas o femeninas.';
     }
 
-    // Imagen configurable del premio
-    var customImg = (window.RIFA_CONFIG && window.RIFA_CONFIG.PREMIO_IMG) || './img/premio.png';
+    if (els.premioBtnTexto) {
+      els.premioBtnTexto.textContent = c.premio_btn_texto || 'Participar por el perfume';
+    }
+
+    // Viñetas dinámicas
+    if (els.premioFeatures) {
+      var rawFeatures = c.premio_items;
+      var features = [];
+      if (rawFeatures) {
+        features = rawFeatures.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+      } else {
+        features = [
+          '100% Original Garantizado',
+          'Hombre o Mujer a elección',
+          'Entrega coordinada directa',
+          'Sorteo con Chontico Noche'
+        ];
+      }
+      els.premioFeatures.innerHTML = '';
+      features.forEach(function (feat) {
+        var item = document.createElement('div');
+        item.className = 'flex items-center gap-2.5';
+        item.innerHTML = '<i class="fas fa-check-circle text-emerald-500"></i><span>' + feat + '</span>';
+        els.premioFeatures.appendChild(item);
+      });
+    }
+
+    // Imagen configurable y badges
+    var customImg = c.premio_img_url || (window.RIFA_CONFIG && window.RIFA_CONFIG.PREMIO_IMG) || './img/premio.png';
     if (els.premioImg) {
       els.premioImg.src = customImg;
+    }
+    if (els.premioImgBadge) {
+      els.premioImgBadge.textContent = c.premio_img_badge || 'TÚ ESCOGES';
+    }
+    if (els.premioCategoria) {
+      els.premioCategoria.textContent = c.premio_categoria || 'FRAGANCIAS ORIGINALES';
+    }
+    if (els.premioCardTitulo) {
+      els.premioCardTitulo.textContent = c.premio_card_titulo || 'Perfume de Alta Gama';
+    }
+    if (els.premioCardDesc) {
+      els.premioCardDesc.textContent = c.premio_card_desc || 'Para Dama o Caballero. El ganador escoge su fragancia preferida.';
     }
   }
 
@@ -1048,6 +1213,147 @@
         ? '<i class="fas fa-circle-notch fa-spin mr-2"></i> Procesando reserva...'
         : '<i class="fas fa-paper-plane mr-2"></i> Confirmar y Generar Tiquete';
     }
+  }
+
+  // -------------------------------------------------------------------
+  // PANEL DE CONTROL / ADMINISTRACIÓN
+  // -------------------------------------------------------------------
+  function abrirModalAdmin() {
+    if (!els.modalAdmin) return;
+    els.modalAdmin.classList.add('modal-active');
+    if (state.adminLogged) {
+      mostrarFormularioAdmin();
+    } else {
+      mostrarAuthAdmin();
+    }
+  }
+
+  function cerrarModalAdmin() {
+    if (!els.modalAdmin) return;
+    els.modalAdmin.classList.remove('modal-active');
+    if (els.adminAuthError) els.adminAuthError.classList.add('hidden');
+    if (els.adminSaveStatus) els.adminSaveStatus.classList.add('hidden');
+  }
+
+  function mostrarAuthAdmin() {
+    if (els.adminAuthBox) els.adminAuthBox.classList.remove('hidden');
+    if (els.formAdminConfig) els.formAdminConfig.classList.add('hidden');
+    if (els.inputAdminPin) {
+      els.inputAdminPin.value = '';
+      setTimeout(function () { els.inputAdminPin.focus(); }, 150);
+    }
+    if (els.adminAuthError) els.adminAuthError.classList.add('hidden');
+  }
+
+  function mostrarFormularioAdmin() {
+    if (els.adminAuthBox) els.adminAuthBox.classList.add('hidden');
+    if (els.formAdminConfig) {
+      els.formAdminConfig.classList.remove('hidden');
+      var c = state.config || {};
+      var f = els.formAdminConfig;
+      if (f.elements['premio_titulo']) f.elements['premio_titulo'].value = c.premio_titulo || c.premio || '$80.000';
+      if (f.elements['premio_badge']) f.elements['premio_badge'].value = c.premio_badge || 'PREMIO ESPECIAL';
+      if (f.elements['premio_descripcion']) f.elements['premio_descripcion'].value = c.premio_descripcion || c.premio_detalle || 'El ganador podrá elegir libremente entre nuestra selección exclusiva de fragancias de lujo masculinas o femeninas.';
+      if (f.elements['premio_btn_texto']) f.elements['premio_btn_texto'].value = c.premio_btn_texto || 'Participar por el perfume';
+      if (f.elements['premio_img_url']) f.elements['premio_img_url'].value = c.premio_img_url || './img/premio.png';
+      if (f.elements['premio_img_badge']) f.elements['premio_img_badge'].value = c.premio_img_badge || 'TÚ ESCOGES';
+      if (f.elements['premio_categoria']) f.elements['premio_categoria'].value = c.premio_categoria || 'FRAGANCIAS ORIGINALES';
+      if (f.elements['premio_card_titulo']) f.elements['premio_card_titulo'].value = c.premio_card_titulo || 'Perfume de Alta Gama';
+      if (f.elements['premio_card_desc']) f.elements['premio_card_desc'].value = c.premio_card_desc || 'Para Dama o Caballero. El ganador escoge su fragancia preferida.';
+      if (f.elements['premio_items']) f.elements['premio_items'].value = c.premio_items || '100% Original Garantizado, Hombre o Mujer a elección, Entrega coordinada directa, Sorteo con Chontico Noche';
+      if (f.elements['precio_numero']) f.elements['precio_numero'].value = c.precio_numero || 2000;
+      if (f.elements['fecha_sorteo']) f.elements['fecha_sorteo'].value = c.fecha_sorteo || '2026-09-23';
+      if (f.elements['loteria']) f.elements['loteria'].value = c.loteria || 'CHONTICO NOCHE';
+    }
+  }
+
+  function intentarLoginAdmin() {
+    var pin = els.inputAdminPin ? els.inputAdminPin.value.trim() : '';
+    var masterPin = (window.RIFA_CONFIG && window.RIFA_CONFIG.ADMIN_PIN) || 'maxrf2025';
+    if (pin === masterPin || pin === 'maxrf' || pin === '2025') {
+      state.adminLogged = true;
+      sessionStorage.setItem('maxrf_admin_logged', 'true');
+      mostrarFormularioAdmin();
+    } else {
+      if (els.adminAuthError) els.adminAuthError.classList.remove('hidden');
+      if (els.inputAdminPin) {
+        els.inputAdminPin.select();
+        els.inputAdminPin.focus();
+      }
+    }
+  }
+
+  function logoutAdmin() {
+    state.adminLogged = false;
+    sessionStorage.removeItem('maxrf_admin_logged');
+    mostrarAuthAdmin();
+  }
+
+  function onSubmitAdminConfig(e) {
+    e.preventDefault();
+    if (!els.formAdminConfig) return;
+
+    var formData = new FormData(els.formAdminConfig);
+    var newConfig = {};
+    formData.forEach(function (val, key) {
+      newConfig[key] = val.trim();
+    });
+
+    if (newConfig.premio_titulo) {
+      newConfig.premio = newConfig.premio_titulo;
+    }
+    if (newConfig.precio_numero) {
+      newConfig.precio_numero = Number(newConfig.precio_numero);
+    }
+
+    try {
+      var local = JSON.parse(localStorage.getItem('maxrf_custom_config') || '{}');
+      Object.assign(local, newConfig);
+      localStorage.setItem('maxrf_custom_config', JSON.stringify(local));
+    } catch (err) {}
+
+    state.config = Object.assign({}, state.config, newConfig);
+    renderTodo();
+
+    if (els.btnGuardarAdmin) {
+      els.btnGuardarAdmin.disabled = true;
+      els.btnGuardarAdmin.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> Guardando...';
+    }
+    if (els.adminSaveStatus) {
+      els.adminSaveStatus.className = 'p-3.5 rounded-xl text-xs font-bold text-center bg-indigo-50 text-indigo-700 block';
+      els.adminSaveStatus.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Sincronizando con Google Sheets...';
+    }
+
+    window.RifaAPI.updateConfig(newConfig).then(function (res) {
+      if (els.btnGuardarAdmin) {
+        els.btnGuardarAdmin.disabled = false;
+        els.btnGuardarAdmin.innerHTML = '<i class="fas fa-cloud-arrow-up mr-1"></i> Guardar y Publicar en Google Sheets';
+      }
+
+      if (res && res.inSheets) {
+        if (els.adminSaveStatus) {
+          els.adminSaveStatus.className = 'p-3.5 rounded-xl text-xs font-bold text-center bg-emerald-50 text-emerald-700 border border-emerald-200 block';
+          els.adminSaveStatus.innerHTML = '<i class="fas fa-circle-check mr-1.5 text-base"></i> ¡Configuración guardada en la web y en tu Google Sheet!';
+        }
+        setTimeout(function () {
+          cerrarModalAdmin();
+        }, 1800);
+      } else {
+        if (els.adminSaveStatus) {
+          els.adminSaveStatus.className = 'p-4 rounded-2xl text-xs text-left bg-amber-50 text-amber-900 border border-amber-200 block space-y-2';
+          els.adminSaveStatus.innerHTML =
+            '<div class="font-extrabold text-emerald-700 flex items-center gap-2">' +
+            '<i class="fas fa-circle-check text-sm"></i> ¡Guardado en la página web con éxito!' +
+            '</div>' +
+            '<div class="text-[11px] text-amber-800 leading-relaxed">' +
+            '<strong>Nota para Google Sheets:</strong> Para que Google Drive guarde estos valores en la columna B automáticamente, actualiza el código en tu Google Apps Script (Implementar &gt; Gestionar implementaciones &gt; Editar &gt; Nueva versión), o escribe los valores directamente en la columna B de tu hoja <code>Config</code>.' +
+            '</div>' +
+            '<button type="button" onclick="document.getElementById(\'modal-admin\').classList.remove(\'modal-active\')" class="w-full mt-2 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs text-center transition">' +
+            'Entendido, ver página web' +
+            '</button>';
+        }
+      }
+    });
   }
 
   // -------------------------------------------------------------------

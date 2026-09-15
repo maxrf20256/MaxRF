@@ -10,6 +10,9 @@ window.RIFA_CONFIG = {
   // Imagen del premio (puedes cambiarla aquí o reemplazar img/premio.png)
   PREMIO_IMG: './img/premio.png',
 
+  // PIN de acceso al Panel de Administración (maxrf2025@gmail.com)
+  ADMIN_PIN: 'maxrf2025',
+
   // Mensaje en modo demo local
   DEMO_MODE_LABEL: 'MODO DEMO — Modo de prueba local'
 };
