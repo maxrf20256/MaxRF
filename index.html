@@ -860,61 +860,20 @@
         </div>
       </div>
 
-      <!-- Notificación de Correo Enviado -->
-      <div id="box-correo-status" class="hidden my-2.5 p-3 bg-indigo-50/90 border border-indigo-200/80 rounded-2xl text-left flex items-center justify-between gap-3">
-        <div class="flex items-center gap-2.5 overflow-hidden">
-          <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shrink-0 text-sm shadow-sm">
-            <i class="fas fa-envelope-circle-check"></i>
-          </div>
-          <div class="truncate">
-            <span class="text-xs font-bold text-slate-900 block">Copia visual enviada al correo del cliente:</span>
-            <span id="txt-correo-notif" class="text-[11px] font-semibold text-indigo-600 truncate block">ejemplo@correo.com</span>
-          </div>
-        </div>
-        <button type="button" id="btn-reenviar-correo" class="shrink-0 text-xs font-bold text-indigo-600 hover:text-indigo-800 bg-white border border-indigo-200 px-2.5 py-1.5 rounded-lg shadow-sm hover:shadow transition">
-          <i class="fas fa-rotate-right mr-1"></i>Reenviar
-        </button>
-      </div>
-
-      <!-- Botones de Acción (no-print) -->
-      <div id="modal-exito-actions" class="no-print space-y-3 mt-4">
+      <!-- Botones de Acción: Solo Descargar imagen del tiquete y Cerrar y volver al talonario -->
+      <div id="modal-exito-actions" class="no-print space-y-3 mt-5">
         
-        <!-- Botón Principal: Enviar Tiquete a WhatsApp del Cliente con Imagen -->
-        <button type="button" id="btn-wa-confirmar" class="w-full py-3.5 px-3 sm:px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-lg shadow-emerald-500/25 transition transform active:scale-98">
-          <i class="fab fa-whatsapp text-xl"></i>
-          <span id="btn-wa-confirmar-text">Enviar Tiquete con Imagen al WhatsApp del Cliente</span>
+        <!-- Botón 1: Descargar imagen del tiquete -->
+        <button type="button" id="btn-descargar-tiquete-img" class="w-full py-3.5 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-lg shadow-indigo-600/25 transition transform active:scale-98">
+          <i class="fas fa-download text-lg"></i>
+          <span>Descargar imagen del tiquete</span>
         </button>
 
-        <a id="btn-wa-copia-soporte" href="#" target="_blank" class="hidden text-center text-[11px] font-semibold text-slate-400 hover:text-emerald-600 transition block">
-          <i class="fab fa-whatsapp text-emerald-500 mr-1"></i>Enviar también copia al WhatsApp de MaxRF
-        </a>
-
-        <!-- Opciones rápidas de Imagen -->
-        <div class="flex items-center justify-center gap-4 text-xs">
-          <button type="button" id="btn-descargar-tiquete-img" class="font-bold text-slate-600 hover:text-indigo-600 flex items-center gap-1.5 transition">
-            <i class="fas fa-camera text-indigo-500"></i> Descargar imagen del tiquete
-          </button>
-          <span class="text-slate-300">•</span>
-          <button type="button" id="btn-copiar-tiquete-img" class="font-bold text-slate-600 hover:text-indigo-600 flex items-center gap-1.5 transition">
-            <i class="fas fa-copy text-indigo-500"></i> Copiar imagen
-          </button>
-        </div>
-
-        <!-- Toast de aviso para captura/copia -->
+        <!-- Toast de aviso para descarga -->
         <div id="toast-tiquete-aviso" class="hidden text-xs font-semibold py-2 px-3 rounded-xl bg-slate-100 text-slate-700 text-center transition"></div>
 
-        <div class="grid grid-cols-2 gap-2.5 pt-1">
-          <button type="button" id="btn-imprimir-tiquete" class="w-full py-2.5 px-2 sm:px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm transition">
-            <i class="fas fa-print"></i>
-            <span>Imprimir / PDF</span>
-          </button>
-          <button type="button" id="btn-enviar-correo-modal" class="w-full py-2.5 px-2 sm:px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm shadow-indigo-600/20 transition">
-            <i class="fas fa-envelope"></i>
-            <span id="btn-enviar-correo-text">Enviar a mi correo</span>
-          </button>
-        </div>
-
-        <button type="button" id="btn-cerrar-exito" class="btn-secondary w-full py-2 rounded-xl font-bold text-xs text-slate-600 hover:text-slate-900">
+        <!-- Botón 2: Cerrar y volver al talonario -->
+        <button type="button" id="btn-cerrar-exito" class="btn-secondary w-full py-2.5 rounded-xl font-bold text-xs sm:text-sm text-slate-600 hover:text-slate-900 border border-slate-200/80 hover:bg-slate-100 transition">
           Cerrar y volver al talonario
         </button>
       </div>

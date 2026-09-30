@@ -420,15 +420,29 @@ function actualizarConfiguracion(data) {
 }
 
 function obtenerHojaConfig(ss) {
-  var names = ['Config', 'config', 'CONFIG', 'Configuracion', 'Configuración', 'Hoja 1', 'Sheet1'];
+  var names = ['Config', 'config', 'CONFIG', 'Configuracion', 'Configuración', 'Parametros', 'Parámetros', 'Ajustes', 'Dinamica', 'Dinámica', 'Premio', 'Hoja 1', 'Sheet1'];
   for (var i = 0; i < names.length; i++) {
     var s = ss.getSheetByName(names[i]);
     if (s) return s;
   }
   var allSheets = ss.getSheets();
   for (var j = 0; j < allSheets.length; j++) {
-    if (allSheets[j].getName().toLowerCase().indexOf('config') !== -1) {
+    var sheetName = allSheets[j].getName().toLowerCase();
+    if (sheetName.indexOf('config') !== -1 || sheetName.indexOf('dinamica') !== -1 || sheetName.indexOf('premio') !== -1 || sheetName.indexOf('ajuste') !== -1) {
       return allSheets[j];
+    }
+  }
+  // Búsqueda inteligente por contenido en Columna A
+  for (var k = 0; k < allSheets.length; k++) {
+    var sh = allSheets[k];
+    if (sh.getLastRow() >= 1) {
+      var colA = sh.getRange(1, 1, Math.min(sh.getLastRow(), 15), 1).getValues();
+      for (var r = 0; r < colA.length; r++) {
+        var txt = String(colA[r][0] || '').toLowerCase();
+        if (txt.indexOf('premio_titulo') !== -1 || txt.indexOf('precio_numero') !== -1) {
+          return sh;
+        }
+      }
     }
   }
   return null;
