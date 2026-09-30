@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MaxRF | Dinamica Digital</title>
-  <meta name="description" content="Elige tu número de la suerte, participa en DinamicaMaxRF y gana un perfume exclusivo. Talonario 100% digital con reserva en tiempo real y respaldo de Chontico Noche.">
+  <meta name="description" content="Elige tu número de la suerte, participa en DinamicaMaxRF y gana increíbles premios. Talonario 100% digital con reserva en tiempo real y respaldo oficial.">
   <link rel="icon" type="image/png" href="./img/Foto Web0.png">
 
   <!-- Tailwind CSS -->
@@ -415,32 +415,14 @@
               $80.000
             </h2>
             
-            <p id="premio-detalle" class="text-slate-600 text-xs sm:text-sm leading-relaxed mb-4 whitespace-pre-line">
-              El ganador podrá elegir libremente entre nuestra selección exclusiva de fragancias de lujo masculinas o femeninas.
-            </p>
-
-            <div id="premio-features" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-5 text-xs sm:text-sm font-semibold text-slate-700">
-              <div class="flex items-center gap-2">
-                <i class="fas fa-check-circle text-emerald-500"></i>
-                <span>100% Original Garantizado</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <i class="fas fa-check-circle text-emerald-500"></i>
-                <span>Hombre o Mujer a elección</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <i class="fas fa-check-circle text-emerald-500"></i>
-                <span>Entrega coordinada directa</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <i class="fas fa-check-circle text-emerald-500"></i>
-                <span>Sorteo con Chontico Noche</span>
-              </div>
+            <!-- Casilla de escritura personalizada en la web -->
+            <div id="premio-detalle" class="text-slate-700 text-xs sm:text-sm leading-relaxed mb-6 whitespace-pre-line bg-slate-50/90 p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-sm font-normal">
+              El ganador podrá disfrutar del premio oficial de la dinámica. Consulta los detalles y términos aquí.
             </div>
 
-            <a id="premio-btn" href="#talonario" class="btn-primary-gradient inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-indigo-500/25">
+            <a id="premio-btn" href="#talonario" class="btn-primary-gradient inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-indigo-500/25">
               <i class="fas fa-ticket"></i>
-              <span id="premio-btn-texto">Participar por el perfume</span>
+              <span id="premio-btn-texto">¡Elegir número y participar!</span>
             </a>
           </div>
 
@@ -450,18 +432,18 @@
               <div class="relative overflow-hidden aspect-square bg-slate-50">
                 <img id="premio-img" src="./img/premio.png" alt="Premio" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='./img/premio.jpg'">
                 <div id="premio-img-badge" class="absolute top-3 right-3 bg-slate-900/80 backdrop-blur text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow">
-                  TÚ ESCOGES
+                  OFICIAL
                 </div>
               </div>
               <div class="p-4 text-center bg-white border-t border-slate-100">
                 <span id="premio-categoria" class="text-xs font-black uppercase tracking-widest text-indigo-600 block mb-1">
-                  FRAGANCIAS ORIGINALES
+                  DINÁMICA OFICIAL
                 </span>
                 <h3 id="premio-card-titulo" class="font-display text-base sm:text-lg font-bold text-slate-900 mb-0.5">
-                  Perfume de Alta Gama
+                  Premio de la Dinámica
                 </h3>
                 <p id="premio-card-desc" class="text-xs text-slate-500">
-                  Para Dama o Caballero. El ganador escoge su fragancia preferida.
+                  ¡Participa y sé el afortunado ganador!
                 </p>
               </div>
             </div>
@@ -744,7 +726,7 @@
         <!-- Código y Nota Legal -->
         <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono border-t border-slate-200/70 pt-2.5">
           <span id="ticket-codigo" class="font-bold text-slate-600">MAXRF-TKT-XXXX</span>
-          <span id="ticket-premio-txt" class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Premio: Perfume a elección</span>
+          <span id="ticket-premio-txt" class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Premio Oficial</span>
         </div>
       </div>
 
@@ -793,22 +775,38 @@
         </button>
       </div>
 
-      <!-- Auth State (si no está logueado) -->
-      <div id="admin-auth-box" class="p-6 sm:p-8 bg-white space-y-4">
-        <div class="text-center max-w-sm mx-auto">
-          <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-2xl mx-auto mb-3">
-            <i class="fas fa-lock"></i>
+      <!-- Auth State (Confirmación de sesión con correo y contraseña) -->
+      <div id="admin-auth-box" class="p-6 sm:p-8 bg-white rounded-b-3xl">
+        <div class="max-w-sm mx-auto">
+          <div class="text-center mb-5">
+            <div class="w-14 h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-2xl mx-auto mb-3 shadow-inner">
+              <i class="fas fa-shield-halved"></i>
+            </div>
+            <h4 class="font-display font-bold text-slate-900 text-lg">Acceso a Administración</h4>
+            <p class="text-xs text-slate-500 mt-1">Confirma tu correo registrado y contraseña de acceso:</p>
           </div>
-          <h4 class="font-display font-bold text-slate-900 text-base">Acceso Restringido a Administrador</h4>
-          <p class="text-xs text-slate-500 mt-1 mb-4">Ingresa tu clave de acceso para editar el premio y la dinámica:</p>
           
-          <div class="flex gap-2">
-            <input type="password" id="input-admin-pin" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2.5 text-sm text-center tracking-widest font-mono text-slate-900 focus:outline-none focus:border-purple-600" placeholder="PIN de Administrador">
-            <button type="button" id="btn-login-admin" class="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold whitespace-nowrap transition">
-              Entrar
+          <form id="form-login-admin" class="space-y-3.5" onsubmit="return false;">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <i class="fas fa-envelope text-purple-600 mr-1"></i> Correo de Administrador
+              </label>
+              <input type="email" id="input-admin-email" value="maxrf2025@gmail.com" required class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-purple-600" placeholder="maxrf2025@gmail.com">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <i class="fas fa-key text-purple-600 mr-1"></i> Contraseña de Acceso / PIN
+              </label>
+              <input type="password" id="input-admin-pin" required class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2.5 text-sm tracking-widest font-mono text-slate-900 focus:outline-none focus:border-purple-600" placeholder="PIN de Administrador">
+            </div>
+
+            <button type="submit" id="btn-login-admin" class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold shadow-md shadow-purple-600/25 flex items-center justify-center gap-2 transition active:scale-98">
+              <i class="fas fa-lock-open"></i>
+              <span>Confirmar Sesión y Entrar</span>
             </button>
-          </div>
-          <p id="admin-auth-error" class="text-xs text-rose-500 font-semibold mt-2 hidden">PIN incorrecto. Intenta de nuevo.</p>
+            <p id="admin-auth-error" class="text-xs text-rose-500 font-semibold text-center mt-2 hidden">Credenciales incorrectas. Verifica el correo y la contraseña.</p>
+          </form>
         </div>
       </div>
 
@@ -822,68 +820,85 @@
 
         <div class="grid sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Título o Valor del Premio *</label>
-            <input type="text" name="premio_titulo" required class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-purple-600" placeholder="Ej: $80.000 o Perfume de Alta Gama">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Título o Nombre del Premio *</label>
+            <input type="text" name="premio_titulo" required class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-purple-600" placeholder="Ej: Hamburguesa Especial o $80.000">
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Badge Superior</label>
-            <input type="text" name="premio_badge" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-purple-600" placeholder="Ej: PREMIO ESPECIAL">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              <i class="fas fa-gift text-purple-600 mr-1"></i> Badge Superior (arriba del título)
+            </label>
+            <input type="text" name="premio_badge" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-purple-600" placeholder="Ej: PREMIO ESPECIAL o GRATIS">
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Descripción Principal del Premio *</label>
-          <textarea name="premio_descripcion" rows="2" required class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-purple-600" placeholder="Descripción detallada de lo que recibe el ganador"></textarea>
-        </div>
-
-        <div class="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Texto del Botón</label>
-            <input type="text" name="premio_btn_texto" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-purple-600" placeholder="Ej: Participar por el perfume">
-          </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Imagen del Premio (URL o ruta)</label>
-            <input type="text" name="premio_img_url" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-purple-600" placeholder="Ej: ./img/premio.png o link https://...">
-          </div>
-        </div>
-
-        <div class="grid sm:grid-cols-3 gap-3">
-          <div>
-            <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Badge en Imagen</label>
-            <input type="text" name="premio_img_badge" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-purple-600" placeholder="Ej: TÚ ESCOGES">
-          </div>
-          <div>
-            <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Categoría Tarjeta</label>
-            <input type="text" name="premio_categoria" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-purple-600" placeholder="Ej: FRAGANCIAS ORIGINALES">
-          </div>
-          <div>
-            <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Título en Tarjeta</label>
-            <input type="text" name="premio_card_titulo" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-purple-600" placeholder="Ej: Perfume de Alta Gama">
-          </div>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+            <i class="fas fa-pen-fancy text-purple-600 mr-1"></i> Escritura personalizada de la dinámica (Detalles y lo que incluye) *
+          </label>
+          <p class="text-[11px] text-slate-500 mb-1.5">Escribe aquí todo lo que deseas que el cliente lea (descripción, qué incluye, condiciones, etc.). Puedes dar saltos de línea libremente.</p>
+          <textarea name="premio_descripcion" rows="5" required class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-purple-600 leading-relaxed" placeholder="Escribe aquí la información completa de la dinámica. Ejemplo:&#10;• Hamburguesa artesanal con doble carne y queso cheddar&#10;• Papas a la francesa y gaseosa&#10;• Entrega a domicilio coordinada&#10;• El sorteo se realizará con la lotería oficial"></textarea>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Subtítulo en Tarjeta</label>
-          <input type="text" name="premio_card_desc" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-purple-600" placeholder="Ej: Para Dama o Caballero. El ganador escoge su fragancia preferida.">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+            <i class="fas fa-ticket text-purple-600 mr-1"></i> Texto del Botón de Participación
+          </label>
+          <input type="text" name="premio_btn_texto" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2.5 text-sm text-slate-900 focus:outline-none focus:border-purple-600" placeholder="Ej: ¡Elegir número y participar! o Participar por la hamburguesa">
         </div>
 
-        <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Viñetas / Beneficios (separadas por comas)</label>
-          <input type="text" name="premio_items" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3.5 py-2 text-sm text-slate-900 focus:outline-none focus:border-purple-600" placeholder="100% Original Garantizado, Hombre o Mujer a elección, Entrega coordinada directa, Sorteo con Chontico Noche">
+        <!-- Datos de la tarjeta debajo de la imagen -->
+        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-3">
+          <div class="flex items-center gap-2 text-xs font-bold text-slate-800 uppercase tracking-wider">
+            <i class="fas fa-image text-purple-600"></i>
+            <span>Datos debajo de la imagen (Tarjeta visual)</span>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                Etiqueta / Categoría (ej: DINÁMICA OFICIAL)
+              </label>
+              <input type="text" name="premio_categoria" class="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-purple-600" placeholder="Ej: DINÁMICA OFICIAL o COMIDAS RÁPIDAS">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                Título debajo de la imagen
+              </label>
+              <input type="text" name="premio_card_titulo" class="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-purple-600" placeholder="Ej: Hamburguesa Especial Max">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+              Descripción corta debajo de la imagen
+            </label>
+            <input type="text" name="premio_card_desc" class="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-purple-600" placeholder="Ej: ¡Participa y sé el afortunado ganador!">
+          </div>
         </div>
 
         <div class="grid sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100">
           <div>
             <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Precio por Número (COP)</label>
-            <input type="number" name="precio_numero" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-purple-600" placeholder="2000">
+            <input type="number" name="precio_numero" min="0" step="100" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-purple-600" placeholder="0 para GRATIS o 2000">
           </div>
           <div>
             <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Fecha del Sorteo</label>
-            <input type="text" name="fecha_sorteo" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-purple-600" placeholder="Ej: 2026-09-23">
+            <input type="text" name="fecha_sorteo" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-purple-600" placeholder="Ej: 2026-10-01">
           </div>
           <div>
             <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Lotería Oficial</label>
-            <input type="text" name="loteria" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-purple-600" placeholder="CHONTICO NOCHE">
+            <input type="text" name="loteria" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-purple-600" placeholder="CHONTICO DIA">
+          </div>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-3 pt-2 border-t border-slate-100">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Imagen del Premio (URL o ruta local)</label>
+            <input type="text" name="premio_img_url" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-purple-600" placeholder="./img/premio.png">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Métodos de Pago (opcional)</label>
+            <input type="text" name="metodos_pago" class="w-full border border-slate-200 bg-slate-50 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-purple-600" placeholder="Nequi 3188178457">
           </div>
         </div>
 
