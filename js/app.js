@@ -19,6 +19,9 @@
     comprobanteMimetype: null,
     countdownInterval: null,
     ultimoTiquete: null,
+    ultimoTiqueteDataUrl: null,
+    ultimoTiqueteBlob: null,
+    toastTimer: null,
     adminLogged: false
   };
 
@@ -125,6 +128,13 @@
     els.btnImprimirTiquete = document.getElementById('btn-imprimir-tiquete');
     els.btnCerrarExito = document.getElementById('btn-cerrar-exito');
     els.btnWaConfirmar = document.getElementById('btn-wa-confirmar');
+    els.btnWaConfirmarText = document.getElementById('btn-wa-confirmar-text');
+    els.btnWaCopiaSoporte = document.getElementById('btn-wa-copia-soporte');
+    els.ticketLoteria = document.getElementById('ticket-loteria');
+    els.ticketPremioTxt = document.getElementById('ticket-premio-txt');
+    els.btnDescargarTiqueteImg = document.getElementById('btn-descargar-tiquete-img');
+    els.btnCopiarTiqueteImg = document.getElementById('btn-copiar-tiquete-img');
+    els.toastTiqueteAviso = document.getElementById('toast-tiquete-aviso');
 
     // Email comprobante elements
     els.checkEnviarCorreo = document.getElementById('check-enviar-correo');
@@ -276,6 +286,17 @@
     }
     if (els.btnReenviarCorreo) {
       els.btnReenviarCorreo.addEventListener('click', enviarComprobanteAlCorreoManual);
+    }
+
+    // Compartir por WhatsApp con Imagen / Descargar Imagen
+    if (els.btnWaConfirmar) {
+      els.btnWaConfirmar.addEventListener('click', compartirTiqueteWhatsApp);
+    }
+    if (els.btnDescargarTiqueteImg) {
+      els.btnDescargarTiqueteImg.addEventListener('click', descargarImagenTiquete);
+    }
+    if (els.btnCopiarTiqueteImg) {
+      els.btnCopiarTiqueteImg.addEventListener('click', function () { copiarImagenTiquete(true); });
     }
 
     // Drag and drop comprobante
@@ -1045,32 +1066,50 @@
 
     setEnviando(true);
 
-    window.RifaAPI.reservar(payload).then(function (res) {
-      setEnviando(false);
-      if (!res || !res.success) {
-        mostrarErrorForm((res && res.message) || 'Ocurrió un error al procesar tu participación. Por favor verifica los datos.');
-        return;
+    var codigoTkt = 'MAXRF-' + Math.floor(100000 + Math.random() * 900000);
+    payload.codigo_tiquete = codigoTkt;
+    payload.ticket = codigoTkt;
+
+    // Actualizar elementos visuales del tiquete en el DOM antes de la captura
+    actualizarDatosTiqueteDOM(payload, codigoTkt);
+
+    // Generar captura gráfica visual del tiquete para adjuntarla directamente a la reserva
+    generarCapturaTiquete(function (dataUrl, blob) {
+      if (dataUrl) {
+        payload.tiquete_imagen_base64 = dataUrl;
       }
+      payload.enviar_correo = enviarCorreo;
 
-      cerrarModalParticipar();
+      console.log('Enviando reservar con payload:', payload);
+      window.RifaAPI.reservar(payload).then(function (res) {
+        console.log('Respuesta recibida de reservar:', res);
+        setEnviando(false);
+        if (!res || !res.success) {
+          mostrarErrorForm((res && res.message) || 'Ocurrió un error al procesar tu participación. Por favor verifica los datos.');
+          return;
+        }
 
-      // Emitir Tiquete Digital Oficial
-      emitirTiqueteDigital(payload, res);
+        cerrarModalParticipar();
 
-      // Abrir modal de éxito con el tiquete
-      if (els.modalExito) els.modalExito.classList.add('modal-active');
+        // Emitir Tiquete Digital Oficial
+        emitirTiqueteDigital(payload, res);
 
-      // Disparar confetti
-      if (window.confetti) {
-        window.confetti({ particleCount: 100, spread: 75, origin: { y: 0.6 } });
-      }
+        // Abrir modal de éxito con el tiquete
+        if (els.modalExito) els.modalExito.classList.add('modal-active');
+
+        // Disparar confetti festivo
+        if (window.confetti) {
+          window.confetti({ particleCount: 100, spread: 75, origin: { y: 0.6 } });
+        }
+      }).catch(function (err) {
+        setEnviando(false);
+        mostrarErrorForm('Error al conectar con el servidor: ' + (err.message || 'Intenta nuevamente.'));
+      });
     });
   }
 
-  // -------------------------------------------------------------------
-  // EMISIÓN DE TIQUETE DIGITAL
-  // -------------------------------------------------------------------
-  function emitirTiqueteDigital(payload, res) {
+  // Actualiza los elementos del DOM del tiquete
+  function actualizarDatosTiqueteDOM(payload, codigoTkt) {
     var ordenados = state.seleccionados.slice().sort();
     var precioUnit = Number(state.config.precio_numero || 900);
     var total = ordenados.length * precioUnit;
@@ -1081,18 +1120,9 @@
       hour: '2-digit',
       minute: '2-digit'
     });
-    var codigoTkt = 'MAXRF-' + (res.id_participante ? String(res.id_participante).replace(/\D/g, '').slice(-6) : Math.floor(100000 + Math.random() * 900000));
     var esPendiente = esValorPendiente(payload.referencia_pago) || esValorPendiente(payload.metodo_pago);
-
-    // Guardar último tiquete para reenvío de correo o impresión
-    state.ultimoTiquete = {
-      payload: payload,
-      res: res,
-      codigoTkt: codigoTkt,
-      total: total,
-      ordenados: ordenados,
-      fechaActual: fechaActual
-    };
+    var loteriaTxt = (state.config && (state.config.loteria || state.config.nombre_loteria)) || 'CHONTICO NOCHE';
+    var premioTxt = (state.config && (state.config.premio_titulo || state.config.premio)) || 'Perfume a elección';
 
     if (els.ticketNombre) els.ticketNombre.textContent = payload.nombre;
     if (els.ticketTelefono) els.ticketTelefono.textContent = payload.telefono;
@@ -1106,6 +1136,8 @@
     if (els.ticketFecha) els.ticketFecha.textContent = fechaActual;
     if (els.ticketTotal) els.ticketTotal.textContent = formatMoney(total);
     if (els.ticketCodigo) els.ticketCodigo.textContent = 'TIQUETE Nº ' + codigoTkt;
+    if (els.ticketLoteria) els.ticketLoteria.textContent = loteriaTxt;
+    if (els.ticketPremioTxt) els.ticketPremioTxt.textContent = 'Premio: ' + premioTxt;
 
     if (els.ticketNumerosContainer) {
       els.ticketNumerosContainer.innerHTML = '';
@@ -1116,28 +1148,51 @@
         els.ticketNumerosContainer.appendChild(badge);
       });
     }
+  }
 
-    // Estado del envío de correo
+  // -------------------------------------------------------------------
+  // EMISIÓN Y CAPTURA VISUAL DE TIQUETE DIGITAL
+  // -------------------------------------------------------------------
+  function emitirTiqueteDigital(payload, res) {
+    var ordenados = state.seleccionados.slice().sort();
+    var precioUnit = Number(state.config.precio_numero || 900);
+    var total = ordenados.length * precioUnit;
+    var fechaActual = new Date().toLocaleString('es-CO', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+    var codigoTkt = payload.codigo_tiquete || (res.ticket || ('MAXRF-' + Math.floor(100000 + Math.random() * 900000)));
+    var loteriaTxt = (state.config && (state.config.loteria || state.config.nombre_loteria)) || 'CHONTICO NOCHE';
+    var premioTxt = (state.config && (state.config.premio_titulo || state.config.premio)) || 'Perfume a elección';
+
+    // Actualizar elementos en DOM
+    actualizarDatosTiqueteDOM(payload, codigoTkt);
+
+    // Guardar último tiquete para reenvío de correo, WhatsApp e impresión
+    state.ultimoTiquete = {
+      payload: payload,
+      res: res,
+      codigoTkt: codigoTkt,
+      total: total,
+      ordenados: ordenados,
+      fechaActual: fechaActual,
+      loteriaTxt: loteriaTxt,
+      premioTxt: premioTxt,
+      tiqueteUrl: res.tiquete_url || ''
+    };
+
+    // Configurar estado del correo
     if (payload.enviar_correo && payload.correo) {
       if (els.boxCorreoStatus) {
         els.boxCorreoStatus.classList.remove('hidden');
         if (els.txtCorreoNotif) els.txtCorreoNotif.textContent = payload.correo;
       }
       if (els.btnEnviarCorreoText) {
-        els.btnEnviarCorreoText.innerHTML = '<i class="fas fa-check mr-1 text-emerald-400"></i> Enviado al correo';
+        els.btnEnviarCorreoText.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> Generando copia visual...';
       }
-      // Llamar al endpoint de envío de correo
-      window.RifaAPI.enviarCorreo({
-        correo: payload.correo,
-        nombre: payload.nombre,
-        telefono: payload.telefono,
-        codigo_tiquete: codigoTkt,
-        numeros: ordenados,
-        total: total,
-        metodo_pago: payload.metodo_pago,
-        referencia_pago: payload.referencia_pago,
-        fecha: fechaActual
-      });
     } else {
       if (els.boxCorreoStatus) {
         els.boxCorreoStatus.classList.add('hidden');
@@ -1147,24 +1202,268 @@
       }
     }
 
-    // Configurar enlace directo a WhatsApp para confirmación
-    var wa = state.config && state.config.whatsapp_contacto ? String(state.config.whatsapp_contacto) : '573188178457';
-    var cleanWa = wa.replace(/\D/g, '');
-    var waMsg = '¡Hola DinamicaMaxRF! Acabo de registrar mi participación con el ' + codigoTkt + '.\n' +
-      '• Participante: ' + payload.nombre + '\n' +
-      '• Números: [' + ordenados.join(', ') + ']\n' +
-      '• Total: ' + formatMoney(total) + '\n' +
-      '• Método: ' + payload.metodo_pago + '\n' +
-      '• Ref. Pago: ' + payload.referencia_pago + '\n' +
-      (esPendiente
-        ? '⚠️ Pago pendiente: Te estaré enviando la captura de pago por aquí para confirmar mis números definitivamente.'
-        : '¡Adjunto mi comprobante para verificar mi número!');
+    // Configurar botón de WhatsApp para que vaya DIRECTO al WhatsApp del cliente
+    var telCliente = (payload.telefono || '').trim();
+    if (els.btnWaConfirmarText) {
+      els.btnWaConfirmarText.textContent = telCliente
+        ? 'Enviar Tiquete con Imagen al WhatsApp del Cliente (' + telCliente + ')'
+        : 'Enviar Tiquete con Imagen al WhatsApp del Cliente';
+    }
 
-    if (els.btnWaConfirmar) {
-      els.btnWaConfirmar.href = 'https://wa.me/' + cleanWa + '?text=' + encodeURIComponent(waMsg);
+    // Enlace opcional de copia administrativa a MaxRF
+    if (els.btnWaCopiaSoporte) {
+      var waSoporte = (state.config && state.config.whatsapp_contacto ? String(state.config.whatsapp_contacto) : '573188178457').replace(/\D/g, '');
+      var msgSoporte = '¡Hola Soporte MaxRF! Registro de venta tiquete ' + codigoTkt + ' para ' + payload.nombre + ' (' + (payload.telefono || 'Sin tel') + ') con números: [' + ordenados.join(', ') + ']. Total: ' + formatMoney(total);
+      els.btnWaCopiaSoporte.href = 'https://wa.me/' + waSoporte + '?text=' + encodeURIComponent(msgSoporte);
+      els.btnWaCopiaSoporte.classList.remove('hidden');
+    }
+
+    // Generar captura gráfica visual del tiquete para emitir al correo y WhatsApp
+    setTimeout(function () {
+      generarCapturaTiquete(function (dataUrl, blob) {
+        if (payload.enviar_correo && payload.correo) {
+          if (els.btnEnviarCorreoText) {
+            els.btnEnviarCorreoText.innerHTML = '<i class="fas fa-check mr-1 text-emerald-400"></i> Copia visual enviada';
+          }
+          window.RifaAPI.enviarCorreo({
+            correo: payload.correo,
+            nombre: payload.nombre,
+            telefono: payload.telefono,
+            codigo_tiquete: codigoTkt,
+            numeros: ordenados,
+            total: total,
+            metodo_pago: payload.metodo_pago,
+            referencia_pago: payload.referencia_pago,
+            loteria: loteriaTxt,
+            fecha: fechaActual,
+            tiquete_imagen_base64: dataUrl
+          });
+        }
+      });
+    }, 200);
+  }
+
+  // Formatea el teléfono para WhatsApp (añade prefijo 57 a celulares de Colombia de 10 dígitos)
+  function formatearTelefonoWhatsApp(tel) {
+    if (!tel) return '';
+    var clean = String(tel).replace(/\D/g, '');
+    if (!clean) return '';
+    if (clean.length === 10 && clean.charAt(0) === '3') {
+      return '57' + clean;
+    }
+    return clean;
+  }
+
+  // Captura gráfica de alta resolución del elemento #ticket-participacion
+  function generarCapturaTiquete(callback) {
+    var ticketEl = document.getElementById('ticket-participacion');
+    if (!ticketEl) {
+      if (callback) callback(null, null);
+      return;
+    }
+
+    if (typeof window.html2canvas !== 'function') {
+      console.warn('html2canvas no está disponible.');
+      if (callback) callback(null, null);
+      return;
+    }
+
+    window.html2canvas(ticketEl, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false
+    }).then(function (canvas) {
+      var dataUrl = canvas.toDataURL('image/png');
+      state.ultimoTiqueteDataUrl = dataUrl;
+
+      canvas.toBlob(function (blob) {
+        state.ultimoTiqueteBlob = blob;
+        if (callback) callback(dataUrl, blob);
+      }, 'image/png');
+    }).catch(function (err) {
+      console.warn('Error generando captura visual con html2canvas:', err);
+      if (callback) callback(null, null);
+    });
+  }
+
+  // Compartir Tiquete Oficial por WhatsApp al cliente con copia visual (imagen)
+  function compartirTiqueteWhatsApp() {
+    if (!state.ultimoTiquete) return;
+    var tkt = state.ultimoTiquete;
+    var codigoTkt = tkt.codigoTkt;
+    var nombre = tkt.payload.nombre;
+    var ordenados = tkt.ordenados;
+    var total = tkt.total;
+    var metodo = tkt.payload.metodo_pago;
+    var ref = tkt.payload.referencia_pago;
+    var esPendiente = esValorPendiente(ref) || esValorPendiente(metodo);
+    var loteriaTxt = tkt.loteriaTxt || (state.config && (state.config.loteria || state.config.nombre_loteria)) || 'CHONTICO NOCHE';
+
+    // WhatsApp DESTINO: Teléfono del CLIENTE que se registró en el formulario
+    var telCliente = (tkt.payload && tkt.payload.telefono ? String(tkt.payload.telefono) : '').trim();
+    var cleanWa = formatearTelefonoWhatsApp(telCliente);
+
+    // Fallback de seguridad si no hubiera teléfono del cliente
+    if (!cleanWa) {
+      var waDefault = state.config && state.config.whatsapp_contacto ? String(state.config.whatsapp_contacto) : '573188178457';
+      cleanWa = formatearTelefonoWhatsApp(waDefault);
+    }
+
+    // Mensaje dirigido AL CLIENTE con todos sus datos oficiales
+    var waMsg = '¡Hola ' + nombre + '! 🍀 Aquí tienes tu Tiquete Oficial de Dinámica MaxRF:\n\n' +
+      '🎟️ Tiquete Nº: ' + codigoTkt + '\n' +
+      '🔢 Tus Números: [' + ordenados.join(', ') + ']\n' +
+      '💰 Total: ' + formatMoney(total) + '\n' +
+      '🎰 Lotería: ' + loteriaTxt + '\n' +
+      '📅 Fecha: ' + tkt.fechaActual + '\n' +
+      '💳 Método / Ref: ' + metodo + ' (' + ref + ')\n\n' +
+      (esPendiente
+        ? '⚠️ Estado: PAGO PENDIENTE\nPor favor envía el comprobante de pago por este medio para confirmar tus números definitivamente.\n\n'
+        : '✅ Estado: RESERVADO OFICIALMENTE\n\n') +
+      '📸 Te adjunto la copia visual oficial de tu tiquete para garantizar tus números reservados. ¡Muchos éxitos en el sorteo!';
+
+    if (tkt.tiqueteUrl) {
+      waMsg += '\n\n🔗 Ver tu tiquete oficial en línea:\n' + tkt.tiqueteUrl;
+    }
+
+    var waUrl = 'https://wa.me/' + cleanWa + '?text=' + encodeURIComponent(waMsg);
+
+    function proceder(blob) {
+      var fileName = 'Tiquete_' + codigoTkt + '.png';
+
+      // 1. Web Share API nativa con archivo (Soportado en navegadores móviles Android/iOS)
+      if (blob && navigator.canShare) {
+        try {
+          var file = new File([blob], fileName, { type: 'image/png' });
+          if (navigator.canShare({ files: [file] })) {
+            navigator.share({
+              files: [file],
+              title: 'Tiquete Oficial ' + codigoTkt,
+              text: waMsg
+            }).catch(function (shareErr) {
+              if (shareErr.name !== 'AbortError') {
+                abrirWhatsAppFallback(blob, fileName, waUrl);
+              }
+            });
+            return;
+          }
+        } catch (e) {
+          console.warn('Web Share API error:', e);
+        }
+      }
+
+      // 2. Fallback de Escritorio: descargar tiquete + copiar al portapapeles + abrir WhatsApp
+      abrirWhatsAppFallback(blob, fileName, waUrl);
+    }
+
+    if (state.ultimoTiqueteBlob) {
+      proceder(state.ultimoTiqueteBlob);
+    } else {
+      mostrarAvisoToast('📸 Preparando captura visual del tiquete...');
+      generarCapturaTiquete(function (dataUrl, blob) {
+        proceder(blob);
+      });
     }
   }
 
+  function abrirWhatsAppFallback(blob, fileName, waUrl) {
+    // Descarga automática de la imagen para que el usuario la tenga de inmediato
+    if (blob) {
+      descargarBlob(blob, fileName);
+    }
+    // Intentar copiar al portapapeles para pegar con Ctrl+V directo en WhatsApp
+    copiarImagenAlPortapapeles(blob, false);
+
+    mostrarAvisoToast('✅ ¡Tiquete visual listo! En WhatsApp solo presiona Ctrl + V para adjuntarlo.');
+    setTimeout(function () {
+      window.open(waUrl, '_blank');
+    }, 400);
+  }
+
+  // Descarga manual de imagen del tiquete
+  function descargarImagenTiquete() {
+    var codigoTkt = state.ultimoTiquete ? state.ultimoTiquete.codigoTkt : 'MAXRF';
+    var fileName = 'Tiquete_' + codigoTkt + '.png';
+
+    if (state.ultimoTiqueteBlob) {
+      descargarBlob(state.ultimoTiqueteBlob, fileName);
+      mostrarAvisoToast('✅ Imagen del tiquete descargada con éxito.');
+    } else {
+      mostrarAvisoToast('📸 Generando imagen del tiquete...');
+      generarCapturaTiquete(function (dataUrl, blob) {
+        if (blob) {
+          descargarBlob(blob, fileName);
+          mostrarAvisoToast('✅ Imagen del tiquete descargada con éxito.');
+        } else {
+          mostrarAvisoToast('⚠️ No se pudo generar la imagen.');
+        }
+      });
+    }
+  }
+
+  function descargarBlob(blob, fileName) {
+    try {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+    } catch (e) {
+      console.warn('Error al descargar blob:', e);
+    }
+  }
+
+  // Copia de imagen al portapapeles
+  function copiarImagenTiquete(mostrarToast) {
+    if (state.ultimoTiqueteBlob) {
+      copiarImagenAlPortapapeles(state.ultimoTiqueteBlob, mostrarToast);
+    } else {
+      if (mostrarToast) mostrarAvisoToast('📸 Generando imagen para copiar...');
+      generarCapturaTiquete(function (dataUrl, blob) {
+        if (blob) {
+          copiarImagenAlPortapapeles(blob, mostrarToast);
+        } else if (mostrarToast) {
+          mostrarAvisoToast('⚠️ No fue posible copiar la imagen.');
+        }
+      });
+    }
+  }
+
+  function copiarImagenAlPortapapeles(blob, mostrarToast) {
+    if (!blob || !navigator.clipboard || typeof window.ClipboardItem === 'undefined') {
+      if (mostrarToast) mostrarAvisoToast('ℹ️ Copia no soportada en este navegador. Puedes descargarla.');
+      return;
+    }
+    try {
+      var item = new ClipboardItem({ 'image/png': blob });
+      navigator.clipboard.write([item]).then(function () {
+        if (mostrarToast) mostrarAvisoToast('📋 ¡Imagen del tiquete copiada al portapapeles!');
+      }).catch(function (err) {
+        console.warn('ClipboardItem error:', err);
+        if (mostrarToast) mostrarAvisoToast('ℹ️ Puedes descargar la imagen con el botón correspondiente.');
+      });
+    } catch (e) {
+      console.warn('Clipboard error:', e);
+    }
+  }
+
+  // Aviso flotante / Toast informativo
+  function mostrarAvisoToast(mensaje) {
+    if (!els.toastTiqueteAviso) return;
+    els.toastTiqueteAviso.textContent = mensaje;
+    els.toastTiqueteAviso.classList.remove('hidden');
+    clearTimeout(state.toastTimer);
+    state.toastTimer = setTimeout(function () {
+      if (els.toastTiqueteAviso) els.toastTiqueteAviso.classList.add('hidden');
+    }, 4500);
+  }
+
+  // Reenvío o envío manual al correo con copia visual
   function enviarComprobanteAlCorreoManual() {
     if (!state.ultimoTiquete || !state.ultimoTiquete.payload) return;
     var tkt = state.ultimoTiquete;
@@ -1176,34 +1475,46 @@
 
     if (els.btnEnviarCorreoModal) els.btnEnviarCorreoModal.disabled = true;
     if (els.btnEnviarCorreoText) {
-      els.btnEnviarCorreoText.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> Enviando...';
+      els.btnEnviarCorreoText.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-1"></i> Enviando copia visual...';
     }
 
-    window.RifaAPI.enviarCorreo({
-      correo: correo,
-      nombre: tkt.payload.nombre,
-      telefono: tkt.payload.telefono,
-      codigo_tiquete: tkt.codigoTkt,
-      numeros: tkt.ordenados,
-      total: tkt.total,
-      metodo_pago: tkt.payload.metodo_pago,
-      referencia_pago: tkt.payload.referencia_pago,
-      fecha: tkt.fechaActual
-    }).then(function () {
-      if (els.btnEnviarCorreoModal) els.btnEnviarCorreoModal.disabled = false;
-      if (els.btnEnviarCorreoText) {
-        els.btnEnviarCorreoText.innerHTML = '<i class="fas fa-check mr-1 text-emerald-400"></i> ¡Enviado!';
-      }
-      if (els.boxCorreoStatus) {
-        els.boxCorreoStatus.classList.remove('hidden');
-        if (els.txtCorreoNotif) els.txtCorreoNotif.textContent = correo;
-      }
-    }).catch(function () {
-      if (els.btnEnviarCorreoModal) els.btnEnviarCorreoModal.disabled = false;
-      if (els.btnEnviarCorreoText) {
-        els.btnEnviarCorreoText.textContent = 'Reintentar envío';
-      }
-    });
+    function dispararEnvio(dataUrl) {
+      window.RifaAPI.enviarCorreo({
+        correo: correo,
+        nombre: tkt.payload.nombre,
+        telefono: tkt.payload.telefono,
+        codigo_tiquete: tkt.codigoTkt,
+        numeros: tkt.ordenados,
+        total: tkt.total,
+        metodo_pago: tkt.payload.metodo_pago,
+        referencia_pago: tkt.payload.referencia_pago,
+        loteria: tkt.loteriaTxt,
+        fecha: tkt.fechaActual,
+        tiquete_imagen_base64: dataUrl || state.ultimoTiqueteDataUrl || null
+      }).then(function () {
+        if (els.btnEnviarCorreoModal) els.btnEnviarCorreoModal.disabled = false;
+        if (els.btnEnviarCorreoText) {
+          els.btnEnviarCorreoText.innerHTML = '<i class="fas fa-check mr-1 text-emerald-400"></i> ¡Copia visual enviada!';
+        }
+        if (els.boxCorreoStatus) {
+          els.boxCorreoStatus.classList.remove('hidden');
+          if (els.txtCorreoNotif) els.txtCorreoNotif.textContent = correo;
+        }
+      }).catch(function () {
+        if (els.btnEnviarCorreoModal) els.btnEnviarCorreoModal.disabled = false;
+        if (els.btnEnviarCorreoText) {
+          els.btnEnviarCorreoText.textContent = 'Reintentar envío';
+        }
+      });
+    }
+
+    if (state.ultimoTiqueteDataUrl) {
+      dispararEnvio(state.ultimoTiqueteDataUrl);
+    } else {
+      generarCapturaTiquete(function (dataUrl) {
+        dispararEnvio(dataUrl);
+      });
+    }
   }
 
   function setEnviando(enviando) {

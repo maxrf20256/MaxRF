@@ -165,14 +165,21 @@ function procesarReserva(data) {
   var fecha = new Date();
   var ticketCode = data.ticket || ('MAXRF-TKT-' + Math.floor(100000 + Math.random() * 900000));
   
+  var compB64 = data.comprobante_base64 || data.comprobanteBase64;
+  var compName = data.comprobante_filename || data.comprobanteFilename || 'comprobante.png';
+  var compMime = data.comprobante_mimetype || data.comprobanteMimetype || 'image/png';
+  
   var comprobanteUrl = '';
-  if (data.comprobanteBase64 && data.comprobanteFilename) {
+  if (compB64) {
     try {
       var folderName = 'Comprobantes MaxRF';
       var folders = DriveApp.getFoldersByName(folderName);
       var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
-      var decoded = Utilities.base64Decode(data.comprobanteBase64);
-      var blob = Utilities.newBlob(decoded, data.comprobanteMimetype || 'image/jpeg', data.comprobanteFilename);
+      if (compB64.indexOf(',') !== -1) {
+        compB64 = compB64.split(',')[1];
+      }
+      var decoded = Utilities.base64Decode(compB64);
+      var blob = Utilities.newBlob(decoded, compMime, compName);
       var file = folder.createFile(blob);
       comprobanteUrl = file.getUrl();
     } catch (e) {
@@ -188,7 +195,7 @@ function procesarReserva(data) {
     numerosStr,
     data.total || 0,
     data.metodo_pago || '',
-    data.referencia || '',
+    data.referencia_pago || data.referencia || '',
     comprobanteUrl,
     ticketCode
   ]);
@@ -212,8 +219,31 @@ function procesarReserva(data) {
     sheetNum.getDataRange().setValues(numData);
   }
   
-  if (data.enviar_correo && data.correo) {
+  var tktB64 = data.tiquete_imagen_base64 || data.tiqueteImagenBase64;
+  var tiqueteDriveUrl = '';
+  if (tktB64) {
     try {
+      var tktFolderName = 'Tiquetes Emitidos MaxRF';
+      var tktFolders = DriveApp.getFoldersByName(tktFolderName);
+      var tktFolder = tktFolders.hasNext() ? tktFolders.next() : DriveApp.createFolder(tktFolderName);
+      tktFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      if (tktB64.indexOf(',') !== -1) {
+        tktB64 = tktB64.split(',')[1];
+      }
+      var tktDecoded = Utilities.base64Decode(tktB64);
+      var tktBlob = Utilities.newBlob(tktDecoded, 'image/png', 'Tiquete_' + ticketCode + '.png');
+      var tktFile = tktFolder.createFile(tktBlob);
+      tktFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      tiqueteDriveUrl = tktFile.getUrl();
+    } catch (eTkt) {
+      Logger.log('Error guardando tiquete en Drive: ' + eTkt);
+    }
+  }
+
+  if ((data.enviar_correo || data.enviarCorreo) && data.correo) {
+    try {
+      data.ticket = ticketCode;
+      data.codigo_tiquete = ticketCode;
       enviarCorreoParticipante(data);
     } catch (errEmail) {
       Logger.log('Error enviando correo: ' + errEmail);
@@ -223,12 +253,14 @@ function procesarReserva(data) {
   return {
     success: true,
     ticket: ticketCode,
+    tiquete_url: tiqueteDriveUrl,
     message: 'Reserva procesada exitosamente'
   };
 }
 
 /**
  * Emite y envía el Tiquete Digital Oficial al correo del participante usando Gmail de maxrf2025@gmail.com
+ * Incluye copia visual (imagen adjunta y en línea) del tiquete oficial
  */
 function enviarCorreoParticipante(payload) {
   var correo = payload.correo;
@@ -236,14 +268,38 @@ function enviarCorreoParticipante(payload) {
     return { success: false, message: 'Correo inválido' };
   }
   var nombre = payload.nombre || 'Participante';
-  var ticket = payload.ticket || ('MAXRF-TKT-' + Math.floor(100000 + Math.random() * 900000));
+  var ticket = payload.codigo_tiquete || payload.ticket || ('MAXRF-TKT-' + Math.floor(100000 + Math.random() * 900000));
   var numeros = payload.numeros || [];
   var total = payload.total || (numeros.length * (DEFAULT_CONFIG.precio_numero || 900));
   var metodo = payload.metodo_pago || 'Nequi';
-  var referencia = payload.referencia || '—';
-  var loteria = payload.loteria || 'Chontico Noche';
-  var fechaTxt = Utilities.formatDate(new Date(), 'GMT-5', 'dd/MM/yyyy hh:mm a');
+  var referencia = payload.referencia_pago || payload.referencia || '—';
+  var loteria = payload.loteria || (DEFAULT_CONFIG.loteria || 'Chontico Noche');
+  var fechaTxt = payload.fecha || Utilities.formatDate(new Date(), 'GMT-5', 'dd/MM/yyyy hh:mm a');
   
+  var inlineImages = {};
+  var attachments = [];
+  var tiqueteImgHtml = '';
+  
+  // Procesar captura visual del tiquete si viene adjunta
+  var rawImg = payload.tiquete_imagen_base64 || payload.tiqueteImagenBase64;
+  if (rawImg) {
+    try {
+      if (rawImg.indexOf(',') !== -1) {
+        rawImg = rawImg.split(',')[1];
+      }
+      var decodedImg = Utilities.base64Decode(rawImg);
+      var tktBlob = Utilities.newBlob(decodedImg, 'image/png', 'Tiquete_' + ticket + '.png');
+      inlineImages['tiqueteVisual'] = tktBlob;
+      attachments.push(tktBlob);
+      tiqueteImgHtml = '<div style="text-align:center;margin:20px 0 25px;">' +
+        '<div style="font-size:12px;font-weight:800;color:#4f46e5;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">📸 Copia Visual de tu Tiquete Oficial</div>' +
+        '<img src="cid:tiqueteVisual" style="width:100%;max-width:460px;border-radius:20px;border:1px solid #cbd5e1;box-shadow:0 12px 28px rgba(0,0,0,0.12);display:inline-block;" alt="Tiquete Digital MaxRF">' +
+        '</div>';
+    } catch (eImg) {
+      Logger.log('Error procesando imagen de tiquete: ' + eImg);
+    }
+  }
+
   var numerosBadges = numeros.map(function(num) {
     return '<span style="display:inline-block;padding:8px 16px;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#ffffff;font-size:20px;font-weight:900;border-radius:12px;margin:4px;letter-spacing:1px;box-shadow:0 3px 8px rgba(79,70,229,0.3);">' + num + '</span>';
   }).join(' ');
@@ -259,10 +315,11 @@ function enviarCorreoParticipante(payload) {
           '</div>' +
         '</div>' +
         '<div style="padding:28px 24px;">' +
-          '<p style="font-size:16px;color:#334155;margin-top:0;margin-bottom:18px;">Hola <strong>' + nombre + '</strong>,</p>' +
-          '<p style="font-size:14px;color:#64748b;margin-bottom:24px;">' +
+          '<p style="font-size:16px;color:#334155;margin-top:0;margin-bottom:12px;">Hola <strong>' + nombre + '</strong>,</p>' +
+          '<p style="font-size:14px;color:#64748b;margin-bottom:18px;">' +
             'Tu participación ha quedado registrada exitosamente. A continuación encuentras tu tiquete oficial con tus números de la suerte para el sorteo de <strong>' + loteria + '</strong>.' +
           '</p>' +
+          tiqueteImgHtml +
           '<div style="background:#f8fafc;border:2px dashed #cbd5e1;border-radius:18px;padding:22px;text-align:center;margin-bottom:24px;">' +
             '<div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Código de Tiquete</div>' +
             '<div style="font-size:16px;font-weight:900;color:#0f172a;letter-spacing:1px;font-family:monospace;background:#e2e8f0;display:inline-block;padding:4px 14px;border-radius:8px;margin-bottom:18px;">' + ticket + '</div>' +
@@ -291,20 +348,29 @@ function enviarCorreoParticipante(payload) {
       '</div>' +
     '</div>';
 
+  var mailOptions = {
+    htmlBody: htmlBody,
+    name: 'DinamicaMaxRF Oficial'
+  };
+  // Si el destinatario es el cliente, enviamos una copia oculta a maxrf2025@gmail.com para el archivo del negocio
+  if (correo.toLowerCase().trim() !== 'maxrf2025@gmail.com') {
+    mailOptions.bcc = 'maxrf2025@gmail.com';
+  }
+  if (Object.keys(inlineImages).length > 0) {
+    mailOptions.inlineImages = inlineImages;
+  }
+  if (attachments.length > 0) {
+    mailOptions.attachments = attachments;
+  }
+
   try {
-    GmailApp.sendEmail(correo, '🍀 Tu Tiquete Oficial de Reserva - DinamicaMaxRF (' + ticket + ')', 'Tu tiquete oficial es: ' + ticket + ' con números: ' + numeros.join(', '), {
-      htmlBody: htmlBody,
-      name: 'DinamicaMaxRF Oficial'
-    });
-    return { success: true, message: 'Correo enviado a ' + correo };
+    GmailApp.sendEmail(correo, '🍀 Tu Tiquete Oficial de Reserva - DinamicaMaxRF (' + ticket + ')', 'Tu tiquete oficial es: ' + ticket + ' con números: ' + numeros.join(', '), mailOptions);
+    return { success: true, message: 'Correo enviado al cliente ' + correo };
   } catch (e) {
-    MailApp.sendEmail({
-      to: correo,
-      subject: '🍀 Tu Tiquete Oficial de Reserva - DinamicaMaxRF (' + ticket + ')',
-      htmlBody: htmlBody,
-      name: 'DinamicaMaxRF Oficial'
-    });
-    return { success: true, message: 'Correo enviado vía MailApp' };
+    mailOptions.to = correo;
+    mailOptions.subject = '🍀 Tu Tiquete Oficial de Reserva - DinamicaMaxRF (' + ticket + ')';
+    MailApp.sendEmail(mailOptions);
+    return { success: true, message: 'Correo enviado vía MailApp a ' + correo };
   }
 }
 
