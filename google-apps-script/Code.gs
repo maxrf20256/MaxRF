@@ -132,6 +132,9 @@ function getEstadoTalonario() {
       }
       var v = cData[j][1];
       if (v !== undefined && v !== null && String(v).trim() !== '') {
+        if (cleanK === 'fecha_sorteo' && Object.prototype.toString.call(v) === '[object Date]') {
+          v = Utilities.formatDate(v, 'GMT-5', 'yyyy-MM-dd');
+        }
         config[cleanK] = v;
         if (cleanK === 'premio_titulo') config['premio'] = v;
         if (cleanK === 'premio') config['premio_titulo'] = v;

@@ -57,25 +57,54 @@
   <!-- HEADER / NAVEGACIÓN (Fase 1: Coincide con la imagen)          -->
   <!-- ============================================================ -->
   <header class="sticky top-0 z-50 border-b border-slate-200/70 bg-white/95 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between px-4 sm:px-8 py-3.5 sm:py-4 gap-3 sm:gap-6">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between px-4 sm:px-8 py-2.5 sm:py-3.5 gap-2.5 sm:gap-4">
       
       <!-- Logo con Mascota & Tipografía de Marca -->
-      <div class="flex items-center gap-3.5 flex-shrink-0">
-        <div class="w-12 h-12 rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 bg-white flex items-center justify-center p-1">
+      <div class="flex items-center gap-3 flex-shrink-0">
+        <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl overflow-hidden shadow-sm border border-slate-200/80 bg-white flex items-center justify-center p-0.5">
           <img src="./img/Foto Web0.png" alt="Logo MaxRF" class="w-full h-full object-contain">
         </div>
         <div class="flex flex-col">
-          <span class="font-display font-black text-xl tracking-tight text-slate-900 leading-none">
+          <span class="font-display font-black text-lg sm:text-xl tracking-tight text-slate-900 leading-none">
             Dinamica<span class="text-purple-600">MaxRF</span>
           </span>
-          <span class="text-[10px] uppercase font-extrabold tracking-widest text-purple-600 leading-none mt-1">
+          <span class="text-[9px] uppercase font-extrabold tracking-widest text-purple-600 leading-none mt-1">
             SORTEO COQUETO 🐕🐾🐶
           </span>
         </div>
       </div>
 
+      <!-- Temporizador Regresivo Compacto en la Cabecera -->
+      <div id="countdown-container" class="flex items-center gap-1.5 sm:gap-2.5 bg-slate-50/90 border border-slate-200/90 rounded-2xl px-3 py-1.5 sm:px-4 sm:py-2 shadow-xs backdrop-blur-xs flex-shrink-0">
+        <div class="flex items-center gap-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-purple-700">
+          <i class="fas fa-clock text-purple-600 animate-pulse"></i>
+          <span class="hidden md:inline">Sorteo en:</span>
+        </div>
+        <div class="flex items-center gap-1 text-slate-900 font-display font-extrabold text-xs sm:text-sm">
+          <div class="bg-white border border-slate-200/90 rounded-lg px-2 py-1 min-w-[30px] sm:min-w-[34px] text-center shadow-xs">
+            <span id="cd-days" class="text-xs sm:text-sm font-black text-slate-900 tabular-nums">00</span>
+            <span class="block text-[8px] uppercase font-bold text-slate-400 -mt-0.5">Días</span>
+          </div>
+          <span class="font-black text-slate-300">:</span>
+          <div class="bg-white border border-slate-200/90 rounded-lg px-2 py-1 min-w-[30px] sm:min-w-[34px] text-center shadow-xs">
+            <span id="cd-hours" class="text-xs sm:text-sm font-black text-slate-900 tabular-nums">00</span>
+            <span class="block text-[8px] uppercase font-bold text-slate-400 -mt-0.5">Horas</span>
+          </div>
+          <span class="font-black text-slate-300">:</span>
+          <div class="bg-white border border-slate-200/90 rounded-lg px-2 py-1 min-w-[30px] sm:min-w-[34px] text-center shadow-xs">
+            <span id="cd-mins" class="text-xs sm:text-sm font-black text-slate-900 tabular-nums">00</span>
+            <span class="block text-[8px] uppercase font-bold text-slate-400 -mt-0.5">Min</span>
+          </div>
+          <span class="font-black text-slate-300">:</span>
+          <div class="bg-white border border-purple-200 rounded-lg px-2 py-1 min-w-[30px] sm:min-w-[34px] text-center shadow-xs text-purple-600">
+            <span id="cd-secs" class="text-xs sm:text-sm font-black text-purple-600 tabular-nums">00</span>
+            <span class="block text-[8px] uppercase font-bold text-purple-400 -mt-0.5">Seg</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Main Headline en la misma fila horizontal -->
-      <h1 class="font-display text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight text-center sm:text-right leading-tight">
+      <h1 class="font-display text-lg sm:text-xl md:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight text-center sm:text-right leading-tight">
         Elige tu número, <span class="text-purple-600">participa</span> y gana
       </h1>
 
@@ -83,62 +112,62 @@
   </header>
 
   <!-- ============================================================ -->
-  <!-- HERO SECTION                                                  -->
+  <!-- HERO SECTION: STATS COMPACTAS                                 -->
   <!-- ============================================================ -->
-  <section id="inicio" class="pt-8 sm:pt-10 pb-14 sm:pb-16 px-4 sm:px-6 relative z-10 text-center">
+  <section id="inicio" class="pt-4 sm:pt-6 pb-6 sm:pb-8 px-4 sm:px-6 relative z-10 text-center">
     
     <!-- Elemento oculto para soporte de app.js sin errores -->
     <span id="hero-premio" class="hidden"></span>
 
-    <div class="max-w-5xl mx-auto">
+    <div class="max-w-4xl mx-auto">
       
-      <!-- Countdown Timer -->
-      <div id="countdown-container" class="mb-8 sm:mb-10 inline-block bg-white/90 border border-slate-200/90 rounded-3xl p-5 sm:p-7 shadow-sm backdrop-blur-md max-w-full">
-        <div class="flex items-center justify-center gap-2 text-[11px] sm:text-xs font-bold uppercase tracking-widest text-slate-500 mb-3.5">
-          <i class="fas fa-clock text-purple-600"></i>
-          <span>TIEMPO RESTANTE PARA EL SORTEO</span>
-        </div>
-        <div class="flex items-center justify-center gap-1.5 sm:gap-3 text-slate-900">
-          <div class="bg-white border border-slate-200/90 rounded-2xl px-4 py-2.5 sm:px-6 sm:py-3.5 text-center min-w-[65px] sm:min-w-[85px] shadow-sm">
-            <div id="cd-days" class="font-display font-extrabold text-2xl sm:text-3xl tabular-nums text-slate-900">08</div>
-            <div class="text-[10px] uppercase font-bold text-slate-400 mt-0.5">Días</div>
+      <!-- Stats Bar Compacto (4 items compactos que no saturan el espacio) -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3.5 max-w-3xl mx-auto">
+        
+        <!-- Disponibles -->
+        <div class="bg-white/95 border border-slate-200/90 rounded-2xl py-2 px-3 sm:py-2.5 sm:px-4 shadow-sm flex items-center justify-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 text-sm">
+            <i class="fas fa-ticket"></i>
           </div>
-          <span class="font-bold text-xl sm:text-2xl text-slate-300">:</span>
-          <div class="bg-white border border-slate-200/90 rounded-2xl px-4 py-2.5 sm:px-6 sm:py-3.5 text-center min-w-[65px] sm:min-w-[85px] shadow-sm">
-            <div id="cd-hours" class="font-display font-extrabold text-2xl sm:text-3xl tabular-nums text-slate-900">04</div>
-            <div class="text-[10px] uppercase font-bold text-slate-400 mt-0.5">Horas</div>
-          </div>
-          <span class="font-bold text-xl sm:text-2xl text-slate-300">:</span>
-          <div class="bg-white border border-slate-200/90 rounded-2xl px-4 py-2.5 sm:px-6 sm:py-3.5 text-center min-w-[65px] sm:min-w-[85px] shadow-sm">
-            <div id="cd-mins" class="font-display font-extrabold text-2xl sm:text-3xl tabular-nums text-slate-900">20</div>
-            <div class="text-[10px] uppercase font-bold text-slate-400 mt-0.5">Min</div>
-          </div>
-          <span class="font-bold text-xl sm:text-2xl text-slate-300">:</span>
-          <div class="bg-white border border-slate-200/90 rounded-2xl px-4 py-2.5 sm:px-6 sm:py-3.5 text-center min-w-[65px] sm:min-w-[85px] shadow-sm">
-            <div id="cd-secs" class="font-display font-extrabold text-2xl sm:text-3xl tabular-nums text-purple-600">25</div>
-            <div class="text-[10px] uppercase font-bold text-slate-400 mt-0.5">Seg</div>
+          <div class="text-left">
+            <div id="stat-disponibles" class="font-display text-lg sm:text-xl font-black text-emerald-600 leading-tight tabular-nums">100</div>
+            <div class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400">Disponibles</div>
           </div>
         </div>
-      </div>
 
-      <!-- Stats Bar (4 columns) -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-5 max-w-4xl mx-auto">
-        <div class="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 text-center shadow-sm flex flex-col items-center justify-center min-h-[110px]">
-          <div id="stat-disponibles" class="font-display text-2xl sm:text-3xl font-black text-emerald-600 tabular-nums">100</div>
-          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-1">Disponibles</div>
+        <!-- Precio -->
+        <div class="bg-white/95 border border-slate-200/90 rounded-2xl py-2 px-3 sm:py-2.5 sm:px-4 shadow-sm flex items-center justify-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0 text-sm">
+            <i class="fas fa-tag"></i>
+          </div>
+          <div class="text-left">
+            <div id="stat-precio" class="font-display text-lg sm:text-xl font-black text-slate-900 leading-tight tabular-nums">$2.000</div>
+            <div class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400">Por número</div>
+          </div>
         </div>
-        <div class="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 text-center shadow-sm flex flex-col items-center justify-center min-h-[110px]">
-          <div id="stat-precio" class="font-display text-2xl sm:text-3xl font-black text-slate-900 tabular-nums">$900</div>
-          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-1">Precio Por número</div>
+
+        <!-- Fecha -->
+        <div class="bg-white/95 border border-slate-200/90 rounded-2xl py-2 px-3 sm:py-2.5 sm:px-4 shadow-sm flex items-center justify-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 text-sm">
+            <i class="fas fa-calendar-alt"></i>
+          </div>
+          <div class="text-left">
+            <div id="stat-fecha" class="font-display text-xs sm:text-sm font-black text-slate-900 leading-tight">30 de sept de<br>2026</div>
+            <div class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400">Fecha sorteo</div>
+          </div>
         </div>
-        <div class="bg-white border border-slate-200/90 rounded-3xl p-5 sm:p-6 text-center shadow-sm flex flex-col items-center justify-center min-h-[110px]">
-          <div id="stat-fecha" class="font-display text-base sm:text-lg font-black text-slate-900 leading-tight">23 de sept de<br>2026</div>
-          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-1">Fecha Del sorteo</div>
+
+        <!-- Lotería -->
+        <div class="bg-white/95 border border-indigo-200 rounded-2xl py-2 px-3 sm:py-2.5 sm:px-4 shadow-sm flex items-center justify-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 text-sm">
+            <i class="fas fa-award"></i>
+          </div>
+          <div class="text-left">
+            <div id="stat-loteria" class="font-display text-xs sm:text-sm font-black text-indigo-600 leading-tight uppercase">CHONTICO DIA</div>
+            <div class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400">Lotería oficial</div>
+          </div>
         </div>
-        <div class="bg-white border-2 border-indigo-400/50 rounded-3xl p-5 sm:p-6 text-center shadow-sm flex flex-col items-center justify-center min-h-[110px]">
-          <div id="stat-loteria" class="font-display text-base sm:text-lg font-black text-indigo-600 leading-tight uppercase">CHONTICO NOCHE</div>
-          <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-1">Lotería Oficial</div>
-        </div>
+
       </div>
 
     </div>
@@ -147,24 +176,14 @@
   <!-- ============================================================ -->
   <!-- 1. TALONARIO DIGITAL (AHORA VA PRIMERO ANTES DE CÓMO FUNCIONA)-->
   <!-- ============================================================ -->
-  <section id="talonario" class="py-16 sm:py-20 px-4 sm:px-6 bg-slate-50/80 border-t border-slate-200/80 relative z-10">
+  <section id="talonario" class="pt-2 sm:pt-4 pb-8 sm:pb-10 px-4 sm:px-6 bg-slate-50/80 border-t border-slate-200/80 relative z-10">
     <div class="max-w-5xl mx-auto">
       
-      <!-- Título de Sección -->
-      <div class="text-center max-w-2xl mx-auto mb-10">
-        <span class="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-2 block">
-          Esta es la oportunidad de probar tu 🍀suerte🍀
-        </span>
-        <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-          Elige tus números de la suerte
-        </h2>
-        <p id="talonario-subtitle" class="text-slate-500 mt-2 text-sm sm:text-base">
-          Cargando disponibilidad en tiempo real...
-        </p>
-      </div>
+      <!-- Placeholder oculto para compatibilidad con app.js -->
+      <span id="talonario-subtitle" class="hidden"></span>
 
       <!-- Leyenda de Estados -->
-      <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6 mb-8 text-xs sm:text-sm font-semibold text-slate-600">
+      <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-5 mb-4 sm:mb-5 text-xs sm:text-sm font-semibold text-slate-600">
         <span class="flex items-center gap-2">
           <span class="w-3.5 h-3.5 rounded-md bg-emerald-500/20 border border-emerald-500 text-emerald-600 inline-block"></span>
           <span>Disponible</span>
@@ -184,7 +203,7 @@
       </div>
 
       <!-- Barra de herramientas: Filtro disponibles, Ruleta aleatoria, Buscador -->
-      <div class="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white p-3.5 sm:p-4 rounded-2xl border border-slate-200 shadow-sm">
+      <div class="flex flex-wrap items-center justify-between gap-3 sm:gap-4 mb-5 sm:mb-6 bg-white p-3 sm:p-3.5 rounded-2xl border border-slate-200 shadow-sm">
         
         <div class="flex flex-wrap items-center gap-3">
           <!-- Toggle Solo Disponibles -->
@@ -283,35 +302,35 @@
   <!-- ============================================================ -->
   <!-- 2. CÓMO FUNCIONA                                              -->
   <!-- ============================================================ -->
-  <section id="como-funciona" class="py-16 sm:py-20 px-4 sm:px-6 bg-white border-t border-slate-200/80 relative z-10">
+  <section id="como-funciona" class="py-8 sm:py-12 px-4 sm:px-6 bg-white border-t border-slate-200/80 relative z-10">
     <div class="max-w-5xl mx-auto">
-      <div class="text-center max-w-xl mx-auto mb-12 reveal-on-scroll">
-        <span class="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-2 block">
+      <div class="text-center max-w-xl mx-auto mb-6 sm:mb-8 reveal-on-scroll">
+        <span class="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-1.5 block">
           Proceso 100% transparente
         </span>
-        <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+        <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
           ¿Cómo participar?
         </h2>
-        <p class="text-slate-500 mt-2 text-sm sm:text-base">
+        <p class="text-slate-500 mt-1.5 text-xs sm:text-sm">
           Participar es fácil, digital, seguro y toma menos de 2 minutos.
         </p>
       </div>
 
       <!-- Bento Steps -->
-      <div class="grid sm:grid-cols-3 gap-6">
+      <div class="grid sm:grid-cols-3 gap-4 sm:gap-6">
         
         <!-- Step 1 -->
-        <div class="premium-card rounded-3xl p-6 sm:p-7 relative overflow-hidden reveal-on-scroll">
-          <span class="absolute top-4 right-5 text-5xl font-black text-slate-200/50 font-display select-none">
+        <div class="premium-card rounded-2xl p-5 sm:p-6 relative overflow-hidden reveal-on-scroll">
+          <span class="absolute top-3 right-4 text-4xl font-black text-slate-200/50 font-display select-none">
             01
           </span>
-          <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl mb-5 shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg mb-4 shadow-xs">
             <i class="fas fa-hand-pointer"></i>
           </div>
-          <h3 class="font-display text-xl font-bold text-slate-900 mb-2">
+          <h3 class="font-display text-lg font-bold text-slate-900 mb-1.5">
             1. Elige tu número
           </h3>
-          <p class="text-sm text-slate-500 leading-relaxed mb-3">
+          <p class="text-xs sm:text-sm text-slate-500 leading-relaxed mb-3">
             Selecciona uno o más números disponibles en el talonario o usa el botón "Número de la suerte".
           </p>
           <a href="https://youtube.com/shorts/O68Ji-c2Z8Q" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition">
@@ -321,17 +340,17 @@
         </div>
 
         <!-- Step 2 -->
-        <div class="premium-card rounded-3xl p-6 sm:p-7 relative overflow-hidden reveal-on-scroll">
-          <span class="absolute top-4 right-5 text-5xl font-black text-slate-200/50 font-display select-none">
+        <div class="premium-card rounded-2xl p-5 sm:p-6 relative overflow-hidden reveal-on-scroll">
+          <span class="absolute top-3 right-4 text-4xl font-black text-slate-200/50 font-display select-none">
             02
           </span>
-          <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl mb-5 shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg mb-4 shadow-xs">
             <i class="fas fa-wallet"></i>
           </div>
-          <h3 class="font-display text-xl font-bold text-slate-900 mb-2">
+          <h3 class="font-display text-lg font-bold text-slate-900 mb-1.5">
             2. Paga por Nequi
           </h3>
-          <p class="text-sm text-slate-500 leading-relaxed mb-3">
+          <p class="text-xs sm:text-sm text-slate-500 leading-relaxed mb-3">
             Transfiere a Nequi (3188178457) y adjunta el comprobante; si pagas después, indica 'Pendiente' para reservar.
           </p>
           <a href="https://youtube.com/shorts/azKMeE9ccvk" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition">
@@ -341,17 +360,17 @@
         </div>
 
         <!-- Step 3 -->
-        <div class="premium-card rounded-3xl p-6 sm:p-7 relative overflow-hidden reveal-on-scroll">
-          <span class="absolute top-4 right-5 text-5xl font-black text-slate-200/50 font-display select-none">
+        <div class="premium-card rounded-2xl p-5 sm:p-6 relative overflow-hidden reveal-on-scroll">
+          <span class="absolute top-3 right-4 text-4xl font-black text-slate-200/50 font-display select-none">
             03
           </span>
-          <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl mb-5 shadow-sm">
+          <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg mb-4 shadow-xs">
             <i class="fas fa-award"></i>
           </div>
-          <h3 class="font-display text-xl font-bold text-slate-900 mb-2">
+          <h3 class="font-display text-lg font-bold text-slate-900 mb-1.5">
             3. Emisión de tiquete
           </h3>
-          <p class="text-sm text-slate-500 leading-relaxed">
+          <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
             Recibes tu tiquete digital oficial asegurando tus números para el sorteo.
           </p>
         </div>
@@ -359,9 +378,9 @@
       </div>
 
       <!-- VIP WhatsApp Community Card -->
-      <div class="mt-8 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-teal-500/10 border border-emerald-500/25 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="mt-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-emerald-500/5 to-teal-500/10 border border-emerald-500/25 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-3.5 text-center sm:text-left">
-          <div class="w-11 h-11 rounded-2xl bg-emerald-500 text-white flex items-center justify-center text-2xl shadow-sm flex-shrink-0">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-xl shadow-xs flex-shrink-0">
             <i class="fab fa-whatsapp"></i>
           </div>
           <div>
@@ -375,65 +394,51 @@
         </a>
       </div>
 
-      <!-- Trust Badges -->
-      <div class="mt-12 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs font-bold text-slate-500">
-        <span class="flex items-center gap-2">
-          <i class="fas fa-shield-check text-emerald-500 text-sm"></i> Sorteo 100% Transparente
-        </span>
-        <span class="flex items-center gap-2">
-          <i class="fab fa-whatsapp text-emerald-500 text-sm"></i> Atención directa por WhatsApp
-        </span>
-        <span class="flex items-center gap-2">
-          <i class="fas fa-receipt text-indigo-500 text-sm"></i> Tiquete Digital Oficial
-        </span>
-      </div>
     </div>
   </section>
 
   <!-- ============================================================ -->
-  <!-- 3. EL PREMIO (CON FOTO DEL PREMIO EDITABLE / MOSTRADA)        -->
-  <!-- ============================================================ -->
-  <section id="premio" class="py-16 sm:py-20 px-4 sm:px-6 relative z-10 bg-slate-50/80 border-t border-slate-200/80">
+  <section id="premio" class="py-8 sm:py-12 px-4 sm:px-6 relative z-10 bg-slate-50/80 border-t border-slate-200/80">
     <div class="max-w-5xl mx-auto">
-      <div class="premium-card rounded-3xl p-6 sm:p-10 relative overflow-hidden border border-indigo-500/20 reveal-on-scroll bg-white">
+      <div class="premium-card rounded-3xl p-5 sm:p-8 relative overflow-hidden border border-indigo-500/20 reveal-on-scroll bg-white">
         
-        <div class="grid md:grid-cols-12 gap-8 items-center">
+        <div class="grid md:grid-cols-12 gap-6 sm:gap-8 items-center">
           
           <!-- Premio Columna Izquierda / Info -->
           <div class="md:col-span-7">
-            <div id="premio-badge" class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-purple-500/10 text-purple-700 text-xs font-bold uppercase tracking-wider mb-4">
+            <div id="premio-badge" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 text-purple-700 text-xs font-bold uppercase tracking-wider mb-3">
               <i class="fas fa-gift"></i>
               <span id="premio-badge-texto">PREMIO ESPECIAL</span>
             </div>
             
-            <h2 id="premio-nombre" class="font-display text-3xl sm:text-5xl font-black text-slate-900 tracking-tight mb-4">
+            <h2 id="premio-nombre" class="font-display text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mb-3">
               $80.000
             </h2>
             
-            <p id="premio-detalle" class="text-slate-600 text-sm sm:text-base leading-relaxed mb-6 whitespace-pre-line">
+            <p id="premio-detalle" class="text-slate-600 text-xs sm:text-sm leading-relaxed mb-4 whitespace-pre-line">
               El ganador podrá elegir libremente entre nuestra selección exclusiva de fragancias de lujo masculinas o femeninas.
             </p>
 
-            <div id="premio-features" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-7 text-sm font-semibold text-slate-700">
-              <div class="flex items-center gap-2.5">
+            <div id="premio-features" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-5 text-xs sm:text-sm font-semibold text-slate-700">
+              <div class="flex items-center gap-2">
                 <i class="fas fa-check-circle text-emerald-500"></i>
                 <span>100% Original Garantizado</span>
               </div>
-              <div class="flex items-center gap-2.5">
+              <div class="flex items-center gap-2">
                 <i class="fas fa-check-circle text-emerald-500"></i>
                 <span>Hombre o Mujer a elección</span>
               </div>
-              <div class="flex items-center gap-2.5">
+              <div class="flex items-center gap-2">
                 <i class="fas fa-check-circle text-emerald-500"></i>
                 <span>Entrega coordinada directa</span>
               </div>
-              <div class="flex items-center gap-2.5">
+              <div class="flex items-center gap-2">
                 <i class="fas fa-check-circle text-emerald-500"></i>
                 <span>Sorteo con Chontico Noche</span>
               </div>
             </div>
 
-            <a id="premio-btn" href="#talonario" class="btn-primary-gradient inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm shadow-md shadow-indigo-500/25">
+            <a id="premio-btn" href="#talonario" class="btn-primary-gradient inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-indigo-500/25">
               <i class="fas fa-ticket"></i>
               <span id="premio-btn-texto">Participar por el perfume</span>
             </a>
@@ -441,18 +446,18 @@
 
           <!-- Premio Columna Derecha / Imagen Real del Premio -->
           <div class="md:col-span-5 flex justify-center">
-            <div class="relative w-full max-w-sm rounded-3xl overflow-hidden bg-white border border-indigo-100 shadow-xl group">
+            <div class="relative w-full max-w-xs rounded-3xl overflow-hidden bg-white border border-indigo-100 shadow-xl group">
               <div class="relative overflow-hidden aspect-square bg-slate-50">
                 <img id="premio-img" src="./img/premio.png" alt="Premio" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='./img/premio.jpg'">
                 <div id="premio-img-badge" class="absolute top-3 right-3 bg-slate-900/80 backdrop-blur text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow">
                   TÚ ESCOGES
                 </div>
               </div>
-              <div class="p-5 text-center bg-white border-t border-slate-100">
+              <div class="p-4 text-center bg-white border-t border-slate-100">
                 <span id="premio-categoria" class="text-xs font-black uppercase tracking-widest text-indigo-600 block mb-1">
                   FRAGANCIAS ORIGINALES
                 </span>
-                <h3 id="premio-card-titulo" class="font-display text-lg font-bold text-slate-900 mb-1">
+                <h3 id="premio-card-titulo" class="font-display text-base sm:text-lg font-bold text-slate-900 mb-0.5">
                   Perfume de Alta Gama
                 </h3>
                 <p id="premio-card-desc" class="text-xs text-slate-500">
@@ -469,124 +474,9 @@
   </section>
 
   <!-- ============================================================ -->
-  <!-- 4. MÉTODOS DE PAGO Y CONFIANZA                                -->
-  <!-- ============================================================ -->
-  <section id="pagos" class="py-16 sm:py-20 px-4 sm:px-6 bg-white border-t border-slate-200/80 relative z-10">
-    <div class="max-w-4xl mx-auto text-center reveal-on-scroll">
-      
-      <span class="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-2 block">
-        Transacción Fácil y Segura
-      </span>
-      <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mb-4">
-        Métodos de pago aceptados
-      </h2>
-      <p class="text-slate-500 text-sm sm:text-base max-w-lg mx-auto mb-10">
-        Paga de forma rápida y directa a través de Nequi. Guarda tu comprobante para adjuntarlo al formulario.
-      </p>
-
-      <!-- Nequi Card Destacada -->
-      <div class="max-w-md mx-auto premium-card rounded-3xl p-6 sm:p-8 mb-8 border-indigo-500/20 text-left bg-white">
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center font-bold text-base shadow-sm">
-              <i class="fas fa-mobile-screen-button"></i>
-            </div>
-            <div>
-              <h3 class="font-display font-bold text-lg text-slate-900">Nequi Colombia</h3>
-              <span class="text-xs text-slate-400">Transferencia móvil inmediata</span>
-            </div>
-          </div>
-          <span class="px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 text-xs font-bold">
-            Activo
-          </span>
-        </div>
-
-        <div class="bg-slate-50 rounded-2xl p-3.5 flex items-center justify-between gap-3 mb-3 border border-slate-200/80">
-          <div>
-            <span class="text-[10px] uppercase font-bold text-slate-400 block">Número de cuenta</span>
-            <span class="font-display font-black text-xl text-slate-900 tracking-wider tabular-nums">3188178457</span>
-          </div>
-          <div class="relative">
-            <button type="button" id="btn-copy-nequi" class="btn-secondary px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 hover:border-indigo-500 bg-white" title="Copiar número al portapapeles">
-              <i class="fas fa-copy"></i>
-              <span>Copiar</span>
-            </button>
-            <span id="copy-tooltip" class="hidden absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow">
-              ¡Copiado!
-            </span>
-          </div>
-        </div>
-
-        <p class="text-xs text-slate-400 text-center">
-          Envía el valor exacto ($XXXX por número) y adjunta el comprobante al reservar.
-        </p>
-      </div>
-
-      <!-- Otros Métodos List -->
-      <div id="metodos-pago-list" class="flex flex-wrap items-center justify-center gap-3"></div>
-
-    </div>
-  </section>
-
-  <!-- ============================================================ -->
-  <!-- 5. PREGUNTAS FRECUENTES (FAQ)                                 -->
-  <!-- ============================================================ -->
-  <section id="faq" class="py-16 sm:py-20 px-4 sm:px-6 bg-slate-50/80 border-t border-slate-200/80 relative z-10">
-    <div class="max-w-3xl mx-auto">
-      
-      <div class="text-center mb-12 reveal-on-scroll">
-        <span class="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-2 block">
-          Resolvemos tus dudas
-        </span>
-        <h2 class="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-          Preguntas frecuentes
-        </h2>
-      </div>
-
-      <div class="space-y-4">
-        
-        <!-- FAQ 1 -->
-        <div class="premium-card rounded-2xl overflow-hidden reveal-on-scroll bg-white">
-          <button type="button" class="faq-toggle w-full px-6 py-5 text-left flex items-center justify-between gap-4 font-bold text-slate-900 text-base">
-            <span>¿Cómo se elige al ganador del sorteo?</span>
-            <i class="faq-icon fas fa-chevron-down text-xs text-slate-400 transition-transform duration-300"></i>
-          </button>
-          <div class="faq-content hidden px-6 pb-5 text-sm text-slate-500 leading-relaxed border-t border-slate-100 pt-3">
-            El sorteo ofrece hasta tres modalidades de acierto: con las dos primeras cifras, las dos intermedias o las dos últimas del número oficial en la fecha estipulada. La transparencia e imparcialidad están garantizadas al 100%, ya que los resultados son de dominio público.
-          </div>
-        </div>
-
-        <!-- FAQ 2 -->
-        <div class="premium-card rounded-2xl overflow-hidden reveal-on-scroll bg-white">
-          <button type="button" class="faq-toggle w-full px-6 py-5 text-left flex items-center justify-between gap-4 font-bold text-slate-900 text-base">
-            <span>¿Puedo apartar mis números y pagar después?</span>
-            <i class="faq-icon fas fa-chevron-down text-xs text-slate-400 transition-transform duration-300"></i>
-          </button>
-          <div class="faq-content hidden px-6 pb-5 text-sm text-slate-500 leading-relaxed border-t border-slate-100 pt-3">
-            Sí. Puedes completar el formulario y adjuntar cualquier imagen para proceder con la reserva de tus números. Luego nos envías tu comprobante por WhatsApp antes del día del sorteo para asegurar tu número de forma definitiva.
-          </div>
-        </div>
-
-        <!-- FAQ 3 -->
-        <div class="premium-card rounded-2xl overflow-hidden reveal-on-scroll bg-white">
-          <button type="button" class="faq-toggle w-full px-6 py-5 text-left flex items-center justify-between gap-4 font-bold text-slate-900 text-base">
-            <span>¿Qué métodos de pago están disponibles?</span>
-            <i class="faq-icon fas fa-chevron-down text-xs text-slate-400 transition-transform duration-300"></i>
-          </button>
-          <div class="faq-content hidden px-6 pb-5 text-sm text-slate-500 leading-relaxed border-t border-slate-100 pt-3">
-            El método principal y más ágil es <strong>Nequi</strong> al número <code>3188178457</code>. Si necesitas otro medio de pago alternativo, puedes escribirnos directamente a nuestro WhatsApp oficial.
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ============================================================ -->
   <!-- FOOTER                                                        -->
   <!-- ============================================================ -->
-  <footer id="contacto" class="bg-slate-950 text-slate-300 pt-16 pb-12 px-4 sm:px-6 border-t border-slate-800 relative z-10 mt-auto">
+  <footer id="contacto" class="bg-slate-950 text-slate-300 pt-8 sm:pt-10 pb-8 px-4 sm:px-6 border-t border-slate-800 relative z-10 mt-auto">
     <div class="max-w-6xl mx-auto grid sm:grid-cols-3 gap-10">
       
       <!-- Marca -->
@@ -630,8 +520,6 @@
           <li><a href="#talonario" class="hover:text-white transition-colors">Talonario Digital</a></li>
           <li><a href="#como-funciona" class="hover:text-white transition-colors">¿Cómo funciona?</a></li>
           <li><a href="#premio" class="hover:text-white transition-colors">El Premio</a></li>
-          <li><a href="#pagos" class="hover:text-white transition-colors">Métodos de Pago</a></li>
-          <li><a href="#faq" class="hover:text-white transition-colors">Preguntas Frecuentes</a></li>
         </ul>
       </div>
 

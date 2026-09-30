@@ -455,7 +455,7 @@
         premio_badge: 'PREMIO ESPECIAL',
         precio_numero: 2000,
         loteria: 'CHONTICO DIA',
-        fecha_sorteo: '2026-09-20'
+        fecha_sorteo: '2026-10-01'
       };
 
       state.config = Object.assign({}, defaults, cleanServer, localCustom);
@@ -484,13 +484,34 @@
 
   function formatFecha(f) {
     try {
-      var d = new Date(f);
-      if (isNaN(d.getTime())) return f;
+      if (!f) return '';
+      var str = String(f).trim();
       var meses = ['enero', 'feb', 'marzo', 'abr', 'mayo', 'jun', 'jul', 'agosto', 'sept', 'oct', 'nov', 'dic'];
-      var dia = d.getDate();
-      var mes = meses[d.getMonth()] || 'sept';
-      var anio = d.getFullYear();
-      return dia + ' de ' + mes + ' de<br>' + anio;
+      
+      // 1. Formato YYYY-MM-DD o ISO con fecha inicial YYYY-MM-DD
+      var matchYMD = str.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+      if (matchYMD) {
+        var anio = matchYMD[1];
+        var mesIndex = parseInt(matchYMD[2], 10) - 1;
+        var dia = parseInt(matchYMD[3], 10);
+        var mes = meses[mesIndex] || '';
+        return dia + ' de ' + mes + ' de<br>' + anio;
+      }
+      
+      // 2. Formato DD-MM-YYYY
+      var matchDMY = str.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+      if (matchDMY) {
+        var dia = parseInt(matchDMY[1], 10);
+        var mesIndex = parseInt(matchDMY[2], 10) - 1;
+        var anio = matchDMY[3];
+        var mes = meses[mesIndex] || '';
+        return dia + ' de ' + mes + ' de<br>' + anio;
+      }
+      
+      // 3. Fallback con UTC para evitar desfase de huso horario
+      var d = new Date(str);
+      if (isNaN(d.getTime())) return f;
+      return d.getUTCDate() + ' de ' + (meses[d.getUTCMonth()] || '') + ' de<br>' + d.getUTCFullYear();
     } catch (e) {
       return f;
     }
@@ -534,7 +555,7 @@
     animateValue(els.statDisponibles, 0, disponibles, 1200);
 
     if (els.statPrecio) els.statPrecio.textContent = formatMoney(state.config.precio_numero || 2000);
-    if (els.statFecha) els.statFecha.innerHTML = state.config.fecha_sorteo ? formatFecha(state.config.fecha_sorteo) : '20 de sept de<br>2026';
+    if (els.statFecha) els.statFecha.innerHTML = state.config.fecha_sorteo ? formatFecha(state.config.fecha_sorteo) : '1 de oct de<br>2026';
     if (els.statLoteria) els.statLoteria.textContent = state.config.loteria || 'CHONTICO DIA';
   }
 
@@ -544,8 +565,28 @@
   function renderCountdown() {
     if (!state.config || !state.config.fecha_sorteo || !els.cdContainer) return;
 
-    var targetDate = new Date(state.config.fecha_sorteo).getTime();
-    if (isNaN(targetDate)) return;
+    var rawFecha = String(state.config.fecha_sorteo).trim();
+    var targetDate;
+
+    var matchYMD = rawFecha.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+    if (matchYMD) {
+      var y = parseInt(matchYMD[1], 10);
+      var m = parseInt(matchYMD[2], 10) - 1;
+      var d = parseInt(matchYMD[3], 10);
+      var lot = String(state.config.loteria || '').toUpperCase();
+      var hora = 22; // 10:00 PM por defecto
+      if (lot.indexOf('DIA') !== -1 || lot.indexOf('DÍA') !== -1) {
+        hora = 13; // Chontico Día juega a la 1:00 PM
+      } else if (lot.indexOf('NOCHE') !== -1) {
+        hora = 20; // Chontico Noche juega a las 8:00 PM
+      }
+      targetDate = new Date(y, m, d, hora, 0, 0).getTime();
+    } else {
+      var parsed = new Date(rawFecha).getTime();
+      targetDate = isNaN(parsed) ? null : parsed;
+    }
+
+    if (!targetDate || isNaN(targetDate)) return;
 
     if (state.countdownInterval) clearInterval(state.countdownInterval);
 
@@ -1573,8 +1614,19 @@
       if (f.elements['premio_card_desc']) f.elements['premio_card_desc'].value = c.premio_card_desc || 'Para Dama o Caballero. El ganador escoge su fragancia preferida.';
       if (f.elements['premio_items']) f.elements['premio_items'].value = c.premio_items || '100% Original Garantizado, Hombre o Mujer a elección, Entrega coordinada directa, Sorteo con Chontico Noche';
       if (f.elements['precio_numero']) f.elements['precio_numero'].value = c.precio_numero || 2000;
-      if (f.elements['fecha_sorteo']) f.elements['fecha_sorteo'].value = c.fecha_sorteo || '2026-09-23';
-      if (f.elements['loteria']) f.elements['loteria'].value = c.loteria || 'CHONTICO NOCHE';
+      if (f.elements['fecha_sorteo']) {
+        var rawF = String(c.fecha_sorteo || '').trim();
+        var mYMD = rawF.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+        if (mYMD) {
+          var y = mYMD[1];
+          var m = String(mYMD[2]).padStart(2, '0');
+          var d = String(mYMD[3]).padStart(2, '0');
+          f.elements['fecha_sorteo'].value = y + '-' + m + '-' + d;
+        } else {
+          f.elements['fecha_sorteo'].value = rawF || '2026-10-01';
+        }
+      }
+      if (f.elements['loteria']) f.elements['loteria'].value = c.loteria || 'CHONTICO DIA';
     }
   }
 
