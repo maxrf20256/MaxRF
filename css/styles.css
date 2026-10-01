@@ -273,40 +273,73 @@ html.dark .ticket-num.disponible {
   }
 }
 
-/* Estado: RESERVADO */
+/* Estado: RESERVADO (Pendiente de Pago) */
 .ticket-num.reservado {
-  background-color: rgba(245, 158, 11, 0.08);
-  border-color: rgba(245, 158, 11, 0.3);
-  color: #d97706;
+  background-color: #fffbeb !important;
+  border-color: #f59e0b !important;
+  border-width: 2px !important;
+  color: #b45309 !important;
   cursor: not-allowed;
-  opacity: 0.75;
+  opacity: 0.95;
+  font-weight: 800;
+  box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.25);
+  position: relative;
 }
 
-html.dark .ticket-num.reservado {
-  background-color: rgba(245, 158, 11, 0.12);
-  border-color: rgba(245, 158, 11, 0.35);
-  color: #fbbf24;
+.ticket-num.reservado::after {
+  content: '⏳';
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 8px;
+  opacity: 0.85;
+}
+
+@media (min-width: 640px) {
+  .ticket-num.reservado::after {
+    font-size: 10px;
+    top: 3px;
+    right: 4px;
+  }
 }
 
 .ticket-num.reservado:hover {
   transform: none;
 }
 
-/* Estado: VENDIDO */
+/* Estado: VENDIDO / PAGADO */
 .ticket-num.vendido {
-  background-color: rgba(244, 63, 94, 0.06);
-  border-color: rgba(244, 63, 94, 0.2);
-  color: #e11d48;
+  background-color: #fee2e2 !important;
+  border-color: #ef4444 !important;
+  border-width: 2px !important;
+  color: #b91c1c !important;
   cursor: not-allowed;
-  opacity: 0.45;
+  opacity: 0.95;
+  font-weight: 800;
   text-decoration: line-through;
-  text-decoration-thickness: 1.5px;
+  text-decoration-color: #ef4444;
+  text-decoration-thickness: 2.5px;
+  box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.25);
+  position: relative;
 }
 
-html.dark .ticket-num.vendido {
-  background-color: rgba(244, 63, 94, 0.08);
-  border-color: rgba(244, 63, 94, 0.2);
-  color: #fb7185;
+.ticket-num.vendido::after {
+  content: '✓';
+  position: absolute;
+  top: 2px;
+  right: 3px;
+  font-size: 9px;
+  color: #b91c1c;
+  font-weight: 900;
+  text-decoration: none !important;
+}
+
+@media (min-width: 640px) {
+  .ticket-num.vendido::after {
+    font-size: 11px;
+    top: 3px;
+    right: 5px;
+  }
 }
 
 .ticket-num.vendido:hover {

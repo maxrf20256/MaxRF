@@ -64,29 +64,63 @@ function getEstadoTalonario() {
   }
   
   var sheetPart = ss.getSheetByName('Participantes') || ss.getSheetByName('Ventas');
-  var reservadosMap = {};
+  var participantesEstadoMap = {}; // '00' -> 'vendido' | 'reservado'
   
   if (sheetPart && sheetPart.getLastRow() > 1) {
     var partData = sheetPart.getDataRange().getValues();
     var headers = partData[0].map(function(h){ return String(h).toLowerCase().trim(); });
     var numColIdx = -1;
+    var estadoColIdx = -1;
+    var refColIdx = -1;
     for (var c = 0; c < headers.length; c++) {
-      if (headers[c].indexOf('nmero') !== -1 || headers[c].indexOf('numero') !== -1 || headers[c] === 'boleta' || headers[c] === '#') {
+      var h = headers[c];
+      if (h.indexOf('nmero') !== -1 || h.indexOf('numero') !== -1 || h === 'boleta' || h === '#') {
         numColIdx = c;
-        break;
+      }
+      if (h.indexOf('estado') !== -1 || h.indexOf('status') !== -1) {
+        estadoColIdx = c;
+      }
+      if (h.indexOf('referencia') !== -1 || h.indexOf('comprobante') !== -1) {
+        refColIdx = c;
       }
     }
-    if (numColIdx !== -1) {
-      for (var r = 1; r < partData.length; r++) {
-        var val = String(partData[r][numColIdx] || '').trim();
-        if (val) {
-          var splitNums = val.split(/[,;\s]+/);
-          for (var k = 0; k < splitNums.length; k++) {
-            var nStr = splitNums[k].trim();
-            if (nStr !== '') {
-              if (nStr.length === 1) nStr = '0' + nStr;
-              reservadosMap[nStr] = true;
-            }
+    
+    // Fallbacks si las columnas no tienen encabezado estándar
+    if (numColIdx === -1) numColIdx = 4;
+    if (estadoColIdx === -1) estadoColIdx = 10;
+    if (refColIdx === -1) refColIdx = 7;
+    
+    for (var r = 1; r < partData.length; r++) {
+      var row = partData[r];
+      var rawNums = String(row[numColIdx] || '').trim();
+      if (!rawNums) continue;
+      
+      var rawEstado = String(row[estadoColIdx] || '').trim().toLowerCase();
+      var rawRef = String(row[refColIdx] || '').trim().toLowerCase();
+      
+      var estadoFinal = 'reservado';
+      if (rawEstado.indexOf('pag') !== -1 || rawEstado.indexOf('conf') !== -1) {
+        estadoFinal = 'vendido';
+      } else if (rawEstado.indexOf('rech') !== -1 || rawEstado.indexOf('canc') !== -1) {
+        estadoFinal = 'disponible';
+      } else {
+        if (rawRef.indexOf('pendiente') !== -1) {
+          estadoFinal = 'reservado';
+        } else if (rawRef.length > 0 && rawRef !== '0') {
+          estadoFinal = 'vendido';
+        } else {
+          estadoFinal = 'reservado';
+        }
+      }
+      
+      var splitNums = rawNums.split(/[,;\s]+/);
+      for (var k = 0; k < splitNums.length; k++) {
+        var nStr = splitNums[k].trim();
+        if (nStr !== '') {
+          if (nStr.length === 1) nStr = '0' + nStr;
+          // Si algún ticket para este número está 'vendido', tiene prioridad
+          if (participantesEstadoMap[nStr] !== 'vendido') {
+            participantesEstadoMap[nStr] = estadoFinal;
           }
         }
       }
@@ -102,15 +136,12 @@ function getEstadoTalonario() {
     if (num.length === 1) num = '0' + num;
     var estadoActual = String(dataNum[i][1] || 'disponible').toLowerCase().trim();
     
-    // Si hay hoja Participantes y el número no figura ahí, reconciliar a disponible
+    // Si hay hoja Participantes, reconciliar con el estado real del participante
     if (sheetPart && sheetPart.getLastRow() > 1) {
-      if (!reservadosMap[num] && estadoActual !== 'disponible') {
-        estadoActual = 'disponible';
-        dataNum[i][1] = 'disponible';
-        updatesNeeded = true;
-      } else if (reservadosMap[num] && estadoActual === 'disponible') {
-        estadoActual = 'reservado';
-        dataNum[i][1] = 'reservado';
+      var estadoEsperado = participantesEstadoMap[num] || 'disponible';
+      if (estadoActual !== estadoEsperado) {
+        estadoActual = estadoEsperado;
+        dataNum[i][1] = estadoEsperado;
         updatesNeeded = true;
       }
     }

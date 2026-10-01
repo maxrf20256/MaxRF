@@ -47,6 +47,25 @@
     bindEvents();
     initScrollReveal();
     cargarEstado();
+
+    // Auto-sincronización en tiempo real para todos los dispositivos (PC, móvil, tablet)
+    document.addEventListener('visibilitychange', function () {
+      if (!document.hidden) {
+        cargarEstado();
+      }
+    });
+    window.addEventListener('focus', function () {
+      cargarEstado();
+    });
+
+    // Auto-polling cada 25 segundos para reflejar compras y pagos en vivo
+    setInterval(function () {
+      var modalPart = document.getElementById('modal-participar');
+      var estaComprando = modalPart && modalPart.classList.contains('modal-active');
+      if (!estaComprando) {
+        cargarEstado();
+      }
+    }, 25000);
   }
 
   // -------------------------------------------------------------------
@@ -551,9 +570,9 @@
     var s = String(valor || 'disponible').trim().toLowerCase();
     s = s.normalize ? s.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : s;
     if (s.indexOf('disp') === 0) return 'disponible';
-    if (s.indexOf('reserv') === 0) return 'reservado';
-    if (s.indexOf('vend') === 0) return 'vendido';
-    if (s.indexOf('rechaz') === 0) return 'disponible';
+    if (s.indexOf('reserv') === 0 || s.indexOf('pend') === 0) return 'reservado';
+    if (s.indexOf('vend') === 0 || s.indexOf('pag') === 0 || s.indexOf('conf') === 0) return 'vendido';
+    if (s.indexOf('rechaz') === 0 || s.indexOf('canc') === 0) return 'disponible';
     return 'disponible';
   }
 
