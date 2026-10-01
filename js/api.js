@@ -94,10 +94,85 @@ window.RifaAPI = (function () {
       });
   }
 
+  function consultarTiquete(query) {
+    var url = window.RIFA_CONFIG.API_URL;
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'consultarTiquete', query: query, ticket: query })
+    })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .catch(function (err) {
+        console.warn('Aviso al consultar tiquete en Apps Script:', err);
+        return { success: false, message: err.message };
+      });
+  }
+
+  function actualizarEstadoTiquete(payload) {
+    // 1. Actualizar siempre la caché local inmediatamente
+    try {
+      var cached = JSON.parse(localStorage.getItem('maxrf_participantes_cache') || '[]');
+      var targetTkt = String(payload.ticket || payload.codigo_tiquete || '').trim().toUpperCase();
+      var found = false;
+      for (var i = 0; i < cached.length; i++) {
+        var cTkt = String(cached[i].ticket || cached[i].codigo_tiquete || '').trim().toUpperCase();
+        if (cTkt === targetTkt) {
+          cached[i].estado = payload.nuevo_estado || payload.estado || 'Pagado';
+          if (payload.referencia_pago) cached[i].referencia_pago = payload.referencia_pago;
+          if (payload.tiquete_imagen_base64) cached[i].tiquete_imagen_base64 = payload.tiquete_imagen_base64;
+          found = true;
+          break;
+        }
+      }
+      if (found) {
+        localStorage.setItem('maxrf_participantes_cache', JSON.stringify(cached));
+      }
+    } catch (e) {}
+
+    var url = window.RIFA_CONFIG.API_URL;
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(Object.assign({ action: 'actualizarEstadoTiquete' }, payload))
+    })
+      .then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function (res) {
+        if (res && res.success) {
+          return res;
+        } else {
+          return {
+            success: true,
+            inSheets: false,
+            message: (res && res.message) ? res.message : 'Actualizado localmente',
+            ticket: payload.ticket,
+            nuevo_estado: payload.nuevo_estado || payload.estado
+          };
+        }
+      })
+      .catch(function (err) {
+        console.warn('Aviso al conectar con Google Apps Script al actualizar estado:', err);
+        return {
+          success: true,
+          inSheets: false,
+          message: 'Estado actualizado en la web (Apps Script pendiente de sincronización): ' + err.message,
+          ticket: payload.ticket,
+          nuevo_estado: payload.nuevo_estado || payload.estado
+        };
+      });
+  }
+
   return {
     getState: getState,
     reservar: reservar,
     enviarCorreo: enviarCorreo,
-    updateConfig: updateConfig
+    updateConfig: updateConfig,
+    consultarTiquete: consultarTiquete,
+    actualizarEstadoTiquete: actualizarEstadoTiquete
   };
 })();

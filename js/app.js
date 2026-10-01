@@ -22,7 +22,13 @@
     ultimoTiqueteDataUrl: null,
     ultimoTiqueteBlob: null,
     toastTimer: null,
-    adminLogged: false
+    adminLogged: false,
+    participantes: [],
+    adminActiveTab: 'config',
+    adminTktFiltro: 'todos',
+    adminTktSearchQuery: '',
+    adminSelectedTiquete: null,
+    adminUltimoSoporteDataUrl: null
   };
 
   var els = {};
@@ -130,6 +136,8 @@
     els.btnWaConfirmarText = document.getElementById('btn-wa-confirmar-text');
     els.btnWaCopiaSoporte = document.getElementById('btn-wa-copia-soporte');
     els.ticketLoteria = document.getElementById('ticket-loteria');
+    els.ticketFechaSorteo = document.getElementById('ticket-fecha-sorteo-val');
+    els.ticketLogoImg = document.getElementById('ticket-logo-img');
     els.ticketPremioTxt = document.getElementById('ticket-premio-txt');
     els.btnDescargarTiqueteImg = document.getElementById('btn-descargar-tiquete-img');
     els.btnCopiarTiqueteImg = document.getElementById('btn-copiar-tiquete-img');
@@ -167,6 +175,43 @@
     els.btnLogoutAdmin = document.getElementById('btn-logout-admin');
     els.adminSaveStatus = document.getElementById('admin-save-status');
     els.btnGuardarAdmin = document.getElementById('btn-guardar-admin');
+
+    // Admin Tabs & Tiquetes
+    els.adminNavBar = document.getElementById('admin-nav-bar');
+    els.tabBtnConfig = document.getElementById('tab-btn-config');
+    els.tabBtnTiquetes = document.getElementById('tab-btn-tiquetes');
+    els.badgeTotalTiquetes = document.getElementById('badge-total-tiquetes');
+    els.adminTiquetesBox = document.getElementById('admin-tiquetes-box');
+    els.adminSearchTiquete = document.getElementById('admin-search-tiquete');
+    els.btnClearSearchTkt = document.getElementById('btn-clear-search-tkt');
+    els.btnRefreshTiquetes = document.getElementById('btn-refresh-tiquetes');
+    els.cntFilterTodos = document.getElementById('cnt-filter-todos');
+    els.cntFilterPendientes = document.getElementById('cnt-filter-pendientes');
+    els.cntFilterPagados = document.getElementById('cnt-filter-pagados');
+    els.cntFilterRechazados = document.getElementById('cnt-filter-rechazados');
+    els.adminTiqueteDetalle = document.getElementById('admin-tiquete-detalle');
+    els.btnCerrarDetalleTkt = document.getElementById('btn-cerrar-detalle-tkt');
+    els.detTicketCodigo = document.getElementById('det-ticket-codigo');
+    els.detTicketEstadoBadge = document.getElementById('det-ticket-estado-badge');
+    els.detTicketNombre = document.getElementById('det-ticket-nombre');
+    els.detTicketTel = document.getElementById('det-ticket-tel');
+    els.detTicketWaLink = document.getElementById('det-ticket-wa-link');
+    els.detTicketNumeros = document.getElementById('det-ticket-numeros');
+    els.detTicketTotal = document.getElementById('det-ticket-total');
+    els.detTicketMetodoRef = document.getElementById('det-ticket-metodo-ref');
+    els.detTicketFecha = document.getElementById('det-ticket-fecha');
+    els.inputRefActualizada = document.getElementById('input-ref-actualizada');
+    els.btnEjecutarCambioEstado = document.getElementById('btn-ejecutar-cambio-estado');
+    els.statusCambioEstado = document.getElementById('status-cambio-estado');
+    els.boxSoporteGenerado = document.getElementById('box-soporte-generado');
+    els.txtSoporteDriveStatus = document.getElementById('txt-soporte-drive-status');
+    els.imgSoportePreview = document.getElementById('img-soporte-preview');
+    els.btnDescargarSoporte = document.getElementById('btn-descargar-soporte');
+    els.btnWhatsappSoporte = document.getElementById('btn-whatsapp-soporte');
+    els.boxDriveLink = document.getElementById('box-drive-link');
+    els.linkSoporteDrive = document.getElementById('link-soporte-drive');
+    els.txtContadorResultados = document.getElementById('txt-contador-resultados');
+    els.listaTiquetesContainer = document.getElementById('lista-tiquetes-container');
   }
 
   // -------------------------------------------------------------------
@@ -377,11 +422,7 @@
     if (els.btnCancelarAdmin) {
       els.btnCancelarAdmin.addEventListener('click', cerrarModalAdmin);
     }
-    if (els.modalAdmin) {
-      els.modalAdmin.addEventListener('click', function (e) {
-        if (e.target === els.modalAdmin) cerrarModalAdmin();
-      });
-    }
+    // El modal admin no se cierra al hacer clic afuera para evitar pérdida accidental de datos
     if (els.formLoginAdmin) {
       els.formLoginAdmin.addEventListener('submit', intentarLoginAdmin);
     }
@@ -403,6 +444,95 @@
     }
     if (els.formAdminConfig) {
       els.formAdminConfig.addEventListener('submit', onSubmitAdminConfig);
+    }
+
+    // Pestañas del Admin (Configuración vs Consultar Tiquetes)
+    if (els.tabBtnConfig) {
+      els.tabBtnConfig.addEventListener('click', function () {
+        switchAdminTab('config');
+      });
+    }
+    if (els.tabBtnTiquetes) {
+      els.tabBtnTiquetes.addEventListener('click', function () {
+        switchAdminTab('tiquetes');
+      });
+    }
+
+    // Buscador y Filtros de Tiquetes en Admin
+    if (els.adminSearchTiquete) {
+      els.adminSearchTiquete.addEventListener('input', function (e) {
+        state.adminTktSearchQuery = e.target.value.trim().toLowerCase();
+        if (els.btnClearSearchTkt) {
+          els.btnClearSearchTkt.classList.toggle('hidden', state.adminTktSearchQuery.length === 0);
+        }
+        renderListaTiquetesAdmin();
+      });
+    }
+    if (els.btnClearSearchTkt) {
+      els.btnClearSearchTkt.addEventListener('click', function () {
+        if (els.adminSearchTiquete) els.adminSearchTiquete.value = '';
+        state.adminTktSearchQuery = '';
+        els.btnClearSearchTkt.classList.add('hidden');
+        renderListaTiquetesAdmin();
+      });
+    }
+    if (els.btnRefreshTiquetes) {
+      els.btnRefreshTiquetes.addEventListener('click', function () {
+        if (els.btnRefreshTiquetes) {
+          els.btnRefreshTiquetes.innerHTML = '<i class="fas fa-rotate fa-spin text-purple-600"></i> Actualizando...';
+        }
+        cargarEstado().then(function () {
+          if (els.btnRefreshTiquetes) {
+            els.btnRefreshTiquetes.innerHTML = '<i class="fas fa-rotate text-purple-600"></i> Actualizar';
+          }
+          renderListaTiquetesAdmin();
+        });
+      });
+    }
+
+    // Filtros rápidos por estado
+    var filterBtns = document.querySelectorAll('.btn-filter-tkt');
+    filterBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var f = this.getAttribute('data-filter') || 'todos';
+        state.adminTktFiltro = f;
+        filterBtns.forEach(function (b) {
+          var isCurrent = b === btn;
+          b.className = isCurrent
+            ? 'btn-filter-tkt px-3 py-1 rounded-lg font-bold bg-purple-600 text-white shadow-sm transition'
+            : 'btn-filter-tkt px-3 py-1 rounded-lg font-semibold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition';
+        });
+        renderListaTiquetesAdmin();
+      });
+    });
+
+    // Detalle de Tiquete y Cambio de Estado
+    if (els.btnCerrarDetalleTkt) {
+      els.btnCerrarDetalleTkt.addEventListener('click', function () {
+        if (els.adminTiqueteDetalle) els.adminTiqueteDetalle.classList.add('hidden');
+        state.adminSelectedTiquete = null;
+      });
+    }
+    if (els.btnEjecutarCambioEstado) {
+      els.btnEjecutarCambioEstado.addEventListener('click', ejecutarCambioEstadoTiqueteAdmin);
+    }
+
+    // Delegación de clics en la lista de tiquetes para seleccionar tiquete
+    if (els.listaTiquetesContainer) {
+      els.listaTiquetesContainer.addEventListener('click', function (e) {
+        var btn = e.target.closest('.btn-seleccionar-tkt');
+        if (btn) {
+          var tktCode = btn.getAttribute('data-ticket');
+          if (tktCode) {
+            var encontrado = state.participantes.find(function (p) {
+              return String(p.ticket || p.codigo_tiquete || '').trim().toUpperCase() === tktCode.toUpperCase();
+            });
+            if (encontrado) {
+              seleccionarTiqueteAdmin(encontrado);
+            }
+          }
+        }
+      });
     }
 
     // Atajo de teclado para abrir el Admin: Ctrl + Alt + A
@@ -433,6 +563,12 @@
   function cargarEstado() {
     return window.RifaAPI.getState().then(function (res) {
       if (!res || !res.success) {
+        // En caso de error o modo local, recuperar participantes de localStorage
+        try {
+          var localCached = localStorage.getItem('maxrf_participantes_cache');
+          if (localCached) state.participantes = JSON.parse(localCached);
+        } catch (e) {}
+
         if (els.talonarioLoading) {
           els.talonarioLoading.innerHTML =
             '<div class="text-center py-10 text-red-500">' +
@@ -464,13 +600,32 @@
         premio_badge: 'PREMIO ESPECIAL',
         precio_numero: 2000,
         loteria: 'CHONTICO DIA',
-        fecha_sorteo: '2026-10-01'
+        fecha_sorteo: '2026-10-01',
+        min_numeros: 1,
+        max_numeros: 10
       };
 
       // Prioridad: defaults < localCustom < cleanServer (Google Sheets en vivo)
       state.config = Object.assign({}, defaults, localCustom, cleanServer);
       state.numeros = res.numeros || [];
+
+      // Sincronizar participantes recibidos de Google Sheets
+      if (res.participantes && Array.isArray(res.participantes) && res.participantes.length > 0) {
+        state.participantes = res.participantes;
+        try {
+          localStorage.setItem('maxrf_participantes_cache', JSON.stringify(res.participantes));
+        } catch (e) {}
+      } else {
+        try {
+          var cachedPart = localStorage.getItem('maxrf_participantes_cache');
+          if (cachedPart) state.participantes = JSON.parse(cachedPart);
+        } catch (e) {}
+      }
+
       renderTodo();
+      if (state.adminLogged) {
+        renderListaTiquetesAdmin();
+      }
       return res;
     });
   }
@@ -494,6 +649,59 @@
       }
     }
     return 2000;
+  }
+
+  function getMinNumeros() {
+    if (state.config && state.config.min_numeros !== undefined && state.config.min_numeros !== null) {
+      var n = parseInt(state.config.min_numeros, 10);
+      if (!isNaN(n) && n >= 1) return n;
+    }
+    return 1;
+  }
+
+  function getMaxNumeros() {
+    if (state.config && state.config.max_numeros !== undefined && state.config.max_numeros !== null) {
+      var n = parseInt(state.config.max_numeros, 10);
+      if (!isNaN(n) && n >= 1) return n;
+    }
+    return 10;
+  }
+
+  var toastTimeout = null;
+  function mostrarToastAlerta(mensaje, tipo) {
+    var toast = document.getElementById('toast-global');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'toast-global';
+      document.body.appendChild(toast);
+    }
+
+    var icono = '<i class="fas fa-triangle-exclamation text-amber-400 text-lg flex-shrink-0"></i>';
+    var bgBorder = 'bg-slate-900/95 text-white border-slate-700 shadow-2xl';
+
+    if (tipo === 'success') {
+      icono = '<i class="fas fa-circle-check text-emerald-400 text-lg flex-shrink-0"></i>';
+      bgBorder = 'bg-emerald-950/95 text-white border-emerald-600/50 shadow-2xl';
+    } else if (tipo === 'info') {
+      icono = '<i class="fas fa-circle-info text-indigo-400 text-lg flex-shrink-0"></i>';
+      bgBorder = 'bg-slate-900/95 text-white border-indigo-500/40 shadow-2xl';
+    } else if (tipo === 'error') {
+      icono = '<i class="fas fa-circle-xmark text-rose-400 text-lg flex-shrink-0"></i>';
+      bgBorder = 'bg-rose-950/95 text-white border-rose-600/50 shadow-2xl';
+    }
+
+    toast.className = 'fixed top-5 left-1/2 -translate-x-1/2 z-[100] max-w-md w-[92%] sm:w-auto px-5 py-3.5 rounded-2xl border backdrop-blur flex items-center gap-3 transition-all duration-300 ' + bgBorder;
+    toast.innerHTML = icono + '<span class="text-xs sm:text-sm font-semibold leading-snug">' + mensaje + '</span>';
+    toast.style.opacity = '1';
+    toast.style.transform = 'translate(-50%, 0)';
+    toast.style.pointerEvents = 'auto';
+
+    if (toastTimeout) clearTimeout(toastTimeout);
+    toastTimeout = setTimeout(function () {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translate(-50%, -15px)';
+      toast.style.pointerEvents = 'none';
+    }, 3500);
   }
 
   function formatMoney(n) {
@@ -536,6 +744,16 @@
       return d.getUTCDate() + ' de ' + (meses[d.getUTCMonth()] || '') + ' de<br>' + d.getUTCFullYear();
     } catch (e) {
       return f;
+    }
+  }
+
+  function formatFechaTexto(f) {
+    try {
+      if (!f) return '1 de oct de 2026';
+      var formatted = formatFecha(f);
+      return String(formatted).replace(/<br\s*\/?>/gi, ' ');
+    } catch (e) {
+      return String(f || '1 de oct de 2026');
     }
   }
 
@@ -651,8 +869,18 @@
     var rangoStr = state.config.rango === '999' ? '000 al 999' : '00 al 99';
     if (els.talonarioSubtitle) {
       var pNum = getPrecioNumero();
+      var minN = getMinNumeros();
+      var maxN = getMaxNumeros();
+      var limitsTxt = '';
+      if (minN > 1 || maxN < 100) {
+        if (minN === maxN) {
+          limitsTxt = ' · Elige exactamente ' + minN + (minN === 1 ? ' número' : ' números') + '.';
+        } else {
+          limitsTxt = ' · Mínimo ' + minN + ' y máximo ' + maxN + ' números por persona.';
+        }
+      }
       els.talonarioSubtitle.textContent =
-        'Talonario oficial del ' + rangoStr + ' con reserva inmediata. Cada número por ' + (pNum === 0 ? 'GRATIS ($0)' : formatMoney(pNum)) + '.';
+        'Talonario oficial del ' + rangoStr + ' con reserva inmediata. Cada número por ' + (pNum === 0 ? 'GRATIS ($0)' : formatMoney(pNum)) + '.' + limitsTxt;
     }
 
     var numerosNormalizados = state.numeros.map(function (item) {
@@ -722,12 +950,18 @@
   // RULETA DE LA SUERTE ("ELEGIR POR MÍ")
   // -------------------------------------------------------------------
   function jugarRuletaDeLaSuerte() {
+    var max = getMaxNumeros();
+    if (state.seleccionados.length >= max) {
+      mostrarToastAlerta('Ya alcanzaste el límite máximo de ' + max + (max === 1 ? ' número por participante.' : ' números por participante.'), 'warning');
+      return;
+    }
+
     var disponibles = state.numeros.filter(function (n) {
       return normalizarEstado(n.estado) === 'disponible' && state.seleccionados.indexOf(n.numero) === -1;
     });
 
     if (disponibles.length === 0) {
-      alert('¡Ya no hay más números disponibles para seleccionar!');
+      mostrarToastAlerta('¡Ya no hay más números disponibles para seleccionar!', 'info');
       return;
     }
 
@@ -898,6 +1132,11 @@
   function toggleSeleccion(numero, el) {
     var idx = state.seleccionados.indexOf(numero);
     if (idx === -1) {
+      var max = getMaxNumeros();
+      if (state.seleccionados.length >= max) {
+        mostrarToastAlerta('Solo puedes elegir un máximo de ' + max + (max === 1 ? ' número por participante.' : ' números por participante.'), 'warning');
+        return;
+      }
       state.seleccionados.push(numero);
       if (el) el.classList.add('seleccionado');
     } else {
@@ -917,9 +1156,18 @@
 
     els.stickyDock.classList.add('dock-visible');
     var ordenados = state.seleccionados.slice().sort();
+    var min = getMinNumeros();
+    var max = getMaxNumeros();
 
     if (els.dockCount) {
-      els.dockCount.textContent = state.seleccionados.length + (state.seleccionados.length === 1 ? ' número' : ' números');
+      var countTxt = state.seleccionados.length + (state.seleccionados.length === 1 ? ' número' : ' números');
+      if (max < 100) {
+        countTxt += ' (' + state.seleccionados.length + '/' + max + ' máx.)';
+      }
+      if (state.seleccionados.length < min) {
+        countTxt += ' · Mínimo: ' + min;
+      }
+      els.dockCount.textContent = countTxt;
     }
 
     if (els.dockLista) {
@@ -937,8 +1185,21 @@
   // MODAL DE PARTICIPACIÓN
   // -------------------------------------------------------------------
   function abrirModalParticipar() {
+    var min = getMinNumeros();
+    var max = getMaxNumeros();
+
     if (state.seleccionados.length === 0) {
-      alert('Por favor selecciona al menos un número del talonario.');
+      mostrarToastAlerta('Por favor selecciona al menos ' + min + (min === 1 ? ' número' : ' números') + ' del talonario.', 'warning');
+      return;
+    }
+
+    if (state.seleccionados.length < min) {
+      mostrarToastAlerta('Debes elegir al menos ' + min + (min === 1 ? ' número' : ' números') + ' para participar. Has elegido ' + state.seleccionados.length + '.', 'warning');
+      return;
+    }
+
+    if (state.seleccionados.length > max) {
+      mostrarToastAlerta('Has superado el máximo permitido de ' + max + (max === 1 ? ' número.' : ' números.'), 'warning');
       return;
     }
 
@@ -1149,6 +1410,29 @@
 
         cerrarModalParticipar();
 
+        // Registrar en state.participantes y cache local
+        var ordenadosNums = state.seleccionados.slice().sort();
+        var estadoInicial = (esPendiente) ? 'Pendiente' : 'Pagado';
+        var regParticipante = {
+          fecha: new Date().toLocaleString('es-CO'),
+          nombre: payload.nombre,
+          telefono: payload.telefono,
+          correo: payload.correo || '',
+          numeros: ordenadosNums,
+          total: ordenadosNums.length * getPrecioNumero(),
+          metodo_pago: payload.metodo_pago,
+          referencia_pago: payload.referencia_pago,
+          ticket: codigoTkt,
+          codigo_tiquete: codigoTkt,
+          estado: estadoInicial,
+          tiquete_imagen_url: (res && res.tiquete_url) || '',
+          tiquete_imagen_base64: dataUrl || ''
+        };
+        state.participantes.unshift(regParticipante);
+        try {
+          localStorage.setItem('maxrf_participantes_cache', JSON.stringify(state.participantes));
+        } catch (eCache) {}
+
         // Emitir Tiquete Digital Oficial
         emitirTiqueteDigital(payload, res);
 
@@ -1179,8 +1463,11 @@
       minute: '2-digit'
     });
     var esPendiente = esValorPendiente(payload.referencia_pago) || esValorPendiente(payload.metodo_pago);
-    var loteriaTxt = (state.config && (state.config.loteria || state.config.nombre_loteria)) || 'CHONTICO NOCHE';
-    var premioTxt = (state.config && (state.config.premio_titulo || state.config.premio)) || 'Premio Oficial';
+    var loteriaTxt = (state.config && (state.config.loteria || state.config.nombre_loteria)) || 'CHONTICO DIA';
+    var rawFechaSorteo = state.config && state.config.fecha_sorteo;
+    var fechaSorteoTxt = rawFechaSorteo ? formatFechaTexto(rawFechaSorteo) : '1 de oct de 2026';
+    var rawPremio = (state.config && (state.config.premio_titulo || state.config.premio));
+    var premioTxt = (rawPremio && String(rawPremio).trim() !== '0') ? String(rawPremio).trim() : 'Premio Oficial';
 
     if (els.ticketNombre) els.ticketNombre.textContent = payload.nombre;
     if (els.ticketTelefono) els.ticketTelefono.textContent = payload.telefono;
@@ -1195,7 +1482,11 @@
     if (els.ticketTotal) els.ticketTotal.textContent = precioUnit === 0 ? 'GRATIS ($0)' : formatMoney(total);
     if (els.ticketCodigo) els.ticketCodigo.textContent = 'TIQUETE Nº ' + codigoTkt;
     if (els.ticketLoteria) els.ticketLoteria.textContent = loteriaTxt;
+    if (els.ticketFechaSorteo) els.ticketFechaSorteo.textContent = fechaSorteoTxt;
     if (els.ticketPremioTxt) els.ticketPremioTxt.textContent = 'Premio: ' + premioTxt;
+    if (els.ticketLogoImg && window.MAXRF_LOGO_DATA_URI) {
+      els.ticketLogoImg.src = window.MAXRF_LOGO_DATA_URI;
+    }
 
     if (els.ticketNumerosContainer) {
       els.ticketNumerosContainer.innerHTML = '';
@@ -1223,8 +1514,11 @@
       minute: '2-digit'
     });
     var codigoTkt = payload.codigo_tiquete || (res.ticket || ('MAXRF-' + Math.floor(100000 + Math.random() * 900000)));
-    var loteriaTxt = (state.config && (state.config.loteria || state.config.nombre_loteria)) || 'CHONTICO NOCHE';
-    var premioTxt = (state.config && (state.config.premio_titulo || state.config.premio)) || 'Premio Oficial';
+    var loteriaTxt = (state.config && (state.config.loteria || state.config.nombre_loteria)) || 'CHONTICO DIA';
+    var rawFechaSorteo = state.config && state.config.fecha_sorteo;
+    var fechaSorteoTxt = rawFechaSorteo ? formatFechaTexto(rawFechaSorteo) : '1 de oct de 2026';
+    var rawPremio = (state.config && (state.config.premio_titulo || state.config.premio));
+    var premioTxt = (rawPremio && String(rawPremio).trim() !== '0') ? String(rawPremio).trim() : 'Premio Oficial';
 
     // Actualizar elementos en DOM
     actualizarDatosTiqueteDOM(payload, codigoTkt);
@@ -1237,6 +1531,7 @@
       total: total,
       ordenados: ordenados,
       fechaActual: fechaActual,
+      fechaSorteoTxt: fechaSorteoTxt,
       loteriaTxt: loteriaTxt,
       premioTxt: premioTxt,
       tiqueteUrl: res.tiquete_url || ''
@@ -1320,30 +1615,260 @@
       return;
     }
 
-    if (typeof window.html2canvas !== 'function') {
-      console.warn('html2canvas no está disponible.');
-      if (callback) callback(null, null);
-      return;
+    var ticketLogo = document.getElementById('ticket-logo-img');
+    if (ticketLogo && window.MAXRF_LOGO_DATA_URI) {
+      ticketLogo.src = window.MAXRF_LOGO_DATA_URI;
     }
 
-    window.html2canvas(ticketEl, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#ffffff',
-      logging: false
-    }).then(function (canvas) {
+    function responderConCanvas(canvas) {
+      try {
+        var dataUrl = canvas.toDataURL('image/png');
+        state.ultimoTiqueteDataUrl = dataUrl;
+        canvas.toBlob(function (blob) {
+          state.ultimoTiqueteBlob = blob;
+          if (callback) callback(dataUrl, blob);
+        }, 'image/png');
+      } catch (eCanvas) {
+        console.warn('Canvas toDataURL falló por seguridad, usando canvas 2D fallback:', eCanvas);
+        generarTiqueteCanvas2D(callback);
+      }
+    }
+
+    if (typeof window.html2canvas === 'function') {
+      window.html2canvas(ticketEl, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: '#ffffff',
+        logging: false
+      }).then(function (canvas) {
+        responderConCanvas(canvas);
+      }).catch(function (err) {
+        console.warn('html2canvas falló, recurriendo a canvas 2D directo:', err);
+        generarTiqueteCanvas2D(callback);
+      });
+    } else {
+      generarTiqueteCanvas2D(callback);
+    }
+  }
+
+  // Generador gráfico 2D nativo ultrarrápido (100% inmune a restricciones de CORS / file://)
+  function generarTiqueteCanvas2D(callback) {
+    try {
+      var tkt = state.ultimoTiquete || {};
+      var payload = tkt.payload || {};
+      var ordenados = tkt.ordenados || state.seleccionados.slice().sort();
+      var codigoTkt = tkt.codigoTkt || 'MAXRF-000000';
+      var titular = payload.nombre || 'Participante';
+      var tel = payload.telefono || '—';
+      var ref = payload.referencia_pago || 'Pendiente';
+      var fechaEmision = tkt.fechaActual || new Date().toLocaleDateString('es-CO');
+      var loteria = tkt.loteriaTxt || 'CHONTICO DIA';
+      var fechaSorteo = tkt.fechaSorteoTxt || formatFechaTexto((state.config && state.config.fecha_sorteo) || '2026-10-01');
+      var total = tkt.total !== undefined ? tkt.total : (ordenados.length * getPrecioNumero());
+      var premio = tkt.premioTxt || (state.config && (state.config.premio_titulo || state.config.premio)) || 'Premio Especial';
+      if (!premio || String(premio).trim() === '0') premio = 'Premio Especial';
+
+      var W = 840;
+      var H = 760;
+      var canvas = document.createElement('canvas');
+      canvas.width = W;
+      canvas.height = H;
+      var ctx = canvas.getContext('2d');
+
+      // Fondo blanco del tiquete
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, W, H);
+
+      // Borde exterior sutil
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(1, 1, W - 2, H - 2);
+
+      // Franja superior / Cabecera
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(0, 0, W, 100);
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, 100);
+      ctx.lineTo(W, 100);
+      ctx.stroke();
+
+      // Logo / Ícono DinamicaMaxRF
+      ctx.fillStyle = '#4f46e5';
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(30, 20, 60, 60, 14); else ctx.rect(30, 20, 60, 60);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 22px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('MRF', 60, 57);
+
+      // Título Marca
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 28px sans-serif';
+      ctx.fillText('DinamicaMaxRF', 105, 52);
+      ctx.fillStyle = '#6366f1';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('TIQUETE OFICIAL DE RIFA', 105, 72);
+
+      // Badge Estado "● RESERVADO"
+      ctx.fillStyle = '#ecfdf5';
+      ctx.strokeStyle = '#6ee7b7';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(W - 190, 32, 160, 36, 18); else ctx.rect(W - 190, 32, 160, 36);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#047857';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('● RESERVADO', W - 110, 56);
+
+      // Cuadro de datos del participante
+      ctx.fillStyle = '#f8fafc';
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(30, 120, W - 60, 140, 16); else ctx.rect(30, 120, W - 60, 140);
+      ctx.fill();
+      ctx.stroke();
+
+      // Fila 1: Titular y Teléfono
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('TITULAR', 50, 150);
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 18px sans-serif';
+      ctx.fillText(titular, 50, 178);
+
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('WHATSAPP / TEL', W - 50, 150);
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 18px sans-serif';
+      ctx.fillText(tel, W - 50, 178);
+
+      // Línea divisoria en datos
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.beginPath();
+      ctx.moveTo(50, 195);
+      ctx.lineTo(W - 50, 195);
+      ctx.stroke();
+
+      // Fila 2: Referencia y Fecha
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('REFERENCIA PAGO', 50, 220);
+      ctx.fillStyle = '#4f46e5';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillText(ref, 50, 245);
+
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('FECHA Y HORA', W - 50, 220);
+      ctx.fillStyle = '#334155';
+      ctx.font = '600 15px sans-serif';
+      ctx.fillText(fechaEmision, W - 50, 245);
+
+      // Caja de Números de la Suerte
+      ctx.fillStyle = '#eef2ff';
+      ctx.strokeStyle = '#c7d2fe';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(30, 280, W - 60, 360, 20); else ctx.rect(30, 280, W - 60, 360);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#4f46e5';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.fillText('TUS NÚMEROS DE LA SUERTE', W / 2, 315);
+
+      // Dibujar badges de números
+      var pillW = 75;
+      var pillH = 65;
+      var gap = 16;
+      var totalW = ordenados.length * pillW + (ordenados.length - 1) * gap;
+      var startX = Math.max(50, (W - totalW) / 2);
+      var currentX = startX;
+      var currentY = 345;
+
+      ordenados.forEach(function (n) {
+        if (currentX + pillW > W - 50) {
+          currentX = startX;
+          currentY += pillH + 12;
+        }
+        ctx.fillStyle = '#4f46e5';
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(currentX, currentY, pillW, pillH, 16); else ctx.rect(currentX, currentY, pillW, pillH);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 30px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(n, currentX + pillW / 2, currentY + pillH / 2 + 10);
+        currentX += pillW + gap;
+      });
+
+      // Línea divisoria en caja de números
+      ctx.strokeStyle = '#c7d2fe';
+      ctx.beginPath();
+      ctx.moveTo(50, 560);
+      ctx.lineTo(W - 50, 560);
+      ctx.stroke();
+
+      // Total a pagar
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#475569';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillText('Total a pagar: ', 50, 595);
+      var totalTxt = total === 0 ? 'GRATIS ($0)' : ('$' + total.toLocaleString('es-CO') + ' COP');
+      ctx.fillStyle = '#4f46e5';
+      ctx.font = 'bold 22px sans-serif';
+      ctx.fillText(totalTxt, 160, 597);
+
+      // Lotería y Fecha del Sorteo
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#475569';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.fillText('Juega: ' + loteria, W - 50, 588);
+      ctx.fillStyle = '#4338ca';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.fillText('Sorteo: ' + fechaSorteo, W - 50, 612);
+
+      // Pie del Tiquete
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.beginPath();
+      ctx.moveTo(30, 665);
+      ctx.lineTo(W - 30, 665);
+      ctx.stroke();
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#475569';
+      ctx.font = 'bold 14px monospace';
+      ctx.fillText('TIQUETE Nº ' + codigoTkt, 30, 705);
+
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#64748b';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.fillText('Premio: ' + premio, W - 30, 705);
+
       var dataUrl = canvas.toDataURL('image/png');
       state.ultimoTiqueteDataUrl = dataUrl;
-
       canvas.toBlob(function (blob) {
         state.ultimoTiqueteBlob = blob;
         if (callback) callback(dataUrl, blob);
       }, 'image/png');
-    }).catch(function (err) {
-      console.warn('Error generando captura visual con html2canvas:', err);
+    } catch (e) {
+      console.error('Error fatal generando tiquete 2D:', e);
       if (callback) callback(null, null);
-    });
+    }
   }
 
   // Compartir Tiquete Oficial por WhatsApp al cliente con copia visual (imagen)
@@ -1608,7 +2133,9 @@
 
   function mostrarAuthAdmin() {
     if (els.adminAuthBox) els.adminAuthBox.classList.remove('hidden');
+    if (els.adminNavBar) els.adminNavBar.classList.add('hidden');
     if (els.formAdminConfig) els.formAdminConfig.classList.add('hidden');
+    if (els.adminTiquetesBox) els.adminTiquetesBox.classList.add('hidden');
     if (els.inputAdminEmail && !els.inputAdminEmail.value) {
       els.inputAdminEmail.value = 'maxrf2025@gmail.com';
     }
@@ -1621,10 +2148,11 @@
 
   function mostrarFormularioAdmin() {
     if (els.adminAuthBox) els.adminAuthBox.classList.add('hidden');
-    if (els.formAdminConfig) {
-      els.formAdminConfig.classList.remove('hidden');
-      var c = state.config || {};
-      var f = els.formAdminConfig;
+    if (els.adminNavBar) els.adminNavBar.classList.remove('hidden');
+
+    var c = state.config || {};
+    var f = els.formAdminConfig;
+    if (f) {
       if (f.elements['premio_titulo']) f.elements['premio_titulo'].value = c.premio_titulo || c.premio || '$80.000';
       if (f.elements['premio_badge']) f.elements['premio_badge'].value = c.premio_badge || 'PREMIO ESPECIAL';
       if (f.elements['premio_descripcion']) {
@@ -1642,6 +2170,12 @@
       }
       if (f.elements['premio_card_desc']) {
         f.elements['premio_card_desc'].value = c.premio_card_desc || '';
+      }
+      if (f.elements['min_numeros']) {
+        f.elements['min_numeros'].value = getMinNumeros();
+      }
+      if (f.elements['max_numeros']) {
+        f.elements['max_numeros'].value = getMaxNumeros();
       }
       if (f.elements['precio_numero']) {
         f.elements['precio_numero'].value = getPrecioNumero();
@@ -1661,6 +2195,670 @@
       if (f.elements['loteria']) f.elements['loteria'].value = c.loteria || 'CHONTICO DIA';
       if (f.elements['premio_img_url']) f.elements['premio_img_url'].value = c.premio_img_url || './img/premio.png';
       if (f.elements['metodos_pago']) f.elements['metodos_pago'].value = c.metodos_pago || 'Nequi 3188178457';
+    }
+
+    switchAdminTab(state.adminActiveTab || 'config');
+    renderListaTiquetesAdmin();
+  }
+
+  function switchAdminTab(tabName) {
+    state.adminActiveTab = tabName;
+    if (tabName === 'config') {
+      if (els.tabBtnConfig) {
+        els.tabBtnConfig.className = 'px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-t-xl text-[11px] sm:text-sm font-bold border-b-2 border-purple-600 text-purple-700 bg-white shadow-sm flex items-center justify-center gap-1.5 transition text-center';
+      }
+      if (els.tabBtnTiquetes) {
+        els.tabBtnTiquetes.className = 'px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-t-xl text-[11px] sm:text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-purple-700 hover:bg-white/60 flex items-center justify-center gap-1.5 transition text-center';
+      }
+      if (els.formAdminConfig) els.formAdminConfig.classList.remove('hidden');
+      if (els.adminTiquetesBox) els.adminTiquetesBox.classList.add('hidden');
+    } else {
+      if (els.tabBtnTiquetes) {
+        els.tabBtnTiquetes.className = 'px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-t-xl text-[11px] sm:text-sm font-bold border-b-2 border-purple-600 text-purple-700 bg-white shadow-sm flex items-center justify-center gap-1.5 transition text-center';
+      }
+      if (els.tabBtnConfig) {
+        els.tabBtnConfig.className = 'px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-t-xl text-[11px] sm:text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-purple-700 hover:bg-white/60 flex items-center justify-center gap-1.5 transition text-center';
+      }
+      if (els.formAdminConfig) els.formAdminConfig.classList.add('hidden');
+      if (els.adminTiquetesBox) els.adminTiquetesBox.classList.remove('hidden');
+      renderListaTiquetesAdmin();
+    }
+  }
+
+  function renderListaTiquetesAdmin() {
+    var participantes = state.participantes || [];
+    var totalCount = participantes.length;
+
+    var countPendientes = 0;
+    var countPagados = 0;
+    var countRechazados = 0;
+
+    participantes.forEach(function (p) {
+      var st = String(p.estado || '').toLowerCase();
+      if (st.indexOf('pag') !== -1 || st.indexOf('conf') !== -1) {
+        countPagados++;
+      } else if (st.indexOf('rech') !== -1 || st.indexOf('canc') !== -1) {
+        countRechazados++;
+      } else {
+        countPendientes++;
+      }
+    });
+
+    if (els.badgeTotalTiquetes) els.badgeTotalTiquetes.textContent = totalCount;
+    if (els.cntFilterTodos) els.cntFilterTodos.textContent = totalCount;
+    if (els.cntFilterPendientes) els.cntFilterPendientes.textContent = countPendientes;
+    if (els.cntFilterPagados) els.cntFilterPagados.textContent = countPagados;
+    if (els.cntFilterRechazados) els.cntFilterRechazados.textContent = countRechazados;
+
+    var filtro = state.adminTktFiltro || 'todos';
+    var query = (state.adminTktSearchQuery || '').trim().toLowerCase();
+
+    var filtrados = participantes.filter(function (p) {
+      var st = String(p.estado || '').toLowerCase();
+      var esPag = st.indexOf('pag') !== -1 || st.indexOf('conf') !== -1;
+      var esRech = st.indexOf('rech') !== -1 || st.indexOf('canc') !== -1;
+      var esPend = !esPag && !esRech;
+
+      if (filtro === 'pendiente' && !esPend) return false;
+      if (filtro === 'pagado' && !esPag) return false;
+      if (filtro === 'rechazado' && !esRech) return false;
+
+      if (query) {
+        var tktCode = String(p.ticket || p.codigo_tiquete || '').toLowerCase();
+        var tel = String(p.telefono || '').toLowerCase();
+        var nom = String(p.nombre || '').toLowerCase();
+        var nums = (Array.isArray(p.numeros) ? p.numeros.join(' ') : String(p.numeros || '')).toLowerCase();
+        var ref = String(p.referencia_pago || '').toLowerCase();
+
+        var match = (tktCode.indexOf(query) !== -1) ||
+                    (tel.indexOf(query) !== -1) ||
+                    (nom.indexOf(query) !== -1) ||
+                    (nums.indexOf(query) !== -1) ||
+                    (ref.indexOf(query) !== -1);
+        if (!match) return false;
+      }
+
+      return true;
+    });
+
+    if (els.txtContadorResultados) {
+      els.txtContadorResultados.textContent = 'Mostrando ' + filtrados.length + ' de ' + totalCount + ' tiquetes';
+    }
+
+    if (!els.listaTiquetesContainer) return;
+    els.listaTiquetesContainer.innerHTML = '';
+
+    if (filtrados.length === 0) {
+      els.listaTiquetesContainer.innerHTML =
+        '<div class="text-center py-10 px-4 bg-slate-50 border border-slate-200/80 rounded-2xl">' +
+        '<i class="fas fa-ticket text-3xl text-slate-300 mb-2"></i>' +
+        '<p class="text-xs sm:text-sm font-bold text-slate-700">No se encontraron tiquetes registrados</p>' +
+        '<p class="text-[11px] text-slate-400 mt-0.5">' + (query ? 'Prueba con otro término de búsqueda o limpia el filtro.' : 'Las reservas registradas aparecerán aquí automáticamente.') + '</p>' +
+        '</div>';
+      return;
+    }
+
+    filtrados.forEach(function (p) {
+      var tktCode = String(p.ticket || p.codigo_tiquete || 'MAXRF-000000');
+      var st = String(p.estado || '').toLowerCase();
+      var esPag = st.indexOf('pag') !== -1 || st.indexOf('conf') !== -1;
+      var esRech = st.indexOf('rech') !== -1 || st.indexOf('canc') !== -1;
+      var badgeCls = 'bg-amber-100 text-amber-800 border-amber-300';
+      var badgeTxt = '● PENDIENTE';
+      var borderCls = 'border-amber-200/80';
+
+      if (esPag) {
+        badgeCls = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+        badgeTxt = '● PAGADO Y CONFIRMADO';
+        borderCls = 'border-emerald-200/80';
+      } else if (esRech) {
+        badgeCls = 'bg-rose-100 text-rose-800 border-rose-300';
+        badgeTxt = '● RECHAZADO';
+        borderCls = 'border-rose-200/80';
+      }
+
+      var arrNums = Array.isArray(p.numeros) ? p.numeros : String(p.numeros || '').split(/[,;\s]+/).filter(Boolean);
+      var numsBadges = arrNums.map(function (n) {
+        return '<span class="px-2 py-0.5 rounded-md font-bold text-xs bg-slate-100 text-slate-800 border border-slate-200">' + n + '</span>';
+      }).join(' ');
+
+      var item = document.createElement('div');
+      item.className = 'p-3.5 sm:p-4 rounded-2xl border transition bg-white hover:border-purple-300 hover:shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-3 ' + borderCls;
+      item.innerHTML =
+        '<div class="space-y-1.5 flex-1">' +
+          '<div class="flex items-center gap-2 flex-wrap">' +
+            '<span class="font-mono font-black text-xs px-2.5 py-0.5 rounded-lg bg-slate-900 text-white">' + tktCode + '</span>' +
+            '<span class="px-2.5 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider border ' + badgeCls + '">' + badgeTxt + '</span>' +
+            '<span class="text-[11px] text-slate-400 font-semibold">' + (p.fecha ? String(p.fecha).split('T')[0] : '') + '</span>' +
+          '</div>' +
+          '<div class="flex items-center gap-3 text-xs flex-wrap">' +
+            '<span class="font-bold text-slate-900 text-sm"><i class="fas fa-user text-purple-600 mr-1"></i>' + (p.nombre || 'Participante') + '</span>' +
+            '<span class="text-slate-600 font-medium"><i class="fas fa-phone text-indigo-500 mr-1"></i>' + (p.telefono || 'Sin tel') + '</span>' +
+            '<span class="text-slate-500 text-[11px]"><i class="fas fa-receipt text-slate-400 mr-1"></i>Ref: <strong>' + (p.referencia_pago || '—') + '</strong></span>' +
+          '</div>' +
+          '<div class="flex items-center gap-2 flex-wrap pt-0.5">' +
+            '<span class="text-[10px] font-bold uppercase text-slate-400">Números:</span>' +
+            '<div class="flex flex-wrap gap-1">' + numsBadges + '</div>' +
+            '<span class="text-xs font-black text-indigo-600 ml-2">Total: ' + formatMoney(p.total) + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="flex items-center gap-2 flex-shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">' +
+          '<button type="button" class="btn-seleccionar-tkt px-3.5 py-2 rounded-xl bg-purple-50 hover:bg-purple-600 text-purple-700 hover:text-white font-bold text-xs border border-purple-200 transition shadow-sm flex items-center gap-1.5" data-ticket="' + tktCode + '">' +
+            '<i class="fas fa-pen-to-square"></i>' +
+            '<span>Gestionar / Soporte</span>' +
+          '</button>' +
+        '</div>';
+
+      els.listaTiquetesContainer.appendChild(item);
+    });
+  }
+
+  function seleccionarTiqueteAdmin(tkt) {
+    state.adminSelectedTiquete = tkt;
+    if (!els.adminTiqueteDetalle) return;
+
+    var tktCode = String(tkt.ticket || tkt.codigo_tiquete || 'MAXRF-000000');
+    var st = String(tkt.estado || '').toLowerCase();
+    var esPag = st.indexOf('pag') !== -1 || st.indexOf('conf') !== -1;
+    var esRech = st.indexOf('rech') !== -1 || st.indexOf('canc') !== -1;
+
+    if (els.detTicketCodigo) els.detTicketCodigo.textContent = tktCode;
+    if (els.detTicketNombre) els.detTicketNombre.textContent = tkt.nombre || '—';
+    if (els.detTicketTel) els.detTicketTel.textContent = tkt.telefono || '—';
+    if (els.detTicketWaLink) {
+      els.detTicketWaLink.href = 'https://wa.me/' + formatearTelefonoWhatsApp(tkt.telefono);
+    }
+    if (els.detTicketTotal) els.detTicketTotal.textContent = formatMoney(tkt.total);
+    if (els.detTicketMetodoRef) {
+      els.detTicketMetodoRef.textContent = (tkt.metodo_pago || 'Nequi') + ' — ' + (tkt.referencia_pago || 'Pendiente');
+    }
+    if (els.detTicketFecha) {
+      els.detTicketFecha.textContent = tkt.fecha ? String(tkt.fecha) : new Date().toLocaleDateString('es-CO');
+    }
+
+    if (els.detTicketEstadoBadge) {
+      if (esPag) {
+        els.detTicketEstadoBadge.className = 'px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300';
+        els.detTicketEstadoBadge.textContent = '● Pagado y Confirmado';
+      } else if (esRech) {
+        els.detTicketEstadoBadge.className = 'px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-300';
+        els.detTicketEstadoBadge.textContent = '● Rechazado';
+      } else {
+        els.detTicketEstadoBadge.className = 'px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300';
+        els.detTicketEstadoBadge.textContent = '● Pendiente';
+      }
+    }
+
+    if (els.detTicketNumeros) {
+      els.detTicketNumeros.innerHTML = '';
+      var arrNums = Array.isArray(tkt.numeros) ? tkt.numeros : String(tkt.numeros || '').split(/[,;\s]+/).filter(Boolean);
+      arrNums.forEach(function (n) {
+        var sp = document.createElement('span');
+        sp.className = 'px-2.5 py-1 rounded-lg bg-purple-600 text-white font-extrabold text-xs shadow-xs';
+        sp.textContent = n;
+        els.detTicketNumeros.appendChild(sp);
+      });
+    }
+
+    var radioVal = esPag ? 'Pagado' : (esRech ? 'Rechazado' : 'Pendiente');
+    var radios = document.querySelectorAll('input[name="cambio_estado_opt"]');
+    radios.forEach(function (r) {
+      r.checked = (r.value === radioVal);
+    });
+
+    if (els.inputRefActualizada) {
+      els.inputRefActualizada.value = tkt.referencia_pago || '';
+    }
+
+    if (els.statusCambioEstado) els.statusCambioEstado.classList.add('hidden');
+    if (els.boxSoporteGenerado) els.boxSoporteGenerado.classList.add('hidden');
+
+    if (tkt.tiquete_imagen_url) {
+      if (els.boxDriveLink && els.linkSoporteDrive) {
+        els.linkSoporteDrive.href = tkt.tiquete_imagen_url;
+        els.boxDriveLink.classList.remove('hidden');
+      }
+    } else if (els.boxDriveLink) {
+      els.boxDriveLink.classList.add('hidden');
+    }
+
+    els.adminTiqueteDetalle.classList.remove('hidden');
+    els.adminTiqueteDetalle.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function ejecutarCambioEstadoTiqueteAdmin() {
+    if (!state.adminSelectedTiquete) return;
+    var tkt = state.adminSelectedTiquete;
+    var tktCode = String(tkt.ticket || tkt.codigo_tiquete || '').trim().toUpperCase();
+
+    var selRadio = document.querySelector('input[name="cambio_estado_opt"]:checked');
+    var nuevoEstado = selRadio ? selRadio.value : 'Pagado';
+    var nuevaRef = els.inputRefActualizada ? els.inputRefActualizada.value.trim() : '';
+    if (!nuevaRef) {
+      if (nuevoEstado === 'Pagado') nuevaRef = 'PAGADO / APROBADO';
+      else if (nuevoEstado === 'Rechazado') nuevaRef = 'RECHAZADO / CANCELADO';
+      else nuevaRef = 'PENDIENTE';
+    }
+
+    if (els.btnEjecutarCambioEstado) {
+      els.btnEjecutarCambioEstado.disabled = true;
+      els.btnEjecutarCambioEstado.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Generando nuevo soporte oficial...';
+    }
+    if (els.statusCambioEstado) {
+      els.statusCambioEstado.className = 'p-3 rounded-xl text-xs font-bold text-center bg-indigo-50 text-indigo-700 block';
+      els.statusCambioEstado.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Generando soporte gráfico y sincronizando con Google Sheets & Drive...';
+    }
+
+    // 1. Generar la nueva imagen de soporte oficial con el status actualizado
+    generarSoporteCanvas2D(tkt, nuevoEstado, nuevaRef, function (dataUrl, blob) {
+      state.adminUltimoSoporteDataUrl = dataUrl;
+
+      // 2. Mostrar la previsualización del soporte
+      if (els.imgSoportePreview) els.imgSoportePreview.src = dataUrl;
+      if (els.boxSoporteGenerado) els.boxSoporteGenerado.classList.remove('hidden');
+
+      var fileName = 'Soporte_' + nuevoEstado.toUpperCase() + '_' + tktCode + '.png';
+      if (els.btnDescargarSoporte) {
+        els.btnDescargarSoporte.href = dataUrl;
+        els.btnDescargarSoporte.download = fileName;
+      }
+
+      // Preparar mensaje de WhatsApp para el cliente
+      var arrNums = Array.isArray(tkt.numeros) ? tkt.numeros : String(tkt.numeros || '').split(/[,;\s]+/).filter(Boolean);
+      var msgWa = '¡Hola ' + (tkt.nombre || 'Participante') + '! 🍀 Te confirmamos que tu tiquete ' + tktCode + ' para la Dinámica MaxRF ha sido actualizado a ' + (nuevoEstado === 'Pagado' ? '✅ PAGADO Y CONFIRMADO' : (nuevoEstado === 'Rechazado' ? '❌ RECHAZADO' : '⚠️ PAGO PENDIENTE')) + ' con éxito.\n\n' +
+        '🎟️ Tiquete: ' + tktCode + '\n' +
+        '🔢 Números: [' + arrNums.join(', ') + ']\n' +
+        '💰 Total: ' + formatMoney(tkt.total) + '\n' +
+        '🎰 Lotería: ' + (state.config.loteria || 'CHONTICO DIA') + '\n' +
+        '🗓️ Sorteo: ' + formatFechaTexto(state.config.fecha_sorteo || '2026-10-01') + '\n' +
+        '💳 Referencia: ' + nuevaRef + '\n\n' +
+        (nuevoEstado === 'Pagado'
+          ? '🎉 ¡Tus números ya están asegurados oficialmente para el sorteo! Te adjuntamos tu soporte digital actualizado.'
+          : 'Para más información comunícate con nosotros.') + '\n\n' +
+        '📸 *DinamicaMaxRF Oficial*';
+
+      var cleanWa = formatearTelefonoWhatsApp(tkt.telefono);
+      if (!cleanWa) cleanWa = formatearTelefonoWhatsApp((state.config && state.config.whatsapp_contacto) || '573188178457');
+      var waUrl = 'https://wa.me/' + cleanWa + '?text=' + encodeURIComponent(msgWa);
+
+      if (els.btnWhatsappSoporte) {
+        els.btnWhatsappSoporte.href = waUrl;
+        els.btnWhatsappSoporte.onclick = function (e) {
+          if (blob && navigator.canShare) {
+            try {
+              var file = new File([blob], fileName, { type: 'image/png' });
+              if (navigator.canShare({ files: [file] })) {
+                e.preventDefault();
+                navigator.share({
+                  files: [file],
+                  title: 'Soporte ' + nuevoEstado + ' ' + tktCode,
+                  text: msgWa
+                }).catch(function () {
+                  window.open(waUrl, '_blank');
+                });
+                return;
+              }
+            } catch (errShare) {}
+          }
+        };
+      }
+
+      if (els.txtSoporteDriveStatus) {
+        els.txtSoporteDriveStatus.textContent = 'Guardando en Google Drive...';
+        els.txtSoporteDriveStatus.className = 'text-[11px] text-purple-600 font-semibold';
+      }
+
+      // 3. Enviar a Google Apps Script
+      window.RifaAPI.actualizarEstadoTiquete({
+        ticket: tktCode,
+        codigo_tiquete: tktCode,
+        nuevo_estado: nuevoEstado,
+        estado: nuevoEstado,
+        referencia_pago: nuevaRef,
+        tiquete_imagen_base64: dataUrl
+      }).then(function (res) {
+        if (els.btnEjecutarCambioEstado) {
+          els.btnEjecutarCambioEstado.disabled = false;
+          els.btnEjecutarCambioEstado.innerHTML = '<i class="fas fa-certificate text-amber-300"></i> Actualizar Estado y Generar Nuevo Soporte Oficial';
+        }
+
+        // Actualizar datos del participante en memoria y en localStorage
+        tkt.estado = nuevoEstado;
+        tkt.referencia_pago = nuevaRef;
+        if (res && res.tiquete_drive_url) {
+          tkt.tiquete_imagen_url = res.tiquete_drive_url;
+          if (els.boxDriveLink && els.linkSoporteDrive) {
+            els.linkSoporteDrive.href = res.tiquete_drive_url;
+            els.boxDriveLink.classList.remove('hidden');
+          }
+          if (els.txtSoporteDriveStatus) {
+            els.txtSoporteDriveStatus.textContent = '✓ Guardado en Google Drive';
+            els.txtSoporteDriveStatus.className = 'text-[11px] text-emerald-600 font-bold';
+          }
+        } else if (els.txtSoporteDriveStatus) {
+          els.txtSoporteDriveStatus.textContent = 'Soporte generado con éxito';
+          els.txtSoporteDriveStatus.className = 'text-[11px] text-emerald-600 font-bold';
+        }
+
+        try {
+          localStorage.setItem('maxrf_participantes_cache', JSON.stringify(state.participantes));
+        } catch (eCache) {}
+
+        // 4. Actualizar estado de los números en el talonario de inmediato
+        var numMap = {};
+        arrNums.forEach(function (n) {
+          var s = String(n).trim();
+          if (s.length === 1) s = '0' + s;
+          numMap[s] = true;
+        });
+
+        var estadoTalonario = 'reservado';
+        if (nuevoEstado === 'Pagado') estadoTalonario = 'vendido';
+        else if (nuevoEstado === 'Rechazado') estadoTalonario = 'disponible';
+
+        state.numeros.forEach(function (numObj) {
+          var cur = String(numObj.numero).trim();
+          if (cur.length === 1) cur = '0' + cur;
+          if (numMap[cur]) {
+            numObj.estado = estadoTalonario;
+          }
+        });
+
+        // Actualizar vistas
+        renderTalonario();
+        renderStats();
+        renderListaTiquetesAdmin();
+
+        // Actualizar badge del detalle
+        if (els.detTicketEstadoBadge) {
+          if (nuevoEstado === 'Pagado') {
+            els.detTicketEstadoBadge.className = 'px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300';
+            els.detTicketEstadoBadge.textContent = '● Pagado y Confirmado';
+          } else if (nuevoEstado === 'Rechazado') {
+            els.detTicketEstadoBadge.className = 'px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-300';
+            els.detTicketEstadoBadge.textContent = '● Rechazado';
+          } else {
+            els.detTicketEstadoBadge.className = 'px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300';
+            els.detTicketEstadoBadge.textContent = '● Pendiente';
+          }
+        }
+        if (els.detTicketMetodoRef) {
+          els.detTicketMetodoRef.textContent = (tkt.metodo_pago || 'Nequi') + ' — ' + nuevaRef;
+        }
+
+        if (els.statusCambioEstado) {
+          els.statusCambioEstado.className = 'p-3 rounded-xl text-xs font-bold text-center bg-emerald-50 text-emerald-700 border border-emerald-200 block';
+          els.statusCambioEstado.innerHTML = '<i class="fas fa-circle-check mr-1.5 text-base"></i> ¡Tiquete actualizado a <strong>' + nuevoEstado + '</strong> y nuevo soporte generado!';
+        }
+
+        mostrarToastAlerta('Tiquete ' + tktCode + ' actualizado a ' + nuevoEstado + ' con éxito.', 'success');
+      });
+    });
+  }
+
+  function generarSoporteCanvas2D(tkt, nuevoEstado, nuevaRef, callback) {
+    try {
+      var tktCode = String(tkt.ticket || tkt.codigo_tiquete || 'MAXRF-000000').toUpperCase();
+      var titular = tkt.nombre || 'Participante';
+      var tel = tkt.telefono || '—';
+      var fechaEmision = new Date().toLocaleString('es-CO', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      var arrNums = Array.isArray(tkt.numeros) ? tkt.numeros : String(tkt.numeros || '').split(/[,;\s]+/).filter(Boolean);
+      var ordenados = arrNums.slice().sort();
+      var total = tkt.total !== undefined ? tkt.total : (ordenados.length * getPrecioNumero());
+      var loteria = (state.config && (state.config.loteria || state.config.nombre_loteria)) || 'CHONTICO DIA';
+      var rawFechaSorteo = state.config && state.config.fecha_sorteo;
+      var fechaSorteo = rawFechaSorteo ? formatFechaTexto(rawFechaSorteo) : '1 de oct de 2026';
+      var premio = (state.config && (state.config.premio_titulo || state.config.premio)) || 'Premio Especial';
+      if (!premio || String(premio).trim() === '0') premio = 'Premio Especial';
+
+      var W = 840;
+      var H = 790;
+      var canvas = document.createElement('canvas');
+      canvas.width = W;
+      canvas.height = H;
+      var ctx = canvas.getContext('2d');
+
+      // Fondo blanco
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, W, H);
+
+      // Borde exterior
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(2, 2, W - 4, H - 4);
+
+      // Cabecera superior
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, W, 105);
+
+      // Logo / Ícono DinamicaMaxRF
+      ctx.fillStyle = '#7c3aed';
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(30, 20, 65, 65, 14); else ctx.rect(30, 20, 65, 65);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 24px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('MRF', 62, 60);
+
+      // Marca y Título Oficial
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 28px sans-serif';
+      ctx.fillText('DinamicaMaxRF', 110, 52);
+      ctx.fillStyle = '#c084fc';
+      ctx.font = 'bold 13px sans-serif';
+      ctx.fillText('SOPORTE OFICIAL DE ESTADO Y VALIDACIÓN', 110, 75);
+
+      // Código de tiquete en la cabecera
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = 'bold 12px monospace';
+      ctx.fillText('CÓDIGO DE TIQUETE', W - 30, 45);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 20px monospace';
+      ctx.fillText(tktCode, W - 30, 72);
+
+      // ==========================================
+      // BANNER PROMINENTE DEL ESTADO ACTUALIZADO
+      // ==========================================
+      var bannerY = 120;
+      var bannerH = 75;
+      var badgeBg = '#ecfdf5';
+      var badgeBorder = '#10b981';
+      var badgeTextColor = '#065f46';
+      var statusTitle = '● PAGADO Y CONFIRMADO';
+      var statusSubtitle = 'PAGO VERIFICADO - NÚMEROS ASEGURADOS OFICIALMENTE PARA EL SORTEO';
+
+      if (nuevoEstado === 'Rechazado') {
+        badgeBg = '#fff1f2';
+        badgeBorder = '#f43f5e';
+        badgeTextColor = '#9f1239';
+        statusTitle = '● RECHAZADO / ANULADO';
+        statusSubtitle = 'RESERVA CANCELADA - NÚMEROS LIBERADOS PARA OTROS PARTICIPANTES';
+      } else if (nuevoEstado === 'Pendiente') {
+        badgeBg = '#fffbeb';
+        badgeBorder = '#f59e0b';
+        badgeTextColor = '#92400e';
+        statusTitle = '● PAGO PENDIENTE';
+        statusSubtitle = 'RESERVA TEMPORAL - PENDIENTE POR ENVIAR COMPROBANTE DE PAGO';
+      }
+
+      ctx.fillStyle = badgeBg;
+      ctx.strokeStyle = badgeBorder;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(30, bannerY, W - 60, bannerH, 16); else ctx.rect(30, bannerY, W - 60, bannerH);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = badgeTextColor;
+      ctx.font = 'bold 24px sans-serif';
+      ctx.fillText(statusTitle, W / 2, bannerY + 36);
+      ctx.font = '600 13px sans-serif';
+      ctx.fillText(statusSubtitle, W / 2, bannerY + 60);
+
+      // ==========================================
+      // CUADRO DE DATOS DEL PARTICIPANTE
+      // ==========================================
+      var datosY = 215;
+      ctx.fillStyle = '#f8fafc';
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(30, datosY, W - 60, 150, 16); else ctx.rect(30, datosY, W - 60, 150);
+      ctx.fill();
+      ctx.stroke();
+
+      // Fila 1: Titular y WhatsApp
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#64748b';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('TITULAR REGISTRADO', 50, datosY + 32);
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 18px sans-serif';
+      ctx.fillText(titular, 50, datosY + 58);
+
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#64748b';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('WHATSAPP / TELÉFONO', W - 50, datosY + 32);
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 18px sans-serif';
+      ctx.fillText(tel, W - 50, datosY + 58);
+
+      // Línea divisoria en datos
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.beginPath();
+      ctx.moveTo(50, datosY + 76);
+      ctx.lineTo(W - 50, datosY + 76);
+      ctx.stroke();
+
+      // Fila 2: Referencia y Fecha
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#64748b';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('REFERENCIA / NOTA DE SOPORTE', 50, datosY + 102);
+      ctx.fillStyle = '#6d28d9';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillText(nuevaRef, 50, datosY + 128);
+
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#64748b';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('FECHA DE EMISIÓN DEL SOPORTE', W - 50, datosY + 102);
+      ctx.fillStyle = '#334155';
+      ctx.font = '600 15px sans-serif';
+      ctx.fillText(fechaEmision, W - 50, datosY + 128);
+
+      // ==========================================
+      // CAJA DE NÚMEROS DE LA SUERTE
+      // ==========================================
+      var numsBoxY = 385;
+      ctx.fillStyle = (nuevoEstado === 'Pagado') ? '#f0fdf4' : ((nuevoEstado === 'Rechazado') ? '#fff1f2' : '#f5f3ff');
+      ctx.strokeStyle = (nuevoEstado === 'Pagado') ? '#bbf7d0' : ((nuevoEstado === 'Rechazado') ? '#fecdd3' : '#ddd6fe');
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(30, numsBoxY, W - 60, 260, 20); else ctx.rect(30, numsBoxY, W - 60, 260);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.textAlign = 'center';
+      ctx.fillStyle = (nuevoEstado === 'Pagado') ? '#15803d' : ((nuevoEstado === 'Rechazado') ? '#be123c' : '#6d28d9');
+      ctx.font = 'bold 14px sans-serif';
+      ctx.fillText('NÚMEROS OFICIALES ASIGNADOS', W / 2, numsBoxY + 32);
+
+      // Badges de los números
+      var pillW = 75;
+      var pillH = 65;
+      var gap = 16;
+      var totalW = ordenados.length * pillW + (ordenados.length - 1) * gap;
+      var startX = Math.max(50, (W - totalW) / 2);
+      var currentX = startX;
+      var currentY = numsBoxY + 50;
+
+      ordenados.forEach(function (n) {
+        if (currentX + pillW > W - 50) {
+          currentX = startX;
+          currentY += pillH + 12;
+        }
+        ctx.fillStyle = (nuevoEstado === 'Pagado') ? '#059669' : ((nuevoEstado === 'Rechazado') ? '#e11d48' : '#7c3aed');
+        ctx.beginPath();
+        if (ctx.roundRect) ctx.roundRect(currentX, currentY, pillW, pillH, 16); else ctx.rect(currentX, currentY, pillW, pillH);
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 30px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(n, currentX + pillW / 2, currentY + pillH / 2 + 10);
+        currentX += pillW + gap;
+      });
+
+      // Línea divisoria en números
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.beginPath();
+      ctx.moveTo(50, numsBoxY + 175);
+      ctx.lineTo(W - 50, numsBoxY + 175);
+      ctx.stroke();
+
+      // Total y Sorteo
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#475569';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.fillText('Total registrado: ', 50, numsBoxY + 215);
+      var totalTxt = total === 0 ? 'GRATIS ($0)' : ('$' + total.toLocaleString('es-CO') + ' COP');
+      ctx.fillStyle = (nuevoEstado === 'Pagado') ? '#059669' : '#0f172a';
+      ctx.font = 'bold 22px sans-serif';
+      ctx.fillText(totalTxt, 185, numsBoxY + 217);
+
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#334155';
+      ctx.font = 'bold 15px sans-serif';
+      ctx.fillText('Juega: ' + loteria, W - 50, numsBoxY + 205);
+      ctx.fillStyle = '#6d28d9';
+      ctx.font = 'bold 14px sans-serif';
+      ctx.fillText('Sorteo: ' + fechaSorteo, W - 50, numsBoxY + 230);
+
+      // ==========================================
+      // PIE DE PÁGINA Y SELLO DE VERIFICACIÓN
+      // ==========================================
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.beginPath();
+      ctx.moveTo(30, 675);
+      ctx.lineTo(W - 30, 675);
+      ctx.stroke();
+
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#64748b';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('EMITIDO POR ADMINISTRACIÓN OFICIAL DINAMICAMAXRF', 30, 715);
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '600 11px sans-serif';
+      ctx.fillText('Soporte oficial de participación verificada con validez legal interna.', 30, 735);
+
+      // Sello gráfico en pie
+      ctx.textAlign = 'right';
+      ctx.fillStyle = (nuevoEstado === 'Pagado') ? '#047857' : ((nuevoEstado === 'Rechazado') ? '#be123c' : '#b45309');
+      ctx.font = 'bold 13px sans-serif';
+      var selloTxt = (nuevoEstado === 'Pagado') ? '✓ APROBADO MAXRF' : ((nuevoEstado === 'Rechazado') ? '✕ RECHAZADO' : '⏳ PENDIENTE');
+      ctx.fillText(selloTxt, W - 30, 715);
+      ctx.fillStyle = '#64748b';
+      ctx.font = 'bold 11px monospace';
+      ctx.fillText(tktCode + ' - ' + nuevoEstado.toUpperCase(), W - 30, 735);
+
+      var dataUrl = canvas.toDataURL('image/png');
+      canvas.toBlob(function (blob) {
+        if (callback) callback(dataUrl, blob);
+      }, 'image/png');
+    } catch (e) {
+      console.error('Error fatal generando soporte 2D:', e);
+      if (callback) callback(null, null);
     }
   }
 
@@ -1720,6 +2918,15 @@
     if (newConfig.precio_numero !== undefined && newConfig.precio_numero !== null && newConfig.precio_numero !== '') {
       newConfig.precio_numero = Number(newConfig.precio_numero);
     }
+    if (newConfig.min_numeros !== undefined && newConfig.min_numeros !== null && newConfig.min_numeros !== '') {
+      newConfig.min_numeros = Math.max(1, parseInt(newConfig.min_numeros, 10) || 1);
+    }
+    if (newConfig.max_numeros !== undefined && newConfig.max_numeros !== null && newConfig.max_numeros !== '') {
+      newConfig.max_numeros = Math.max(1, parseInt(newConfig.max_numeros, 10) || 10);
+    }
+    if (newConfig.min_numeros && newConfig.max_numeros && newConfig.min_numeros > newConfig.max_numeros) {
+      newConfig.max_numeros = newConfig.min_numeros;
+    }
 
     try {
       var local = JSON.parse(localStorage.getItem('maxrf_custom_config') || '{}');
@@ -1755,18 +2962,12 @@
         }, 1800);
       } else {
         if (els.adminSaveStatus) {
-          els.adminSaveStatus.className = 'p-4 rounded-2xl text-xs text-left bg-amber-50 text-amber-900 border border-amber-200 block space-y-2';
-          els.adminSaveStatus.innerHTML =
-            '<div class="font-extrabold text-emerald-700 flex items-center gap-2">' +
-            '<i class="fas fa-circle-check text-sm"></i> ¡Guardado en la página web con éxito!' +
-            '</div>' +
-            '<div class="text-[11px] text-amber-800 leading-relaxed">' +
-            '<strong>Nota para Google Sheets:</strong> Para que Google Drive guarde estos valores en la columna B automáticamente, actualiza el código en tu Google Apps Script (Implementar &gt; Gestionar implementaciones &gt; Editar &gt; Nueva versión), o escribe los valores directamente en la columna B de tu hoja <code>Config</code>.' +
-            '</div>' +
-            '<button type="button" onclick="document.getElementById(\'modal-admin\').classList.remove(\'modal-active\')" class="w-full mt-2 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs text-center transition">' +
-            'Entendido, ver página web' +
-            '</button>';
+          els.adminSaveStatus.className = 'p-3.5 rounded-xl text-xs font-bold text-center bg-emerald-50 text-emerald-700 border border-emerald-200 block';
+          els.adminSaveStatus.innerHTML = '<i class="fas fa-circle-check mr-1.5 text-base"></i> ¡Configuración guardada con éxito en la página web!';
         }
+        setTimeout(function () {
+          cerrarModalAdmin();
+        }, 1800);
       }
     });
   }

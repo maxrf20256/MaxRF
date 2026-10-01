@@ -671,7 +671,7 @@
         <div class="flex items-center justify-between border-b border-slate-200/80 pb-3 mb-3">
           <div class="flex items-center gap-2.5">
             <div class="w-10 h-10 rounded-xl overflow-hidden border border-indigo-200 bg-white shadow-sm flex items-center justify-center">
-              <img src="./img/Foto Web0.png" class="w-full h-full object-cover" alt="Logo MaxRF">
+              <img id="ticket-logo-img" src="./img/logo_thumb.png" class="w-full h-full object-cover" alt="Logo MaxRF">
             </div>
             <div>
               <span class="font-display font-black text-slate-900 text-base leading-none block">DinamicaMaxRF</span>
@@ -716,10 +716,17 @@
             <!-- Se llena por JS: [ 00 ], [ 07 ] -->
           </div>
           <div class="mt-3 pt-2.5 border-t border-indigo-200/60 flex items-center justify-between text-xs font-bold text-slate-700">
-            <span>Total a pagar: <span id="ticket-total" class="text-indigo-600 font-extrabold text-sm">$0</span></span>
-            <span class="flex items-center gap-1 text-slate-500">
-              <i class="fas fa-ticket text-indigo-500"></i> Juega: <strong id="ticket-loteria" class="text-slate-900">CHONTICO NOCHE</strong>
-            </span>
+            <div>
+              <span>Total a pagar: <span id="ticket-total" class="text-indigo-600 font-extrabold text-sm">$0</span></span>
+            </div>
+            <div class="text-right">
+              <div class="flex items-center justify-end gap-1 text-slate-600">
+                <i class="fas fa-ticket text-indigo-500"></i> Juega: <strong id="ticket-loteria" class="text-slate-900">CHONTICO DIA</strong>
+              </div>
+              <div class="text-[11px] text-slate-500 font-semibold mt-0.5 flex items-center justify-end gap-1">
+                <i class="fas fa-calendar-day text-indigo-500"></i> Sorteo: <strong id="ticket-fecha-sorteo-val" class="text-indigo-700 font-extrabold">1 de oct de 2026</strong>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -810,13 +817,33 @@
         </div>
       </div>
 
-      <!-- Formulario de Configuración (visible tras login) -->
-      <form id="form-admin-config" class="hidden p-6 sm:p-8 bg-white space-y-4 max-h-[80vh] overflow-y-auto rounded-b-3xl">
-        
-        <div class="p-3 bg-purple-50/70 border border-purple-100 rounded-2xl flex items-center justify-between text-xs text-purple-800">
-          <span><i class="fas fa-circle-check text-purple-600 mr-1.5"></i> Sesión activa: <strong>maxrf2025@gmail.com</strong></span>
-          <button type="button" id="btn-logout-admin" class="text-slate-400 hover:text-slate-600 underline">Cerrar sesión</button>
+      <!-- Barra de Navegación y Pestañas del Admin (visible tras login) -->
+      <div id="admin-nav-bar" class="hidden px-5 sm:px-8 pt-3 bg-slate-100/90 border-b border-slate-200">
+        <div class="flex items-center justify-between pb-2.5 text-xs text-purple-900 border-b border-slate-200/60">
+          <span class="flex items-center gap-1.5 font-medium">
+            <i class="fas fa-circle-check text-emerald-500"></i> Sesión activa: <strong class="text-slate-800">maxrf2025@gmail.com</strong>
+          </span>
+          <button type="button" id="btn-logout-admin" class="text-slate-500 hover:text-rose-600 font-bold transition flex items-center gap-1 text-[11px] px-2 py-1 rounded hover:bg-white/80">
+            <i class="fas fa-right-from-bracket"></i> Cerrar sesión
+          </button>
         </div>
+        
+        <!-- Pestañas de Navegación -->
+        <div class="grid grid-cols-2 gap-2 pt-2">
+          <button type="button" id="tab-btn-config" class="px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-t-xl text-[11px] sm:text-sm font-bold border-b-2 border-purple-600 text-purple-700 bg-white shadow-sm flex items-center justify-center gap-1.5 transition text-center">
+            <i class="fas fa-sliders text-purple-600 text-xs sm:text-sm"></i>
+            <span class="truncate">⚙️ Configuración</span>
+          </button>
+          <button type="button" id="tab-btn-tiquetes" class="px-2.5 sm:px-4 py-2 sm:py-2.5 rounded-t-xl text-[11px] sm:text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-purple-700 hover:bg-white/60 flex items-center justify-center gap-1.5 transition text-center">
+            <i class="fas fa-ticket text-indigo-500 text-xs sm:text-sm"></i>
+            <span class="truncate">🎟️ Tiquetes</span>
+            <span id="badge-total-tiquetes" class="px-2 py-0.5 rounded-full text-[10px] font-black bg-purple-100 text-purple-700">0</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Formulario de Configuración (visible tras login - Tab 1) -->
+      <form id="form-admin-config" class="hidden p-6 sm:p-8 bg-white space-y-4 max-h-[75vh] overflow-y-auto rounded-b-3xl">
 
         <div class="grid sm:grid-cols-2 gap-4">
           <div>
@@ -876,6 +903,31 @@
           </div>
         </div>
 
+        <!-- Límites de Selección por Participante -->
+        <div class="p-4 bg-purple-50/50 rounded-2xl border border-purple-100/80 space-y-3">
+          <div class="flex items-center gap-2 text-xs font-bold text-purple-950 uppercase tracking-wider">
+            <i class="fas fa-arrow-down-1-9 text-purple-600"></i>
+            <span>Límites de Números por Participante</span>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                Número MÍNIMO a elegir *
+              </label>
+              <input type="number" name="min_numeros" min="1" max="100" value="1" required class="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-purple-600" placeholder="Ej: 1">
+              <p class="text-[10px] text-slate-500 mt-1">El usuario no podrá participar sin elegir al menos esta cantidad.</p>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                Número MÁXIMO permitido *
+              </label>
+              <input type="number" name="max_numeros" min="1" max="100" value="10" required class="w-full border border-slate-200 bg-white rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-purple-600" placeholder="Ej: 10">
+              <p class="text-[10px] text-slate-500 mt-1">Límite máximo de números que una persona puede elegir a la vez.</p>
+            </div>
+          </div>
+        </div>
+
         <div class="grid sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100">
           <div>
             <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">Precio por Número (COP)</label>
@@ -917,10 +969,177 @@
 
       </form>
 
+      <!-- Panel de Consulta y Gestión de Tiquetes (Tab 2) -->
+      <div id="admin-tiquetes-box" class="hidden p-4 sm:p-6 bg-white space-y-4 max-h-[75vh] overflow-y-auto rounded-b-3xl">
+        
+        <!-- Barra de Búsqueda y Filtros Rápidos -->
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
+          <div class="flex flex-col sm:flex-row gap-2.5">
+            <div class="relative flex-1">
+              <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+              <input type="text" id="admin-search-tiquete" placeholder="Buscar por código (ej: MAXRF-109774), celular o nombre..." class="w-full pl-9 pr-8 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-900 focus:outline-none focus:border-purple-600">
+              <button type="button" id="btn-clear-search-tkt" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs">
+                <i class="fas fa-times-circle"></i>
+              </button>
+            </div>
+            <button type="button" id="btn-refresh-tiquetes" class="px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-100 text-xs font-bold text-slate-700 flex items-center justify-center gap-1.5 transition">
+              <i class="fas fa-rotate text-purple-600"></i>
+              <span>Actualizar</span>
+            </button>
+          </div>
+
+          <!-- Filtros Rápidos por Estado -->
+          <div class="flex flex-wrap items-center gap-1.5 pt-1 border-t border-slate-200/60 text-xs">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mr-1">Filtro:</span>
+            <button type="button" data-filter="todos" class="btn-filter-tkt px-3 py-1 rounded-lg font-bold bg-purple-600 text-white shadow-sm transition">
+              Todos (<span id="cnt-filter-todos">0</span>)
+            </button>
+            <button type="button" data-filter="pendiente" class="btn-filter-tkt px-3 py-1 rounded-lg font-semibold bg-white text-slate-600 hover:bg-amber-50 hover:text-amber-700 border border-slate-200 transition">
+              Pendientes (<span id="cnt-filter-pendientes">0</span>)
+            </button>
+            <button type="button" data-filter="pagado" class="btn-filter-tkt px-3 py-1 rounded-lg font-semibold bg-white text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 border border-slate-200 transition">
+              Pagados (<span id="cnt-filter-pagados">0</span>)
+            </button>
+            <button type="button" data-filter="rechazado" class="btn-filter-tkt px-3 py-1 rounded-lg font-semibold bg-white text-slate-600 hover:bg-rose-50 hover:text-rose-700 border border-slate-200 transition">
+              Rechazados (<span id="cnt-filter-rechazados">0</span>)
+            </button>
+          </div>
+        </div>
+
+        <!-- Tarjeta de Gestión / Detalle del Tiquete Seleccionado -->
+        <div id="admin-tiquete-detalle" class="hidden bg-gradient-to-br from-purple-50/40 via-white to-indigo-50/40 p-4 sm:p-5 rounded-2xl border-2 border-purple-200 shadow-md space-y-4">
+          <!-- Header del detalle -->
+          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-purple-100 pb-3">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-1 rounded-lg bg-purple-600 text-white font-mono text-xs font-black" id="det-ticket-codigo">MAXRF-000000</span>
+              <span id="det-ticket-estado-badge" class="px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-100 text-amber-800 border border-amber-300">● Pendiente</span>
+            </div>
+            <button type="button" id="btn-cerrar-detalle-tkt" class="text-xs text-slate-400 hover:text-slate-700 font-bold px-2 py-1 rounded hover:bg-slate-100 transition">
+              <i class="fas fa-times mr-1"></i> Cerrar detalle
+            </button>
+          </div>
+
+          <!-- Grid de datos del participante -->
+          <div class="grid sm:grid-cols-2 gap-3 text-xs bg-white p-3.5 rounded-xl border border-slate-200/80">
+            <div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Titular:</span>
+              <span id="det-ticket-nombre" class="font-bold text-slate-900 text-sm block mt-0.5">—</span>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">WhatsApp / Teléfono:</span>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span id="det-ticket-tel" class="font-bold text-slate-900 text-sm">—</span>
+                <a id="det-ticket-wa-link" href="#" target="_blank" class="px-2 py-0.5 rounded-md bg-emerald-100 hover:bg-emerald-200 text-emerald-800 font-bold text-[11px] inline-flex items-center gap-1 transition">
+                  <i class="fab fa-whatsapp"></i> Chat
+                </a>
+              </div>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Números Asignados:</span>
+              <div id="det-ticket-numeros" class="flex flex-wrap gap-1.5 mt-1"></div>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total:</span>
+              <span id="det-ticket-total" class="font-extrabold text-indigo-600 text-sm block mt-0.5">$0 COP</span>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Método y Referencia:</span>
+              <span id="det-ticket-metodo-ref" class="font-medium text-slate-700 block mt-0.5">—</span>
+            </div>
+            <div>
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Fecha de Reserva:</span>
+              <span id="det-ticket-fecha" class="font-medium text-slate-600 block mt-0.5">—</span>
+            </div>
+          </div>
+
+          <!-- Caja de Actualización de Estado -->
+          <div class="bg-purple-100/50 p-4 rounded-xl border border-purple-200 space-y-3">
+            <div class="flex items-center gap-2 text-xs font-black text-purple-950 uppercase tracking-wider">
+              <i class="fas fa-arrows-rotate text-purple-600"></i>
+              <span>Cambiar Estado y Emitir Soporte Actualizado</span>
+            </div>
+
+            <div class="grid sm:grid-cols-3 gap-2">
+              <label class="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-emerald-500 transition">
+                <input type="radio" name="cambio_estado_opt" value="Pagado" class="text-emerald-600 focus:ring-emerald-500">
+                <span class="text-xs font-bold text-emerald-800">● Pagado y Confirmado</span>
+              </label>
+              <label class="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-amber-500 transition">
+                <input type="radio" name="cambio_estado_opt" value="Pendiente" class="text-amber-600 focus:ring-amber-500">
+                <span class="text-xs font-bold text-amber-800">● Pendiente</span>
+              </label>
+              <label class="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-rose-500 transition">
+                <input type="radio" name="cambio_estado_opt" value="Rechazado" class="text-rose-600 focus:ring-rose-500">
+                <span class="text-xs font-bold text-rose-800">● Rechazado</span>
+              </label>
+            </div>
+
+            <div>
+              <label class="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
+                Nota / Referencia de Pago (Opcional):
+              </label>
+              <input type="text" id="input-ref-actualizada" placeholder="Ej: Aprobado Nequi M-98234 o Pagado en efectivo" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 focus:outline-none focus:border-purple-600">
+            </div>
+
+            <button type="button" id="btn-ejecutar-cambio-estado" class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-purple-600/25 transition active:scale-98">
+              <i class="fas fa-certificate text-amber-300"></i>
+              <span>Actualizar Estado y Generar Nuevo Soporte Oficial</span>
+            </button>
+
+            <div id="status-cambio-estado" class="hidden p-3 rounded-xl text-xs font-semibold text-center"></div>
+          </div>
+
+          <!-- Previsualización del Soporte Oficial Actualizado Generado -->
+          <div id="box-soporte-generado" class="hidden bg-white p-4 rounded-xl border border-slate-200 space-y-3">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-800">
+              <span class="flex items-center gap-1.5 text-emerald-700">
+                <i class="fas fa-circle-check"></i> Soporte Oficial Actualizado Listo
+              </span>
+              <span id="txt-soporte-drive-status" class="text-[11px] text-slate-400 font-normal">Guardando en Google Drive...</span>
+            </div>
+
+            <!-- Contenedor con la imagen del soporte generado -->
+            <div class="border border-slate-200 rounded-xl overflow-hidden bg-slate-50 p-2 text-center">
+              <img id="img-soporte-preview" src="" alt="Soporte Oficial Actualizado" class="max-h-72 mx-auto rounded-lg shadow-sm">
+            </div>
+
+            <!-- Botones de Acción para el Soporte -->
+            <div class="grid sm:grid-cols-2 gap-2.5">
+              <a id="btn-descargar-soporte" href="#" download="" class="py-2.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition">
+                <i class="fas fa-download"></i>
+                <span>Descargar Soporte (PNG)</span>
+              </a>
+              <a id="btn-whatsapp-soporte" href="#" target="_blank" class="py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition">
+                <i class="fab fa-whatsapp"></i>
+                <span>Enviar Soporte por WhatsApp</span>
+              </a>
+            </div>
+
+            <div id="box-drive-link" class="hidden text-center pt-1">
+              <a id="link-soporte-drive" href="#" target="_blank" class="text-xs text-purple-600 hover:text-purple-800 underline font-semibold inline-flex items-center gap-1">
+                <i class="fab fa-google-drive"></i> Ver archivo en Google Drive Oficial
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lista de Resultados de Tiquetes -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between px-1 text-xs text-slate-500 font-semibold">
+            <span id="txt-contador-resultados">Mostrando 0 tiquetes</span>
+          </div>
+          <div id="lista-tiquetes-container" class="space-y-2.5">
+            <!-- Rellenado por JS -->
+          </div>
+        </div>
+
+      </div>
+
     </div>
   </div>
 
   <!-- Scripts -->
+  <script src="./js/logo-data.js"></script>
   <script src="./js/html2canvas.min.js"></script>
   <script src="./js/config.js"></script>
   <script src="./js/api.js"></script>

@@ -15,7 +15,9 @@ var DEFAULT_CONFIG = {
   fecha_sorteo: '2026-09-03T05:00:00.000Z',
   metodos_pago: 'Nequi 3188178457',
   whatsapp_contacto: '573188178457',
-  estado_rifa: 'activa'
+  estado_rifa: 'activa',
+  min_numeros: 1,
+  max_numeros: 10
 };
 
 function doGet(e) {
@@ -39,6 +41,10 @@ function doPost(e) {
       return jsonResponse(enviarCorreoParticipante(data));
     } else if (action === 'updateConfig') {
       return jsonResponse(actualizarConfiguracion(data));
+    } else if (action === 'actualizarEstadoTiquete') {
+      return jsonResponse(actualizarEstadoTiquete(data));
+    } else if (action === 'consultarTiquete') {
+      return jsonResponse(consultarTiquete(data));
     }
     return jsonResponse({ success: false, message: 'Acción no reconocida' });
   } catch (err) {
@@ -142,15 +148,49 @@ function getEstadoTalonario() {
     }
   }
   
+  var listaParticipantes = [];
+  if (sheetPart && sheetPart.getLastRow() > 1) {
+    var pRows = sheetPart.getDataRange().getValues();
+    for (var p = 1; p < pRows.length; p++) {
+      var row = pRows[p];
+      var rawTicket = String(row[9] || '').trim();
+      if (!rawTicket) continue;
+      var rawNums = String(row[4] || '');
+      var arrNums = rawNums.split(/[,;\s]+/).map(function(s){return s.trim();}).filter(Boolean);
+      var rawRef = String(row[7] || '').trim();
+      var rawEstado = String(row[10] || '').trim();
+      if (!rawEstado) {
+        rawEstado = (rawRef.toLowerCase().indexOf('pendiente') !== -1) ? 'Pendiente' : 'Pagado';
+      }
+      listaParticipantes.push({
+        fecha: row[0],
+        nombre: row[1],
+        telefono: row[2],
+        correo: row[3],
+        numeros: arrNums,
+        total: row[5],
+        metodo_pago: row[6],
+        referencia_pago: row[7],
+        comprobante_url: row[8],
+        ticket: rawTicket,
+        codigo_tiquete: rawTicket,
+        estado: rawEstado,
+        tiquete_imagen_url: row[11] || ''
+      });
+    }
+  }
+
   return {
     success: true,
     config: config,
-    numeros: listaNumeros
+    numeros: listaNumeros,
+    participantes: listaParticipantes
   };
 }
 
 /**
  * Procesa la reserva en el Sheet y envía el correo si se solicitó.
+ * Guarda la imagen del tiquete en Google Drive y registra todos los datos.
  */
 function procesarReserva(data) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -160,68 +200,39 @@ function procesarReserva(data) {
   if (sheetPart.getLastRow() === 0) {
     sheetPart.appendRow([
       'Fecha', 'Nombre', 'Teléfono', 'Correo', 'Números', 
-      'Total', 'Método Pago', 'Referencia', 'Comprobante URL', 'Código Tiquete'
+      'Total', 'Método Pago', 'Referencia', 'Comprobante URL', 'Código Tiquete', 'Estado', 'Tiquete Drive URL'
     ]);
   }
   
   var numerosStr = (data.numeros || []).join(', ');
   var fecha = new Date();
-  var ticketCode = data.ticket || ('MAXRF-TKT-' + Math.floor(100000 + Math.random() * 900000));
+  var ticketCode = data.ticket || data.codigo_tiquete || ('MAXRF-' + Math.floor(100000 + Math.random() * 900000));
   
+  // 1. Guardar comprobante si se adjuntó imagen
   var compB64 = data.comprobante_base64 || data.comprobanteBase64;
   var compName = data.comprobante_filename || data.comprobanteFilename || 'comprobante.png';
   var compMime = data.comprobante_mimetype || data.comprobanteMimetype || 'image/png';
-  
   var comprobanteUrl = '';
   if (compB64) {
     try {
       var folderName = 'Comprobantes MaxRF';
       var folders = DriveApp.getFoldersByName(folderName);
       var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
+      folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
       if (compB64.indexOf(',') !== -1) {
         compB64 = compB64.split(',')[1];
       }
       var decoded = Utilities.base64Decode(compB64);
       var blob = Utilities.newBlob(decoded, compMime, compName);
       var file = folder.createFile(blob);
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
       comprobanteUrl = file.getUrl();
     } catch (e) {
-      Logger.log('Error guardando en Drive: ' + e);
+      Logger.log('Error guardando comprobante en Drive: ' + e);
     }
   }
-  
-  sheetPart.appendRow([
-    fecha,
-    data.nombre || '',
-    data.telefono || '',
-    data.correo || '',
-    numerosStr,
-    data.total || 0,
-    data.metodo_pago || '',
-    data.referencia_pago || data.referencia || '',
-    comprobanteUrl,
-    ticketCode
-  ]);
-  
-  if (sheetNum) {
-    var numData = sheetNum.getDataRange().getValues();
-    var selMap = {};
-    (data.numeros || []).forEach(function(n) {
-      var s = String(n).trim();
-      if (s.length === 1) s = '0' + s;
-      selMap[s] = true;
-    });
-    
-    for (var i = 1; i < numData.length; i++) {
-      var cur = String(numData[i][0]).trim();
-      if (cur.length === 1) cur = '0' + cur;
-      if (selMap[cur]) {
-        numData[i][1] = 'reservado';
-      }
-    }
-    sheetNum.getDataRange().setValues(numData);
-  }
-  
+
+  // 2. Guardar imagen oficial del tiquete en Google Drive (Tiquetes Emitidos MaxRF)
   var tktB64 = data.tiquete_imagen_base64 || data.tiqueteImagenBase64;
   var tiqueteDriveUrl = '';
   if (tktB64) {
@@ -243,10 +254,54 @@ function procesarReserva(data) {
     }
   }
 
+  // 3. Determinar estado inicial
+  var refPago = String(data.referencia_pago || data.referencia || '').trim();
+  var metPago = String(data.metodo_pago || '').trim();
+  var esPendiente = refPago.toLowerCase().indexOf('pendiente') !== -1 || metPago.toLowerCase().indexOf('pendiente') !== -1;
+  var estadoInicial = esPendiente ? 'Pendiente' : 'Pagado';
+
+  sheetPart.appendRow([
+    fecha,
+    data.nombre || '',
+    data.telefono || '',
+    data.correo || '',
+    numerosStr,
+    data.total || 0,
+    metPago,
+    refPago,
+    comprobanteUrl,
+    ticketCode,
+    estadoInicial,
+    tiqueteDriveUrl
+  ]);
+  
+  // 4. Marcar números en talonario
+  if (sheetNum) {
+    var numData = sheetNum.getDataRange().getValues();
+    var selMap = {};
+    (data.numeros || []).forEach(function(n) {
+      var s = String(n).trim();
+      if (s.length === 1) s = '0' + s;
+      selMap[s] = true;
+    });
+    
+    var estadoNum = esPendiente ? 'reservado' : 'vendido';
+    for (var i = 1; i < numData.length; i++) {
+      var cur = String(numData[i][0]).trim();
+      if (cur.length === 1) cur = '0' + cur;
+      if (selMap[cur]) {
+        numData[i][1] = estadoNum;
+      }
+    }
+    sheetNum.getDataRange().setValues(numData);
+  }
+
+  // 5. Enviar correo si solicitado
   if ((data.enviar_correo || data.enviarCorreo) && data.correo) {
     try {
       data.ticket = ticketCode;
       data.codigo_tiquete = ticketCode;
+      data.tiquete_url = tiqueteDriveUrl;
       enviarCorreoParticipante(data);
     } catch (errEmail) {
       Logger.log('Error enviando correo: ' + errEmail);
@@ -256,8 +311,145 @@ function procesarReserva(data) {
   return {
     success: true,
     ticket: ticketCode,
+    codigo_tiquete: ticketCode,
     tiquete_url: tiqueteDriveUrl,
-    message: 'Reserva procesada exitosamente'
+    estado: estadoInicial,
+    message: 'Reserva procesada exitosamente y tiquete guardado en Google Drive'
+  };
+}
+
+/**
+ * Consulta un tiquete en la hoja Participantes
+ */
+function consultarTiquete(data) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheetPart = ss.getSheetByName('Participantes') || ss.getSheetByName('Ventas');
+  if (!sheetPart || sheetPart.getLastRow() <= 1) {
+    return { success: false, message: 'No hay participantes registrados.' };
+  }
+  var pData = sheetPart.getDataRange().getValues();
+  var target = String(data.ticket || data.codigo_tiquete || data.query || '').trim().toLowerCase();
+  for (var r = 1; r < pData.length; r++) {
+    var row = pData[r];
+    var ticketCode = String(row[9] || '').trim();
+    var tel = String(row[2] || '').trim();
+    var nombre = String(row[1] || '').trim();
+    if (ticketCode.toLowerCase() === target || tel.toLowerCase() === target || (target.length >= 3 && nombre.toLowerCase().indexOf(target) !== -1)) {
+      return {
+        success: true,
+        participante: {
+          fecha: row[0],
+          nombre: row[1],
+          telefono: row[2],
+          correo: row[3],
+          numeros: String(row[4]).split(/[,;\s]+/).map(function(s){return s.trim();}).filter(Boolean),
+          total: row[5],
+          metodo_pago: row[6],
+          referencia_pago: row[7],
+          comprobante_url: row[8],
+          ticket: row[9],
+          codigo_tiquete: row[9],
+          estado: row[10] || (String(row[7]).toLowerCase().indexOf('pendiente') !== -1 ? 'Pendiente' : 'Pagado'),
+          tiquete_imagen_url: row[11] || ''
+        }
+      };
+    }
+  }
+  return { success: false, message: 'Tiquete no encontrado.' };
+}
+
+/**
+ * Actualiza el estado del tiquete (de Pendiente a Pagado, etc.), guarda el nuevo soporte en Drive y actualiza el talonario.
+ */
+function actualizarEstadoTiquete(data) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheetPart = ss.getSheetByName('Participantes') || ss.getSheetByName('Ventas');
+  var sheetNum = ss.getSheetByName('Numeros') || ss.getSheetByName('Talonario');
+  var targetTicket = String(data.ticket || data.codigo_tiquete || '').trim().toUpperCase();
+  var nuevoEstado = String(data.nuevo_estado || data.estado || 'Pagado').trim();
+  
+  if (!sheetPart) {
+    return { success: false, message: 'Hoja Participantes no encontrada' };
+  }
+  
+  var pData = sheetPart.getDataRange().getValues();
+  var rowIndex = -1;
+  var rowData = null;
+  for (var r = 1; r < pData.length; r++) {
+    if (String(pData[r][9] || '').trim().toUpperCase() === targetTicket) {
+      rowIndex = r + 1; // 1-indexado en Sheets
+      rowData = pData[r];
+      break;
+    }
+  }
+  
+  if (rowIndex === -1) {
+    return { success: false, message: 'No se encontró el tiquete ' + targetTicket };
+  }
+  
+  // Guardar nueva imagen de soporte en Drive si se envió
+  var nuevoDriveUrl = '';
+  var tktB64 = data.tiquete_imagen_base64 || data.tiqueteImagenBase64;
+  if (tktB64) {
+    try {
+      var tktFolderName = 'Tiquetes Emitidos MaxRF';
+      var tktFolders = DriveApp.getFoldersByName(tktFolderName);
+      var tktFolder = tktFolders.hasNext() ? tktFolders.next() : DriveApp.createFolder(tktFolderName);
+      tktFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      if (tktB64.indexOf(',') !== -1) {
+        tktB64 = tktB64.split(',')[1];
+      }
+      var tktDecoded = Utilities.base64Decode(tktB64);
+      var tktBlob = Utilities.newBlob(tktDecoded, 'image/png', 'Soporte_' + nuevoEstado.toUpperCase() + '_' + targetTicket + '.png');
+      var tktFile = tktFolder.createFile(tktBlob);
+      tktFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      nuevoDriveUrl = tktFile.getUrl();
+    } catch (eDrive) {
+      Logger.log('Error actualizando imagen en Drive: ' + eDrive);
+    }
+  }
+  
+  // Actualizar columna Estado (Col 11) y Tiquete Drive URL (Col 12)
+  sheetPart.getRange(rowIndex, 11).setValue(nuevoEstado);
+  if (nuevoDriveUrl) {
+    sheetPart.getRange(rowIndex, 12).setValue(nuevoDriveUrl);
+  }
+  
+  // Actualizar estado en la hoja Numeros
+  var numerosStr = String(rowData[4] || '');
+  var nums = numerosStr.split(/[,;\s]+/).map(function(s){return s.trim();}).filter(Boolean);
+  if (sheetNum && nums.length > 0) {
+    var numData = sheetNum.getDataRange().getValues();
+    var numMap = {};
+    nums.forEach(function(n) {
+      var s = n.length === 1 ? ('0' + n) : n;
+      numMap[s] = true;
+    });
+    
+    var estadoNum = 'reservado';
+    if (nuevoEstado.toLowerCase().indexOf('pag') !== -1 || nuevoEstado.toLowerCase().indexOf('conf') !== -1) {
+      estadoNum = 'vendido';
+    } else if (nuevoEstado.toLowerCase().indexOf('rech') !== -1 || nuevoEstado.toLowerCase().indexOf('canc') !== -1) {
+      estadoNum = 'disponible';
+    }
+    
+    for (var i = 1; i < numData.length; i++) {
+      var cur = String(numData[i][0]).trim();
+      if (cur.length === 1) cur = '0' + cur;
+      if (numMap[cur]) {
+        numData[i][1] = estadoNum;
+      }
+    }
+    sheetNum.getDataRange().setValues(numData);
+  }
+  
+  return {
+    success: true,
+    message: 'Tiquete ' + targetTicket + ' actualizado a ' + nuevoEstado,
+    ticket: targetTicket,
+    codigo_tiquete: targetTicket,
+    nuevo_estado: nuevoEstado,
+    tiquete_drive_url: nuevoDriveUrl || rowData[11] || ''
   };
 }
 
