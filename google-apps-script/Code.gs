@@ -182,31 +182,72 @@ function getEstadoTalonario() {
   var listaParticipantes = [];
   if (sheetPart && sheetPart.getLastRow() > 1) {
     var pRows = sheetPart.getDataRange().getValues();
+    var pHeaders = pRows[0].map(function(h){ return String(h).toLowerCase().trim(); });
+    var pTicketIdx = -1, pNomIdx = -1, pTelIdx = -1, pCorreoIdx = -1, pNumIdx = -1;
+    var pTotalIdx = -1, pMetodoIdx = -1, pRefIdx = -1, pCompIdx = -1, pEstadoIdx = -1, pDriveIdx = -1;
+    
+    for (var c = 0; c < pHeaders.length; c++) {
+      var h = pHeaders[c];
+      if (h.indexOf('ticket') !== -1 || h.indexOf('tiquete') !== -1 || h.indexOf('cdigo') !== -1 || h.indexOf('codigo') !== -1) pTicketIdx = c;
+      if (h.indexOf('nombre') !== -1 || h.indexOf('participante') !== -1 || h.indexOf('cliente') !== -1) pNomIdx = c;
+      if (h.indexOf('tel') !== -1 || h.indexOf('cel') !== -1) pTelIdx = c;
+      if (h.indexOf('correo') !== -1 || h.indexOf('email') !== -1) pCorreoIdx = c;
+      if (h.indexOf('nmero') !== -1 || h.indexOf('numero') !== -1 || h === 'boleta' || h === '#') pNumIdx = c;
+      if (h.indexOf('total') !== -1 || h.indexOf('monto') !== -1 || h.indexOf('valor') !== -1) pTotalIdx = c;
+      if (h.indexOf('mtodo') !== -1 || h.indexOf('metodo') !== -1 || h.indexOf('forma') !== -1) pMetodoIdx = c;
+      if (h.indexOf('referencia') !== -1 || h.indexOf('ref') !== -1) pRefIdx = c;
+      if (h.indexOf('comprobante') !== -1) pCompIdx = c;
+      if (h.indexOf('estado') !== -1 || h.indexOf('status') !== -1) pEstadoIdx = c;
+      if (h.indexOf('drive') !== -1 || h.indexOf('imagen') !== -1 || h.indexOf('soporte') !== -1) pDriveIdx = c;
+    }
+    
+    if (pTicketIdx === -1) pTicketIdx = 9;
+    if (pNomIdx === -1) pNomIdx = 1;
+    if (pTelIdx === -1) pTelIdx = 2;
+    if (pCorreoIdx === -1) pCorreoIdx = 3;
+    if (pNumIdx === -1) pNumIdx = 4;
+    if (pTotalIdx === -1) pTotalIdx = 5;
+    if (pMetodoIdx === -1) pMetodoIdx = 6;
+    if (pRefIdx === -1) pRefIdx = 7;
+    if (pCompIdx === -1) pCompIdx = 8;
+    if (pEstadoIdx === -1) pEstadoIdx = 10;
+    if (pDriveIdx === -1) pDriveIdx = 11;
+
     for (var p = 1; p < pRows.length; p++) {
       var row = pRows[p];
-      var rawTicket = String(row[9] || '').trim();
+      var rawTicket = String(row[pTicketIdx] || '').trim();
+      if (!rawTicket) {
+        for (var col = 0; col < row.length; col++) {
+          var val = String(row[col] || '').trim();
+          if (val.indexOf('MAXRF-') !== -1) {
+            rawTicket = val;
+            break;
+          }
+        }
+      }
       if (!rawTicket) continue;
-      var rawNums = String(row[4] || '');
+
+      var rawNums = String(row[pNumIdx] || '');
       var arrNums = rawNums.split(/[,;\s]+/).map(function(s){return s.trim();}).filter(Boolean);
-      var rawRef = String(row[7] || '').trim();
-      var rawEstado = String(row[10] || '').trim();
+      var rawRef = String(row[pRefIdx] || '').trim();
+      var rawEstado = String(row[pEstadoIdx] || '').trim();
       if (!rawEstado) {
         rawEstado = (rawRef.toLowerCase().indexOf('pendiente') !== -1) ? 'Pendiente' : 'Pagado';
       }
       listaParticipantes.push({
         fecha: row[0],
-        nombre: row[1],
-        telefono: row[2],
-        correo: row[3],
+        nombre: row[pNomIdx],
+        telefono: row[pTelIdx],
+        correo: row[pCorreoIdx],
         numeros: arrNums,
-        total: row[5],
-        metodo_pago: row[6],
-        referencia_pago: row[7],
-        comprobante_url: row[8],
+        total: row[pTotalIdx],
+        metodo_pago: row[pMetodoIdx],
+        referencia_pago: row[pRefIdx],
+        comprobante_url: row[pCompIdx],
         ticket: rawTicket,
         codigo_tiquete: rawTicket,
         estado: rawEstado,
-        tiquete_imagen_url: row[11] || ''
+        tiquete_imagen_url: row[pDriveIdx] || ''
       });
     }
   }
@@ -239,17 +280,14 @@ function procesarReserva(data) {
   var fecha = new Date();
   var ticketCode = data.ticket || data.codigo_tiquete || ('MAXRF-' + Math.floor(100000 + Math.random() * 900000));
   
-  // 1. Guardar comprobante si se adjuntó imagen
+  // 1. Guardar comprobante si se adjuntó imagen en carpeta 'Talonario / Comprobantes MaxRF'
   var compB64 = data.comprobante_base64 || data.comprobanteBase64;
   var compName = data.comprobante_filename || data.comprobanteFilename || 'comprobante.png';
   var compMime = data.comprobante_mimetype || data.comprobanteMimetype || 'image/png';
   var comprobanteUrl = '';
   if (compB64) {
     try {
-      var folderName = 'Comprobantes MaxRF';
-      var folders = DriveApp.getFoldersByName(folderName);
-      var folder = folders.hasNext() ? folders.next() : DriveApp.createFolder(folderName);
-      folder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      var folder = obtenerSubcarpetaTalonario(ss, 'Comprobantes MaxRF');
       if (compB64.indexOf(',') !== -1) {
         compB64 = compB64.split(',')[1];
       }
@@ -263,15 +301,12 @@ function procesarReserva(data) {
     }
   }
 
-  // 2. Guardar imagen oficial del tiquete en Google Drive (Tiquetes Emitidos MaxRF)
+  // 2. Guardar imagen oficial del tiquete en carpeta 'Talonario / Tiquetes Emitidos MaxRF'
   var tktB64 = data.tiquete_imagen_base64 || data.tiqueteImagenBase64;
   var tiqueteDriveUrl = '';
   if (tktB64) {
     try {
-      var tktFolderName = 'Tiquetes Emitidos MaxRF';
-      var tktFolders = DriveApp.getFoldersByName(tktFolderName);
-      var tktFolder = tktFolders.hasNext() ? tktFolders.next() : DriveApp.createFolder(tktFolderName);
-      tktFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      var tktFolder = obtenerSubcarpetaTalonario(ss, 'Tiquetes Emitidos MaxRF');
       if (tktB64.indexOf(',') !== -1) {
         tktB64 = tktB64.split(',')[1];
       }
@@ -360,28 +395,79 @@ function consultarTiquete(data) {
   }
   var pData = sheetPart.getDataRange().getValues();
   var target = String(data.ticket || data.codigo_tiquete || data.query || '').trim().toLowerCase();
+  
+  var headers = pData[0].map(function(h){ return String(h).toLowerCase().trim(); });
+  var ticketColIdx = -1, telColIdx = -1, nomColIdx = -1, correoColIdx = -1, numColIdx = -1;
+  var totalColIdx = -1, metodoColIdx = -1, refColIdx = -1, compColIdx = -1, estadoColIdx = -1, driveColIdx = -1;
+  
+  for (var c = 0; c < headers.length; c++) {
+    var h = headers[c];
+    if (h.indexOf('ticket') !== -1 || h.indexOf('tiquete') !== -1 || h.indexOf('cdigo') !== -1 || h.indexOf('codigo') !== -1) ticketColIdx = c;
+    if (h.indexOf('tel') !== -1 || h.indexOf('cel') !== -1) telColIdx = c;
+    if (h.indexOf('nombre') !== -1 || h.indexOf('participante') !== -1 || h.indexOf('cliente') !== -1) nomColIdx = c;
+    if (h.indexOf('correo') !== -1 || h.indexOf('email') !== -1) correoColIdx = c;
+    if (h.indexOf('nmero') !== -1 || h.indexOf('numero') !== -1 || h === 'boleta' || h === '#') numColIdx = c;
+    if (h.indexOf('total') !== -1 || h.indexOf('monto') !== -1 || h.indexOf('valor') !== -1) totalColIdx = c;
+    if (h.indexOf('mtodo') !== -1 || h.indexOf('metodo') !== -1 || h.indexOf('forma') !== -1) metodoColIdx = c;
+    if (h.indexOf('referencia') !== -1 || h.indexOf('ref') !== -1) refColIdx = c;
+    if (h.indexOf('comprobante') !== -1) compColIdx = c;
+    if (h.indexOf('estado') !== -1 || h.indexOf('status') !== -1) estadoColIdx = c;
+    if (h.indexOf('drive') !== -1 || h.indexOf('imagen') !== -1 || h.indexOf('soporte') !== -1) driveColIdx = c;
+  }
+  
+  if (ticketColIdx === -1) ticketColIdx = 9;
+  if (telColIdx === -1) telColIdx = 2;
+  if (nomColIdx === -1) nomColIdx = 1;
+  if (correoColIdx === -1) correoColIdx = 3;
+  if (numColIdx === -1) numColIdx = 4;
+  if (totalColIdx === -1) totalColIdx = 5;
+  if (metodoColIdx === -1) metodoColIdx = 6;
+  if (refColIdx === -1) refColIdx = 7;
+  if (compColIdx === -1) compColIdx = 8;
+  if (estadoColIdx === -1) estadoColIdx = 10;
+  if (driveColIdx === -1) driveColIdx = 11;
+  
   for (var r = 1; r < pData.length; r++) {
     var row = pData[r];
-    var ticketCode = String(row[9] || '').trim();
-    var tel = String(row[2] || '').trim();
-    var nombre = String(row[1] || '').trim();
-    if (ticketCode.toLowerCase() === target || tel.toLowerCase() === target || (target.length >= 3 && nombre.toLowerCase().indexOf(target) !== -1)) {
+    var ticketCode = String(row[ticketColIdx] || '').trim();
+    var tel = String(row[telColIdx] || '').trim();
+    var nombre = String(row[nomColIdx] || '').trim();
+    
+    var match = (ticketCode.toLowerCase() === target) ||
+                (tel.toLowerCase() === target) ||
+                (target.length >= 3 && nombre.toLowerCase().indexOf(target) !== -1);
+                
+    if (!match && target) {
+      for (var col = 0; col < row.length; col++) {
+        if (String(row[col] || '').trim().toLowerCase() === target) {
+          match = true;
+          break;
+        }
+      }
+    }
+    
+    if (match) {
+      var rawEstado = String(row[estadoColIdx] || '').trim();
+      var rawRef = String(row[refColIdx] || '').trim();
+      if (!rawEstado) {
+        rawEstado = (rawRef.toLowerCase().indexOf('pendiente') !== -1) ? 'Pendiente' : 'Pagado';
+      }
       return {
         success: true,
         participante: {
           fecha: row[0],
-          nombre: row[1],
-          telefono: row[2],
-          correo: row[3],
-          numeros: String(row[4]).split(/[,;\s]+/).map(function(s){return s.trim();}).filter(Boolean),
-          total: row[5],
-          metodo_pago: row[6],
-          referencia_pago: row[7],
-          comprobante_url: row[8],
-          ticket: row[9],
-          codigo_tiquete: row[9],
-          estado: row[10] || (String(row[7]).toLowerCase().indexOf('pendiente') !== -1 ? 'Pendiente' : 'Pagado'),
-          tiquete_imagen_url: row[11] || ''
+          nombre: row[nomColIdx],
+          telefono: row[telColIdx],
+          correo: row[correoColIdx],
+          numeros: String(row[numColIdx]).split(/[,;\s]+/).map(function(s){return s.trim();}).filter(Boolean),
+          total: row[totalColIdx],
+          metodo_pago: row[metodoColIdx],
+          referencia_pago: row[refColIdx],
+          comprobante_url: row[compColIdx],
+          ticket: ticketCode || ('MAXRF-' + r),
+          codigo_tiquete: ticketCode || ('MAXRF-' + r),
+          estado: rawEstado,
+          tiquete_imagen_url: row[driveColIdx] || ''
         }
       };
     }
@@ -391,6 +477,7 @@ function consultarTiquete(data) {
 
 /**
  * Actualiza el estado del tiquete (de Pendiente a Pagado, etc.), guarda el nuevo soporte en Drive y actualiza el talonario.
+ * Sincroniza dinámicamente tanto la hoja Participantes como la hoja Numeros y la carpeta en Google Drive.
  */
 function actualizarEstadoTiquete(data) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -398,35 +485,88 @@ function actualizarEstadoTiquete(data) {
   var sheetNum = ss.getSheetByName('Numeros') || ss.getSheetByName('Talonario');
   var targetTicket = String(data.ticket || data.codigo_tiquete || '').trim().toUpperCase();
   var nuevoEstado = String(data.nuevo_estado || data.estado || 'Pagado').trim();
+  var nuevaRef = String(data.referencia_pago || data.referencia || '').trim();
   
   if (!sheetPart) {
-    return { success: false, message: 'Hoja Participantes no encontrada' };
+    return { success: false, inSheets: false, message: 'Hoja Participantes no encontrada en la hoja de cálculo' };
   }
   
   var pData = sheetPart.getDataRange().getValues();
+  if (pData.length <= 1) {
+    return { success: false, inSheets: false, message: 'No hay filas registradas en la hoja Participantes' };
+  }
+
+  // Detectar columnas dinámicamente según encabezados
+  var headers = pData[0].map(function(h){ return String(h).toLowerCase().trim(); });
+  var ticketColIdx = -1;
+  var estadoColIdx = -1;
+  var refColIdx = -1;
+  var driveColIdx = -1;
+  var numColIdx = -1;
+  
+  for (var c = 0; c < headers.length; c++) {
+    var h = headers[c];
+    if (h.indexOf('ticket') !== -1 || h.indexOf('tiquete') !== -1 || h.indexOf('cdigo') !== -1 || h.indexOf('codigo') !== -1) {
+      ticketColIdx = c;
+    }
+    if (h.indexOf('estado') !== -1 || h.indexOf('status') !== -1) {
+      estadoColIdx = c;
+    }
+    if (h.indexOf('referencia') !== -1 || h.indexOf('ref') !== -1 || h.indexOf('comprobante') !== -1) {
+      if (refColIdx === -1) refColIdx = c;
+    }
+    if (h.indexOf('drive') !== -1 || h.indexOf('imagen') !== -1 || h.indexOf('soporte') !== -1) {
+      driveColIdx = c;
+    }
+    if (h.indexOf('nmero') !== -1 || h.indexOf('numero') !== -1 || h === 'boleta' || h === '#') {
+      numColIdx = c;
+    }
+  }
+  
+  // Posiciones estándar por defecto
+  if (ticketColIdx === -1) ticketColIdx = 9;
+  if (estadoColIdx === -1) estadoColIdx = 10;
+  if (refColIdx === -1) refColIdx = 7;
+  if (driveColIdx === -1) driveColIdx = 11;
+  if (numColIdx === -1) numColIdx = 4;
+  
+  // Buscar fila del tiquete por código en la columna correspondiente
   var rowIndex = -1;
   var rowData = null;
   for (var r = 1; r < pData.length; r++) {
-    if (String(pData[r][9] || '').trim().toUpperCase() === targetTicket) {
-      rowIndex = r + 1; // 1-indexado en Sheets
+    var val = String(pData[r][ticketColIdx] || '').trim().toUpperCase();
+    if (val === targetTicket) {
+      rowIndex = r + 1; // 1-indexado para Google Sheets
       rowData = pData[r];
       break;
     }
   }
   
+  // Búsqueda exhaustiva por si el código está en otra columna
   if (rowIndex === -1) {
-    return { success: false, message: 'No se encontró el tiquete ' + targetTicket };
+    for (var r2 = 1; r2 < pData.length; r2++) {
+      for (var col = 0; col < pData[r2].length; col++) {
+        var cellVal = String(pData[r2][col] || '').trim().toUpperCase();
+        if (cellVal === targetTicket) {
+          rowIndex = r2 + 1;
+          rowData = pData[r2];
+          break;
+        }
+      }
+      if (rowIndex !== -1) break;
+    }
   }
   
-  // Guardar nueva imagen de soporte en Drive si se envió
+  if (rowIndex === -1) {
+    return { success: false, inSheets: false, message: 'No se encontró el tiquete ' + targetTicket + ' en la hoja Participantes.' };
+  }
+  
+  // 1. Guardar nueva imagen oficial de soporte en Google Drive (carpeta 'Talonario / Tiquetes Emitidos MaxRF')
   var nuevoDriveUrl = '';
   var tktB64 = data.tiquete_imagen_base64 || data.tiqueteImagenBase64;
   if (tktB64) {
     try {
-      var tktFolderName = 'Tiquetes Emitidos MaxRF';
-      var tktFolders = DriveApp.getFoldersByName(tktFolderName);
-      var tktFolder = tktFolders.hasNext() ? tktFolders.next() : DriveApp.createFolder(tktFolderName);
-      tktFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      var tktFolder = obtenerSubcarpetaTalonario(ss, 'Tiquetes Emitidos MaxRF');
       if (tktB64.indexOf(',') !== -1) {
         tktB64 = tktB64.split(',')[1];
       }
@@ -436,18 +576,34 @@ function actualizarEstadoTiquete(data) {
       tktFile.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
       nuevoDriveUrl = tktFile.getUrl();
     } catch (eDrive) {
-      Logger.log('Error actualizando imagen en Drive: ' + eDrive);
+      Logger.log('Error guardando soporte en Drive: ' + eDrive);
     }
   }
   
-  // Actualizar columna Estado (Col 11) y Tiquete Drive URL (Col 12)
-  sheetPart.getRange(rowIndex, 11).setValue(nuevoEstado);
-  if (nuevoDriveUrl) {
-    sheetPart.getRange(rowIndex, 12).setValue(nuevoDriveUrl);
+  // 2. Asegurar y actualizar columna 'Estado' en Google Sheets
+  if (estadoColIdx >= headers.length || !headers[estadoColIdx]) {
+    sheetPart.getRange(1, estadoColIdx + 1).setValue('Estado');
+  }
+  sheetPart.getRange(rowIndex, estadoColIdx + 1).setValue(nuevoEstado);
+  
+  // 3. Actualizar columna 'Referencia' si se envió nueva referencia
+  if (nuevaRef && refColIdx !== -1) {
+    if (refColIdx >= headers.length || !headers[refColIdx]) {
+      sheetPart.getRange(1, refColIdx + 1).setValue('Referencia');
+    }
+    sheetPart.getRange(rowIndex, refColIdx + 1).setValue(nuevaRef);
   }
   
-  // Actualizar estado en la hoja Numeros
-  var numerosStr = String(rowData[4] || '');
+  // 4. Actualizar columna 'Tiquete Drive URL' si se generó archivo en Drive
+  if (nuevoDriveUrl && driveColIdx !== -1) {
+    if (driveColIdx >= headers.length || !headers[driveColIdx]) {
+      sheetPart.getRange(1, driveColIdx + 1).setValue('Tiquete Drive URL');
+    }
+    sheetPart.getRange(rowIndex, driveColIdx + 1).setValue(nuevoDriveUrl);
+  }
+  
+  // 5. Actualizar estado de los números en la hoja Numeros / Talonario
+  var numerosStr = String(rowData[numColIdx] || '');
   var nums = numerosStr.split(/[,;\s]+/).map(function(s){return s.trim();}).filter(Boolean);
   if (sheetNum && nums.length > 0) {
     var numData = sheetNum.getDataRange().getValues();
@@ -476,11 +632,13 @@ function actualizarEstadoTiquete(data) {
   
   return {
     success: true,
-    message: 'Tiquete ' + targetTicket + ' actualizado a ' + nuevoEstado,
+    inSheets: true,
+    message: 'Tiquete ' + targetTicket + ' actualizado a ' + nuevoEstado + ' en Google Sheets y Drive',
     ticket: targetTicket,
     codigo_tiquete: targetTicket,
     nuevo_estado: nuevoEstado,
-    tiquete_drive_url: nuevoDriveUrl || rowData[11] || ''
+    nueva_referencia: nuevaRef,
+    tiquete_drive_url: nuevoDriveUrl || String(rowData[driveColIdx] || '')
   };
 }
 
@@ -678,3 +836,46 @@ function jsonResponse(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
 }
+
+/**
+ * Obtiene la carpeta de Google Drive donde reside la hoja 'Rifa Digital - Base de Datos'
+ * (la carpeta 'Talonario'). Si no se detecta el contenedor, busca 'Talonario' en Drive.
+ */
+function obtenerCarpetaBaseTalonario(ss) {
+  try {
+    if (!ss) ss = SpreadsheetApp.getActiveSpreadsheet();
+    var file = DriveApp.getFileById(ss.getId());
+    var parents = file.getParents();
+    if (parents.hasNext()) {
+      return parents.next();
+    }
+  } catch (e) {
+    Logger.log('Error obteniendo carpeta padre del Sheet: ' + e);
+  }
+  
+  try {
+    var folders = DriveApp.getFoldersByName('Talonario');
+    if (folders.hasNext()) {
+      return folders.next();
+    }
+  } catch (e2) {}
+  
+  return DriveApp.getRootFolder();
+}
+
+/**
+ * Obtiene o crea una subcarpeta dentro de la carpeta 'Talonario' (junto a la hoja de cálculo).
+ */
+function obtenerSubcarpetaTalonario(ss, nombreSubcarpeta) {
+  var baseFolder = obtenerCarpetaBaseTalonario(ss);
+  var subfolders = baseFolder.getFoldersByName(nombreSubcarpeta);
+  if (subfolders.hasNext()) {
+    return subfolders.next();
+  }
+  var newFolder = baseFolder.createFolder(nombreSubcarpeta);
+  try {
+    newFolder.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  } catch (eShare) {}
+  return newFolder;
+}
+

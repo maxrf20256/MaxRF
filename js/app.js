@@ -2544,19 +2544,37 @@
         // Actualizar datos del participante en memoria y en localStorage
         tkt.estado = nuevoEstado;
         tkt.referencia_pago = nuevaRef;
+        var sincronizadoEnSheets = res && res.inSheets && res.success;
+
         if (res && res.tiquete_drive_url) {
           tkt.tiquete_imagen_url = res.tiquete_drive_url;
           if (els.boxDriveLink && els.linkSoporteDrive) {
             els.linkSoporteDrive.href = res.tiquete_drive_url;
             els.boxDriveLink.classList.remove('hidden');
           }
+        }
+
+        if (sincronizadoEnSheets) {
           if (els.txtSoporteDriveStatus) {
-            els.txtSoporteDriveStatus.textContent = '✓ Guardado en Google Drive';
+            els.txtSoporteDriveStatus.textContent = '✓ Guardado en Google Sheets y Google Drive';
             els.txtSoporteDriveStatus.className = 'text-[11px] text-emerald-600 font-bold';
           }
-        } else if (els.txtSoporteDriveStatus) {
-          els.txtSoporteDriveStatus.textContent = 'Soporte generado con éxito';
-          els.txtSoporteDriveStatus.className = 'text-[11px] text-emerald-600 font-bold';
+          if (els.statusCambioEstado) {
+            els.statusCambioEstado.className = 'p-3 rounded-xl text-xs font-bold text-center bg-emerald-50 text-emerald-700 border border-emerald-200 block';
+            els.statusCambioEstado.innerHTML = '<i class="fas fa-circle-check mr-1.5 text-base"></i> ¡Tiquete actualizado a <strong>' + nuevoEstado + '</strong> y sincronizado en Google Sheets y Google Drive!';
+          }
+          mostrarToastAlerta('Tiquete ' + tktCode + ' actualizado en Google Sheets y Drive.', 'success');
+        } else {
+          var detalleError = (res && res.message) ? (' (' + res.message + ')') : '';
+          if (els.txtSoporteDriveStatus) {
+            els.txtSoporteDriveStatus.textContent = '⚠️ Actualizado en web (Google Apps Script desactualizado)';
+            els.txtSoporteDriveStatus.className = 'text-[11px] text-amber-600 font-bold';
+          }
+          if (els.statusCambioEstado) {
+            els.statusCambioEstado.className = 'p-3 rounded-xl text-xs font-bold text-center bg-amber-50 text-amber-900 border border-amber-300 block text-left';
+            els.statusCambioEstado.innerHTML = '<i class="fas fa-triangle-exclamation mr-1.5 text-amber-600 text-sm"></i> <strong>Atención:</strong> El tiquete cambió en pantalla pero <u>NO se pudo guardar en Google Sheets/Drive</u>' + detalleError + '. Para que se guarde automáticamente en la nube, debes implementar la nueva versión de <strong>Code.gs</strong> en Google Apps Script.';
+          }
+          mostrarToastAlerta('Actualizado en web. Para guardar en Sheet/Drive, actualiza Code.gs en Apps Script.', 'warning');
         }
 
         try {
@@ -2604,13 +2622,6 @@
         if (els.detTicketMetodoRef) {
           els.detTicketMetodoRef.textContent = (tkt.metodo_pago || 'Nequi') + ' — ' + nuevaRef;
         }
-
-        if (els.statusCambioEstado) {
-          els.statusCambioEstado.className = 'p-3 rounded-xl text-xs font-bold text-center bg-emerald-50 text-emerald-700 border border-emerald-200 block';
-          els.statusCambioEstado.innerHTML = '<i class="fas fa-circle-check mr-1.5 text-base"></i> ¡Tiquete actualizado a <strong>' + nuevoEstado + '</strong> y nuevo soporte generado!';
-        }
-
-        mostrarToastAlerta('Tiquete ' + tktCode + ' actualizado a ' + nuevoEstado + ' con éxito.', 'success');
       });
     });
   }

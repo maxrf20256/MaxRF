@@ -144,12 +144,12 @@ window.RifaAPI = (function () {
       })
       .then(function (res) {
         if (res && res.success) {
-          return res;
+          return Object.assign({ inSheets: true }, res);
         } else {
           return {
-            success: true,
+            success: false,
             inSheets: false,
-            message: (res && res.message) ? res.message : 'Actualizado localmente',
+            message: (res && res.message) ? res.message : 'Google Apps Script no procesó el cambio',
             ticket: payload.ticket,
             nuevo_estado: payload.nuevo_estado || payload.estado
           };
@@ -158,9 +158,9 @@ window.RifaAPI = (function () {
       .catch(function (err) {
         console.warn('Aviso al conectar con Google Apps Script al actualizar estado:', err);
         return {
-          success: true,
+          success: false,
           inSheets: false,
-          message: 'Estado actualizado en la web (Apps Script pendiente de sincronización): ' + err.message,
+          message: 'Error de conexión con Google Apps Script: ' + err.message,
           ticket: payload.ticket,
           nuevo_estado: payload.nuevo_estado || payload.estado
         };
