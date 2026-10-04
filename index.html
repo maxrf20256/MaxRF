@@ -337,7 +337,7 @@
           <div class="md:col-span-5 flex justify-center">
             <div class="relative w-full max-w-xs rounded-3xl overflow-hidden bg-white border border-indigo-100 shadow-xl group">
               <div class="relative overflow-hidden aspect-square bg-slate-50">
-                <img id="premio-img" src="./img/premio.png" alt="Premio" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='./img/premio.jpg'">
+                <img id="premio-img" src="./img/Hamburguesa.jpg" alt="Premio" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='./img/Hamburguesa.jpg'">
                 <div id="premio-img-badge" class="absolute top-3 right-3 bg-slate-900/80 backdrop-blur text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow">
                   OFICIAL
                 </div>
@@ -396,9 +396,9 @@
           <p class="text-xs sm:text-sm text-slate-500 leading-relaxed mb-3">
             Selecciona uno o más números disponibles en el talonario o usa el botón "Número de la suerte".
           </p>
-          <a href="https://youtube.com/shorts/a6gAUdedpno" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition">
+          <a href="https://youtube.com/shorts/O68Ji-c2Z8Q" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition">
             <i class="fab fa-youtube text-rose-600 text-sm"></i>
-            <span>Ver como seleccionar número.</span>
+            <span>Ver video tutorial (Short)</span>
           </a>
         </div>
 
@@ -416,9 +416,9 @@
           <p class="text-xs sm:text-sm text-slate-500 leading-relaxed mb-3">
             Transfiere a Nequi (3188178457) y adjunta el comprobante; si pagas después, indica 'Pendiente' para reservar.
           </p>
-          <a href="https://youtube.com/shorts/8GpqL1guIes" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition">
+          <a href="https://youtube.com/shorts/azKMeE9ccvk" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 text-xs font-bold text-indigo-600 hover:text-indigo-800 transition">
             <i class="fab fa-youtube text-rose-600 text-sm"></i>
-            <span>Ver cómo pagar y enviar soporte.</span>
+            <span>Ver cómo pagar y enviar soporte</span>
           </a>
         </div>
 
@@ -532,6 +532,103 @@
   <a id="wa-float" href="#" target="_blank" rel="noopener noreferrer" class="wa-float-btn hidden" aria-label="Escribir por WhatsApp" title="Escribir por WhatsApp">
     <i class="fab fa-whatsapp"></i>
   </a>
+
+  <!-- ============================================================ -->
+  <!-- MODAL FLYER PROMOCIONAL / BIENVENIDA (POPUP FLOTANTE)        -->
+  <!-- ============================================================ -->
+  <div id="modal-flyer" class="modal-overlay">
+    <div class="modal-dialog p-5 sm:p-8 bg-white rounded-3xl relative shadow-2xl border border-indigo-500/20 max-h-[92vh] overflow-y-auto min-h-[320px] flex flex-col justify-center">
+      
+      <!-- Botón Cerrar (X) -->
+      <button type="button" id="btn-cerrar-flyer" class="absolute top-3 right-3 sm:top-4 sm:right-4 z-30 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center text-base transition shadow-sm cursor-pointer" title="Cerrar ventana" aria-label="Cerrar flyer">
+        <i class="fas fa-times"></i>
+      </button>
+
+      <!-- 1. VISTA ANIMADA DE CARGA (mientras se descarga la data real del servidor) -->
+      <div id="flyer-loading" class="py-8 sm:py-12 px-4 sm:px-8 text-center flex flex-col items-center justify-center">
+        <!-- Ícono dinámico animado con resplandor -->
+        <div class="relative mb-5">
+          <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 text-white flex items-center justify-center shadow-xl shadow-indigo-500/30 animate-bounce">
+            <i class="fas fa-gift text-2xl sm:text-3xl"></i>
+          </div>
+          <span class="absolute -top-1 -right-1 flex h-4 w-4">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-4 w-4 bg-emerald-500 border-2 border-white"></span>
+          </span>
+        </div>
+
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold uppercase tracking-wider mb-2 border border-indigo-100">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Sincronizando dinámica en vivo</span>
+        </div>
+
+        <h3 class="font-display text-xl sm:text-2xl font-black text-slate-900 mb-2">
+          Consultando premio oficial...
+        </h3>
+        <p class="text-xs sm:text-sm text-slate-500 max-w-md mx-auto leading-relaxed mb-6">
+          Obteniendo la información más reciente y números disponibles en tiempo real.
+        </p>
+
+        <!-- Barra de progreso animada con brillo shimmer -->
+        <div class="w-56 sm:w-72 h-2.5 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/60 shadow-inner">
+          <div class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full w-full animate-pulse"></div>
+        </div>
+      </div>
+
+      <!-- 2. VISTA DE CONTENIDO REAL (se muestra animadamente cuando la data real está lista) -->
+      <div id="flyer-content" class="hidden transition-opacity duration-300 opacity-0">
+        <div class="grid md:grid-cols-12 gap-6 sm:gap-8 items-center pt-2 sm:pt-0">
+          
+          <!-- Columna Izquierda / Información y Pasos -->
+          <div class="md:col-span-7">
+            <div id="flyer-premio-badge" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 text-purple-700 text-xs font-bold uppercase tracking-wider mb-3">
+              <i class="fas fa-gift"></i>
+              <span id="flyer-premio-badge-texto">PREMIO ESPECIAL</span>
+            </div>
+            
+            <h2 id="flyer-premio-nombre" class="font-display text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mb-3">
+              ...
+            </h2>
+            
+            <!-- Casilla de descripción / pasos de la dinámica -->
+            <div id="flyer-premio-detalle" class="text-slate-700 text-xs sm:text-sm leading-relaxed mb-6 whitespace-pre-line bg-slate-50/90 p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-sm font-normal">
+              Cargando información oficial...
+            </div>
+
+            <button type="button" id="btn-participar-flyer" class="btn-primary-gradient inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-bold text-xs sm:text-sm shadow-md shadow-indigo-500/25 cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition">
+              <i class="fas fa-ticket"></i>
+              <span id="flyer-premio-btn-texto">¡Elegir número y participar!</span>
+            </button>
+          </div>
+
+          <!-- Columna Derecha / Imagen del Premio -->
+          <div class="md:col-span-5 flex justify-center">
+            <div class="relative w-full max-w-xs rounded-3xl overflow-hidden bg-white border border-indigo-100 shadow-xl group">
+              <div class="relative overflow-hidden aspect-square bg-slate-50">
+                <img id="flyer-premio-img" src="./img/Hamburguesa.jpg" alt="Premio" class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='./img/Hamburguesa.jpg'">
+                <div id="flyer-premio-img-badge" class="absolute top-3 right-3 bg-slate-900/80 backdrop-blur text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow">
+                  OFICIAL
+                </div>
+              </div>
+              <div class="p-4 text-center bg-white border-t border-slate-100">
+                <span id="flyer-premio-categoria" class="text-xs font-black uppercase tracking-widest text-indigo-600 block mb-1">
+                  DINÁMICA OFICIAL
+                </span>
+                <h3 id="flyer-premio-card-titulo" class="font-display text-base sm:text-lg font-bold text-slate-900 mb-0.5">
+                  Premio de la Dinámica
+                </h3>
+                <p id="flyer-premio-card-desc" class="text-xs text-slate-500">
+                  ¡Participa y sé el afortunado ganador!
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
 
   <!-- ============================================================ -->
   <!-- MODAL DE PARTICIPACIÓN                                        -->
